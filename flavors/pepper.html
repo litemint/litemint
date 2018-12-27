@@ -1,0 +1,134 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <!-- License MIT.
+         copyright 2018 Frederic Rezeau, Litemint LLC. -->
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-127548934-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-127548934-1');
+    </script>
+
+    <meta charset="utf-8" />
+    <meta name="author" content="Frederic Rezeau">
+    <meta name="application-name" content="Litemint">
+    <meta name="description" content="Secure, peer-to-peer, digital currency trading and wallet service.">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="pragma" content="no-cache">
+
+    <link rel="stylesheet" type="text/css" href="res/css/all.css">
+    <link rel="icon" type="image/x-icon" href="res/img/favicon.ico" />
+
+    <title>Litemint</title>
+</head>
+<body>
+    <canvas id="mainview"></canvas>
+    <canvas id="qrcode" width="720" height="720"></canvas>
+
+    <div id="chart-container"></div>
+    <div id="import-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input id="import" type="password">
+            </div>
+        </form>
+    </div>
+    <div id="verification-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input id="words" type="text">
+            </div>
+        </form>
+    </div>
+    <div id="rename-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input class="opaque-input" id="rename" type="text" maxlength="24">
+            </div>
+        </form>
+    </div>
+    <div id="address-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input id="address" type="text">
+            </div>
+            <div class="group">
+                <input id="memo" type="text" maxlength="28">
+            </div>
+        </form>
+    </div>
+    <div id="domain-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input class="no-border-input" id="domain" type="search">
+            </div>
+        </form>
+    </div>
+    <div id="asset-page" class="page hidden">
+        <div id="asset-issuer-title" class="asset-box-title"></div>
+        <div id="asset-issuer" class="asset-box"></div>
+        <div id="asset-description-title" class="asset-box-title"></div>
+        <div id="asset-description" class="asset-box"></div>
+        <div id="asset-conditions-title" class="asset-box-title"></div>
+        <div id="asset-conditions" class="asset-box"></div>
+    </div>
+    <div id="about-page" class="page hidden">
+        <div id="about-title" class="header"></div>
+        <div id="about-content" class="content">
+            <div class="box-top"><p style="text-align:center;"><span id="about-page-devby"></span><a href="https://twitter.com/FredericRezeau">Frederic Rezeau</a><br /><br /><span id="about-page-distby"></span><a href="https://litemint.com">Litemint LLC</a><br /><span id="about-page-license"></span><a href="https://github.com/litemint/litemint/blob/master/LICENSE">MIT</a><br /><br /><span id="about-page-version"></span><br /><span style="font-size:0.8em">Copyright © 2018 Litemint LLC.</span></p></div>
+            <div class="box-contact"><a href="https://www.facebook.com/litemint/"><img src="res/img/fb.png" class="social-big" /></a><a href="https://twitter.com/LitemintHQ"><img src="res/img/twitter.png" class="social-big" /></a><a href="mailto:hello@litemint.com"><img src="res/img/email.png" class="social-big" /></a></div>
+            <div class="shadow box"><img src="res/img/github.png" class="social" /><a id="about-page-view-git" href="https://github.com/litemint/litemint"></a><br /><span id="about-page-available-git" style="color:rgba(36, 41, 46, 0.5)"></span></div>
+            <div class="shadow box"><b><span id="about-page-help"></span></b><br /><br /><a href="https://litemint.com">https://litemint.com</a><br /><span id="about-page-support"></span><a href="mailto:support@litemint.com">support@litemint.com</a><br /><span id="about-page-security"></span><a href="mailto:security@litemint.com">security@litemint.com</a></div>
+            <div class="shadow box"><b><span id="about-page-legal"></span></b><br /><br /><a href="https://litemint.com/terms.html"><span id="about-page-terms"></span></a><br /><a href="https://litemint.com/privacy.html"><span id="about-page-privacy"></span></a></div>
+            <div class="shadow box"><b><span id="about-page-warning"></span></b><br /><br /><span id="about-page-trade-warning"></span></div>
+            <div class="shadow box">
+                <b><span id="about-page-depends"></span></b><br />
+                <br />
+                <b>js-stellar-sdk</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">Apache-2.0 License</span><br />
+                https://github.com/stellar/js-stellar-sdk<br />
+                <br />
+                <b>aes-js</b> (Advanced Encryption Standard)<br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/ricmoo/aes-js<br />
+                <br />
+                <b>elliptic</b> (Elliptic Curve Cryptography)<br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/indutny/elliptic<br />
+                <br />
+                <b>bip39</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/iancoleman/bip39<br />
+                <br />
+                <b>jquery</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/jquery/jquery<br />
+                <br />
+                <b>material-design-icons</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">Apache-2.0 License</span><br />
+                https://github.com/google/material-design-icons<br />
+                <br />
+                <b>Chart.js</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/chartjs/Chart.js<br />
+                <br />
+                <b>jquery-qrcode</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/jeromeetienne/jquery-qrcode<br />
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="core.min.js"></script>
+    <script src="pepper.min.js"></script>
+</body>
+</html>
