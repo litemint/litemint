@@ -187,8 +187,8 @@
         "Weiter",
         "Krypto ist grenzenlos, erforsche es.",
         "Falsche PIN. Nochmal versuchen.",
-        "PIN kann zw. 4-12 Zahlen lang sein.",
-        "Wähle eine, welche schwer zu erraten ist.",
+        "Die PIN kann zw. 4-12 Zahlen lang sein.",
+        "Wähle eine PIN, welche schwer zu erraten ist.",
         "Optionen",
         "Konto wechseln", // 10
         "Konto erzeugen",
@@ -199,9 +199,9 @@
         "Konto wird geladen, bitte warten...",
         "Konto",
         "Konto wird geladen, bitte warten...",
-        "SICHERE DEINE WIEDERHERSTELLUNGS PHRASE",
+        "SICHERE DEINE WIEDERHERSTELLUNGS-PHRASE",
         "Schreibe die nächsten 24 Wörter auf Papier.", // 20
-        "Falls du dein Gerät oder den PIN verlierst",
+        "Falls du dein Gerät oder die PIN verlierst",
         "können diese Wörter dein Konto wiederherstellen.",
         "OK",
         "Schreibe",
@@ -213,10 +213,10 @@
         "Benutze ein Leerzeichen zw. den Wörtern", //30
         "ERFOLGREICH!",
         "FEHLGESCHLAGEN!",
-        "Wiederherstellungs Phrase nicht bestätigt.",
+        "Wiederherstellungs-Phrase nicht bestätigt.",
         "Dein Konto ist nicht gesichert.",
-        "Schreibe alle Wörter von 1 bis 24.",
-        "Halte deine Wiederherstellungs Phrase geheim!",
+        "Schreibe alle Wörter von 1-24.",
+        "Halte deine Wiederherstellungs-Phrase geheim!",
         "Benutze diese 24 Wörter um deine Geldmittel wiederherzustellen.",  // TO LONG???
         "falls du dein Gerät oder PIN verlierst.",
         "Mit Liebe gemacht",
@@ -232,10 +232,10 @@
         "Reserve:",
         "Guthaben:", // 50
         "Betrag zu senden:",
-        "Empfangsaddresse eingeben",
+        "Empfangsadresse eingeben",
         "Notiz einfügen (optional)",
         "Ungültiger Betrag",
-        "Ungültige Addresse",
+        "Ungültige Adresse",
         "Verfügbares Guthaben",
         "Sie senden:",
         "Gebühr:",
@@ -247,20 +247,20 @@
         "Währung entfernt",
         "Deine Zahlung war erfolgreich.",
         "Deine Zahlung ist fehlgeschlagen.",
-        "Überprüfen die Empfangsaddresse",
+        "Überprüfen die Empfangsadresse",
         "und versuche es nochmal.",
         "Der Transaktionsempfang wird bald",
-        "in deiner Aktivitätenlist aufscheinen.", // 70
+        "in deiner Aktivitätenliste aufscheinen.", // 70
         "Partner",
         "Empfangswährung:",
         "Sie können diese Währung mit der XML Adressee empfangen.",
         "Sie können jegliche Währung mit der XML Adressee empfangen.",
-        "Berühren, um Addresse zu kopieren",
+        "Berühren, um Adresse zu kopieren",
         "Währung wählen",
         "Details",
         "Preisdiagramm",
         "Teilen",
-        "Website", // 80
+        "Webseite", // 80
         "Währung entfernen",
         "Verifiziert",
         "Vertrauenswürdig",
@@ -277,7 +277,7 @@
         "Lizenz: ",
         "Abhängigkeitslizenzen",
         "Warnung",
-        "Der Handel ist mit erheblichen Risiken verbunden und kann zum Verlust Ihres investierten Kapitals führen. Sie sollten nicht mehr investieren, als Sie sich leisten können, und sicherstellen, die damit verbundenen Risiken vollständig zu verstehen.",
+        "Der Handel ist mit erheblichen Risiken verbunden und kann zum Verlust Ihres investierten Kapitals führen. Sie sollten nicht mehr investieren, als Sie sich leisten können, und sicherstellen, dass Sie die damit verbundenen Risiken vollständig verstehen.",
         "Rechtliche Links",
         "Nutzungsbedinungen",
         "Datenschutzbestimmungen", //100
@@ -292,7 +292,7 @@
         "Währung erlaubt",
         "Währung verboten", // 110
         "Optionen geändert",
-        "Daten geänder",
+        "Daten geändert",
         "Sequenz angestoßen",
         "Konten zusammengeführt",
         "Verkaufsauftrag",
@@ -302,7 +302,7 @@
         "Keine Daten verfügbar",
         "(24H)", // 120
         "Der QR code wurde in die Zwischenablage kopiert.",
-        "Die Addresse wurde in die Zwischenablage kopiert.",
+        "Die Adresse wurde in die Zwischenablage kopiert.",
         "Notiz kopiert:",
         "Ausstellers Domainname eingeben",
         "Warte...",
@@ -311,20 +311,20 @@
         "Beschreibung:",
         "Konditionen:",
         "Lumen sind die eigentliche Währung des Stellar Netzwerkes. Ein Lumen (XML) ist eine Einheit dieser digitalen Währung, so wie Bitcoin.", // 130
-        "Anzahl der Lumen ist durch feste Regeln auf Protokollebene bestimmt. Die Anzahl bei der Entstehung erzeugten Lumen betrug 100 Milliarden. Jedes Jahr beträgt die Inflationsrate 1%. Neue Lumen können von niemanden beliebig generiert werden.",
-        "Hinzufügen deaktiviert. Nicht genügend XML in reserve.",
+        "Anzahl der Lumen ist durch feste Regeln auf Protokollebene bestimmt. Die Anzahl bei der Entstehung erzeugten Lumen betrug 100 Milliarden. Jedes Jahr beträgt die Inflationsrate 1%. Neue Lumen können von niemandem beliebig generiert werden.",
+        "Hinzufügen deaktiviert. Nicht genügend XML in Reserve.",
         "Aussteller:",
-        "Ihre Addresse:",
+        "Ihre Adresse:",
         "Teilen mit",
-        "Einen Privaten Schlüssel, Öffentliche Addresse oder die",
-        "24 Wörter der Wiederherstellungsphrase eingeben um ein Konto zu importieren.",
+        "Einen Privaten Schlüssel, Öffentliche Adresse oder die",
+        "24 Wörter der Wiederherstellungs-Phrase eingeben um ein Konto zu importieren.",
         "Kontoeinstellungen",
-        "Sichern Sie ihre Wiederherstellungsphrase",
+        "Sichern Sie ihre Wiederherstellungs-Phrase",
         "Konto umbenennen", // 140
         "Konto löschen",
         "Sind Sie sicher? Zur Bestätigung berühren.",
         "Sind Sie sich wirklich sicher?",
-        "Letzte chance! Hier berühren um zu Bestätigen.",
+        "Letzte Chance! Hier berühren um zu bestätigen.",
         "Lösche...",
         "Neuen Kontonamen eingeben",
         "Währung zitieren",
@@ -332,11 +332,11 @@
         "Gültiges Konto eingeben",
         "KONTO IMPORTIEREN",//150
         "Importiere: ",
-        "Letzte Addressen",
+        "Letzte Adressen",
         "Zahlung erhalten: ",
         "Benachrichtigungen",
         "Toasts",
-        "Ihre einfache Addresse bekommen",
+        "Ihre einfache Adresse bekommen",
         "Marktplatz"
     ];
 
