@@ -1,0 +1,245 @@
+
+@font-face {
+    font-family: 'Roboto-Regular';
+    src: url('../fonts/roboto/Roboto-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Bold';
+    src: url('../fonts/roboto/Roboto-Bold.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Thin';
+    src: url('../fonts/roboto/Roboto-Thin.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Medium';
+    src: url('../fonts/roboto/Roboto-Medium.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Black';
+    src: url('../fonts/roboto/Roboto-Black.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Light';
+    src: url('../fonts/roboto/Roboto-Light.ttf');
+}
+
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+a {
+    color: rgb(42, 193, 188);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: rgb(255, 255, 255);
+    -ms-touch-action: none;
+    touch-action: none;
+    font-family: Roboto-Regular;
+}
+
+body {
+    overflow: hidden;
+    outline: none;
+}
+
+canvas {
+    font-family: Roboto-Regular;
+    outline: 0px;
+    display: block;
+}
+
+chart-container {
+    position: absolute;
+    display: block;
+    z-index: 0;
+}
+
+.lowercase {
+    text-transform: lowercase;
+}
+
+.form {
+    font-family: Roboto-Regular;
+    position: absolute;
+    z-index: 1;
+    display: none;
+}
+
+.page {
+    font-family: Roboto-Regular;
+    position: absolute;
+    z-index: 1;
+    display: none;
+    background-color: white;
+    color: black;
+    transition: all 0.35s;
+}
+
+.header {
+    font-family: Roboto-Medium;
+    height: 50px;
+    background-color: rgb(224, 115, 119);
+    color: white;
+    line-height: 50px;
+    padding-left: 11px;
+}
+
+    .header img {
+        vertical-align: middle;
+        display: inline-block;
+        height: 100%;
+    }
+
+#about-close-img {
+    opacity: 0.5;
+    filter: alpha(opacity=40);
+}
+
+    #about-close-img:hover {
+        opacity: 1.0;
+        filter: alpha(opacity=100);
+    }
+
+#qrcode{
+    display:none;
+    width:720px;
+    height:720px;
+}
+
+.hidden {
+    display: none;
+}
+
+.content {
+    width: 100%;
+    top: 50px;
+    bottom: 0;
+    position: absolute;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    background-color: white;
+}
+
+.shadow {
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
+}
+
+.social {
+    vertical-align: middle;
+    float:left;
+    display: inline-block;
+    height: 50px;
+}
+
+.social-big {
+    vertical-align: middle;
+    height: 70px;
+    transition: all 0.3s ease 0s;
+}
+    .social-big:hover {
+        opacity: 0.7;
+    }
+
+.box-top {
+    padding: 7px;
+    background-color: rgb(42, 193, 188);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+    .box-top a {
+        color: rgb(255, 255, 255);
+    }
+
+.box-contact {
+    padding: 7px;
+    background-color: rgb(36, 41, 46);
+    text-align:center;
+    height:84px;
+}
+
+.box {
+    padding: 15px;
+    background-color: white;
+    margin: 15px;
+    color: rgb(36, 41, 46);
+}
+
+.asset-box-title {
+    padding: 5px;
+    background-color: white;
+    margin: 5px;
+    color: rgb(36, 41, 46);
+    font-weight:bold;
+}
+
+.asset-box {
+    padding: 5px;
+    background-color: white;
+    margin: 5px;
+    color: rgb(36, 41, 46);
+}
+
+.simple-button {
+    background: #2ac1bc;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    border: 0;
+    transition: all 0.3s ease 0s;
+    border-radius: 10px;
+    outline: none;
+}
+    .simple-button:hover {
+        background: #1fa39f;
+    }
+
+
+::-webkit-input-placeholder {
+    color: rgb(190, 190, 190);
+}
+
+:-moz-placeholder {
+    color: rgb(190, 190, 190);
+    opacity: 1;
+}
+
+::-moz-placeholder {
+    color: rgb(190, 190, 190);
+    opacity: 1;
+}
+
+:-ms-input-placeholder {
+    color: rgb(190, 190, 190);
+}
+
+::-ms-input-placeholder {
+    color: rgb(190, 190, 190);
+}
+
+::placeholder {
+    color: rgb(190, 190, 190);
+}
+
+::-webkit-scrollbar {
+    height: 1px; /* At least not zero */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, .3); /* Or any other instruction making the element visible */
+}

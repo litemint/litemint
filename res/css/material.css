@@ -1,0 +1,89 @@
+@font-face {
+    font-family: 'Roboto-Regular';
+    src: url('../fonts/roboto/Roboto-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Bold';
+    src: url('../fonts/roboto/Roboto-Bold.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Thin';
+    src: url('../fonts/roboto/Roboto-Thin.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Medium';
+    src: url('../fonts/roboto/Roboto-Medium.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Black';
+    src: url('../fonts/roboto/Roboto-Black.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto-Light';
+    src: url('../fonts/roboto/Roboto-Light.ttf');
+}
+
+*,
+:before,
+:after {
+    box-sizing: border-box;
+}
+
+form {
+    font-family: Roboto-Regular;
+    width: 100%;
+}
+
+.group {
+    font-family: Roboto-Regular;
+    position: relative;
+}
+
+textarea {
+    resize: none;
+}
+
+input,
+textarea {
+    font-family: Roboto-Regular;
+    background: none;
+    color: rgb(36, 41, 46);
+    display: block;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px solid #c6c6c6;
+    transition: 300ms ease all;
+}
+    input:focus,
+    textarea:focus {
+        outline: none;
+        border-bottom: 2px solid rgb(42, 193, 188);
+    }
+
+input[type="password"] {
+    letter-spacing: 0.3em;
+}
+
+.no-border-input {
+    border-bottom: 0;
+}
+    .no-border-input:focus {
+        border-bottom: 0;
+    }
+
+
+.opaque-input {
+    border-bottom: 0;
+    background: #fff;
+}
+
+    .opaque-input:focus {
+        border-bottom: 0;
+        background: #fff;
+    }

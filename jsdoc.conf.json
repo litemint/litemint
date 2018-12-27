@@ -1,0 +1,8 @@
+﻿{
+  "source": {
+    "include": [ "js" ],
+    "exclude": [ "js/config-debug.js", "js/thirdparty" ],
+    "includePattern": ".+\\.js(doc|x)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  }
+}
