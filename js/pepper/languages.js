@@ -175,6 +175,172 @@
     ];
 
     /**
+     * Language pack for German.
+     * @member germanLanguagePack
+     * @memberof Litemint.Pepper.Resources
+    */
+    const germanLanguagePack = [
+        "Neue PIN erzeugen",
+        "PIN eingeben",
+        "PIN bestätigen",
+        "Einloggen",
+        "Weiter",
+        "Krypto ist grenzenlos, erforsche es.",
+        "Falsche PIN. Nochmal versuchen.",
+        "Die PIN kann zw. 4-12 Zahlen lang sein.",
+        "Wähle eine PIN, welche schwer zu erraten ist.",
+        "Optionen",
+        "Konto wechseln", // 10
+        "Konto erzeugen",
+        "Konto importieren",
+        "Sprache wählen",
+        "Hilfe & Rückmeldung",
+        "Konfiguriere Sprache, bitte warten...",
+        "Konto wird geladen, bitte warten...",
+        "Konto",
+        "Konto wird geladen, bitte warten...",
+        "SICHERE DEINE WIEDERHERSTELLUNGS-PHRASE",
+        "Schreibe die nächsten 24 Wörter auf Papier.", // 20
+        "Falls du dein Gerät oder die PIN verlierst",
+        "können diese Wörter dein Konto wiederherstellen.",
+        "OK",
+        "Schreibe",
+        "Verifiziere",
+        "Beende",
+        "Nächster Schritt",
+        "Schließen",
+        "Tippe die Wörter in gleicher Reihenfolge (1-24).",
+        "Benutze ein Leerzeichen zw. den Wörtern", //30
+        "ERFOLGREICH!",
+        "FEHLGESCHLAGEN!",
+        "Wiederherstellungs-Phrase nicht bestätigt.",
+        "Dein Konto ist nicht gesichert.",
+        "Schreibe alle Wörter von 1-24.",
+        "Halte deine Wiederherstellungs-Phrase geheim!",
+        "Benutze diese 24 Wörter um deine Geldmittel wiederherzustellen.",  // TO LONG???
+        "falls du dein Gerät oder PIN verlierst.",
+        "Mit Liebe gemacht",
+        "Guthaben", // 40
+        "Lade...",
+        "Verifiziert",
+        "Nicht verifiziert",
+        "Senden",
+        "Empfangen",
+        "Tauschen",
+        "Aktivitäten",
+        "Währungen",
+        "Reserve:",
+        "Guthaben:", // 50
+        "Betrag zu senden:",
+        "Empfangsadresse eingeben",
+        "Notiz einfügen (optional)",
+        "Ungültiger Betrag",
+        "Ungültige Adresse",
+        "Verfügbares Guthaben",
+        "Sie senden:",
+        "Gebühr:",
+        "vor einer Minute",
+        "vor ein paar Minuten", // 60
+        "vor ein paar Sekunden",
+        "Hinzufügen", //mayby keep "Add" if too long
+        "Währung hinzugefügt",
+        "Währung entfernt",
+        "Deine Zahlung war erfolgreich.",
+        "Deine Zahlung ist fehlgeschlagen.",
+        "Überprüfen die Empfangsadresse",
+        "und versuche es nochmal.",
+        "Der Transaktionsempfang wird bald",
+        "in deiner Aktivitätenliste aufscheinen.", // 70
+        "Partner",
+        "Empfangswährung:",
+        "Sie können diese Währung mit der XML Adressee empfangen.",
+        "Sie können jegliche Währung mit der XML Adressee empfangen.",
+        "Berühren, um Adresse zu kopieren",
+        "Währung wählen",
+        "Details",
+        "Preisdiagramm",
+        "Teilen",
+        "Webseite", // 80
+        "Währung entfernen",
+        "Verifiziert",
+        "Vertrauenswürdig",
+        "Keine leeren Guthaben",
+        "Zahlung empfangen",
+        "Zahlung gesendet",
+        "Handeln",
+        "Vertrauenslinien",
+        "Andere",
+        "Ausloggen", // 90
+        "Konto verwalten",
+        "Entwickelt von: ",
+        "Verteilt von: ",
+        "Lizenz: ",
+        "Abhängigkeitslizenzen",
+        "Warnung",
+        "Der Handel ist mit erheblichen Risiken verbunden und kann zum Verlust Ihres investierten Kapitals führen. Sie sollten nicht mehr investieren, als Sie sich leisten können, und sicherstellen, dass Sie die damit verbundenen Risiken vollständig verstehen.",
+        "Rechtliche Links",
+        "Nutzungsbedinungen",
+        "Datenschutzbestimmungen", //100
+        "Hilfe",
+        "Support: ",
+        "Sicherheit: ",
+        "Auf Github anzeigen",
+        "Der Quellcode dieses Projektes ist auf Github einsehbar.",
+        "Deine Geldbörse ist leer,",
+        "Es wird Zeit, deine Freunde anzupumpen.",
+        "Verbindungsfehler, wiederhole... ",
+        "Währung erlaubt",
+        "Währung verboten", // 110
+        "Optionen geändert",
+        "Daten geändert",
+        "Sequenz angestoßen",
+        "Konten zusammengeführt",
+        "Verkaufsauftrag",
+        "Verkauf abbrechen",
+        "Pfadzahlung",
+        "Beobachtungskonto",
+        "Keine Daten verfügbar",
+        "(24H)", // 120
+        "Der QR code wurde in die Zwischenablage kopiert.",
+        "Die Adresse wurde in die Zwischenablage kopiert.",
+        "Notiz kopiert:",
+        "Ausstellers Domainname eingeben",
+        "Warte...",
+        "Code:",
+        "Ausstellers Währung:",
+        "Beschreibung:",
+        "Konditionen:",
+        "Lumen sind die eigentliche Währung des Stellar Netzwerkes. Ein Lumen (XML) ist eine Einheit dieser digitalen Währung, so wie Bitcoin.", // 130
+        "Anzahl der Lumen ist durch feste Regeln auf Protokollebene bestimmt. Die Anzahl bei der Entstehung erzeugten Lumen betrug 100 Milliarden. Jedes Jahr beträgt die Inflationsrate 1%. Neue Lumen können von niemandem beliebig generiert werden.",
+        "Hinzufügen deaktiviert. Nicht genügend XML in Reserve.",
+        "Aussteller:",
+        "Ihre Adresse:",
+        "Teilen mit",
+        "Einen Privaten Schlüssel, Öffentliche Adresse oder die",
+        "24 Wörter der Wiederherstellungs-Phrase eingeben um ein Konto zu importieren.",
+        "Kontoeinstellungen",
+        "Sichern Sie ihre Wiederherstellungs-Phrase",
+        "Konto umbenennen", // 140
+        "Konto löschen",
+        "Sind Sie sicher? Zur Bestätigung berühren.",
+        "Sind Sie sich wirklich sicher?",
+        "Letzte Chance! Hier berühren um zu bestätigen.",
+        "Lösche...",
+        "Neuen Kontonamen eingeben",
+        "Währung zitieren",
+        "Konto importieren",
+        "Gültiges Konto eingeben",
+        "KONTO IMPORTIEREN",//150
+        "Importiere: ",
+        "Letzte Adressen",
+        "Zahlung erhalten: ",
+        "Benachrichtigungen",
+        "Toasts",
+        "Ihre einfache Adresse bekommen",
+        "Marktplatz"
+    ];
+
+    /**
      * Language pack for French.
      * @member frenchLanguagePack
      * @memberof Litemint.Pepper.Resources
@@ -347,7 +513,8 @@
     */
     namespace.Pepper.Resources.languagePacks = {
         "en": { "name": "English", "text": englishLanguagePack },
-        "fr": { "name": "Français", "text": frenchLanguagePack }
+        "fr": { "name": "Français", "text": frenchLanguagePack },
+        "de": { "name": "Deutsch", "text": germanLanguagePack}
     };
 
     /**
