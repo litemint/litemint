@@ -154,6 +154,7 @@
         let data = namespace.Pepper.loadWalletData();
         namespace.Pepper.Resources.localeText = namespace.Pepper.Resources.languagePacks[languageId].text.slice();
         namespace.Pepper.Resources.languageId = languageId;
+        namespace.Pepper.Resources.languageScale = namespace.Pepper.Resources.languagePacks[languageId].scale || 1;
         data.languageId = languageId;
         namespace.Pepper.saveWalletData(data);
         if (cb) {
@@ -3575,7 +3576,7 @@
 
     // Get the font.
     namespace.Pepper.View.prototype.getFont = function (name) {
-        return this.baseFontSize + "px " + name;
+        return this.baseFontSize * namespace.Pepper.Resources.languageScale + "px " + name;
     };
 
     // Load the scroller.

@@ -16,6 +16,8 @@
     namespace.Pepper.Resources.localeText = namespace.Pepper.Resources
         .languagePacks[namespace.Pepper.Resources.defaultLanguage].text.slice();
     namespace.Pepper.Resources.languageId = namespace.Pepper.Resources.defaultLanguage;
+    namespace.Pepper.Resources.languageScale = namespace.Pepper.Resources
+        .languagePacks[namespace.Pepper.Resources.defaultLanguage].scale || 1;
 
     /**
      * UI Primary color.
