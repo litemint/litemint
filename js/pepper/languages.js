@@ -217,8 +217,8 @@
         "Dein Konto ist nicht gesichert.",
         "Schreibe alle Wörter von 1-24.",
         "Halte deine Wiederherstellungs-Phrase geheim!",
-        "Benutze diese 24 Wörter um deine Geldmittel wiederherzustellen.",  // TO LONG???
-        "falls du dein Gerät oder PIN verlierst.",
+        "Benutze die 24 Wörter um dein Konto wiederherzustellen.",
+        "falls du dein Gerät oder die PIN verlierst.",
         "Mit Liebe gemacht",
         "Guthaben", // 40
         "Lade...",
@@ -239,10 +239,10 @@
         "Verfügbares Guthaben",
         "Sie senden:",
         "Gebühr:",
-        "vor einer Minute",
-        "vor ein paar Minuten", // 60
+        "Minute",
+        "Minuten", // 60
         "vor ein paar Sekunden",
-        "Hinzufügen", //mayby keep "Add" if too long
+        "Hinzufügen",
         "Währung hinzugefügt",
         "Währung entfernt",
         "Deine Zahlung war erfolgreich.",
@@ -258,16 +258,16 @@
         "Berühren, um Adresse zu kopieren",
         "Währung wählen",
         "Details",
-        "Preisdiagramm",
+        "Kursdiagramm",
         "Teilen",
         "Webseite", // 80
         "Währung entfernen",
         "Verifiziert",
         "Vertrauenswürdig",
-        "Keine leeren Guthaben",
+        "Leere Guthaben ausblenden",
         "Zahlung empfangen",
         "Zahlung gesendet",
-        "Handeln",
+        "Handel",
         "Vertrauenslinien",
         "Andere",
         "Ausloggen", // 90
@@ -307,12 +307,12 @@
         "Ausstellers Domainname eingeben",
         "Warte...",
         "Code:",
-        "Ausstellers Währung:",
+        "Herausgeber:", //previous: "Ausstellers Währung"
         "Beschreibung:",
         "Konditionen:",
         "Lumen sind die eigentliche Währung des Stellar Netzwerkes. Ein Lumen (XML) ist eine Einheit dieser digitalen Währung, so wie Bitcoin.", // 130
         "Anzahl der Lumen ist durch feste Regeln auf Protokollebene bestimmt. Die Anzahl bei der Entstehung erzeugten Lumen betrug 100 Milliarden. Jedes Jahr beträgt die Inflationsrate 1%. Neue Lumen können von niemandem beliebig generiert werden.",
-        "Hinzufügen deaktiviert. Nicht genügend XML in Reserve.",
+        "Hinzufügen deaktiviert. Nicht genügend XML.",
         "Aussteller:",
         "Ihre Adresse:",
         "Teilen mit",
@@ -327,7 +327,7 @@
         "Letzte Chance! Hier berühren um zu bestätigen.",
         "Lösche...",
         "Neuen Kontonamen eingeben",
-        "Währung zitieren",
+        "Währung wählen",
         "Konto importieren",
         "Gültiges Konto eingeben",
         "KONTO IMPORTIEREN",//150
