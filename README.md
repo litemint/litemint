@@ -1,6 +1,6 @@
 <h1 align="left"><a href="https://litemint.com" target="_blank" rel="noopener noreferrer"><img align=left width="75" src="https://litemint.com/300x300.png" alt="Litemint logo">Litemint</a></h1>
 
-[![GitHub license](https://img.shields.io/github/license/litemint/litemint.svg)](https://github.com/litemint/litemint/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/litemint/litemint/blob/master/LICENSE) [![Build Status](https://travis-ci.org/litemint/litemint.svg?branch=master)](https://travis-ci.org/litemint/litemint)
 
 > The crypto world is limitless, explore it.
 

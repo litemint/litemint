@@ -1,0 +1,12 @@
+{
+  "name": "Litemint",
+  "description": "Litemint Wallet",
+  "author": "Litemint LLC",
+  "version": "1.0.9",
+  "devDependencies": {
+    "jshint": "^2.9.7"
+  },
+  "scripts": {
+    "test": "jshint test/core_test.js"
+  }
+}
