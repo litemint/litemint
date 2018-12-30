@@ -838,18 +838,6 @@
         "마켓플레이스"
     ];
 
-    "Import Account",
-        "Enter a valid account",
-        "IMPORT AN ACCOUNT",//150
-        "Importing: ",
-        "Recent Addresses",
-        "Payment Received: ",
-        "Notifications",
-        "Toasts",
-        "Get Your Friendly Address",
-        "Marketplace"
-
-
     /**
      * List of language packs.
      * @member languagePacks
