@@ -121,7 +121,7 @@
         "View on Github",
         "This project source code is available on Github.",
         "Your wallet is empty,",
-        "Time to nag your friends.",
+        "use your receive address.",
         "Connection error. Retrying...",
         "Asset Allowed",
         "Asset Disallowed", // 110
@@ -171,7 +171,9 @@
         "Notifications",
         "Toasts",
         "Get Your Friendly Address",
-        "Marketplace"
+        "Marketplace",
+        "Give Us Some Love",
+        "Help us grow and rate us if you enjoy Litemint!"
     ];
 
     /**

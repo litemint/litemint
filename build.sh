@@ -77,6 +77,9 @@ java -jar $COMPILER \
 --js js/thirdparty/crypto/base58.min.js \
 --js js/thirdparty/crypto/aes.min.js \
 --js js/thirdparty/crypto/bip39.min.js \
+--js js/thirdparty/crypto/scrypt-async.min.js \
+--js js/thirdparty/crypto/nacl-fast.min.js \
+--js js/thirdparty/crypto/nacl-util.min.js \
 --js js/thirdparty/stellar/stellar-sdk.min.js \
 --js js/core/decl.js \
 --js js/core/utils.js \

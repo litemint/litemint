@@ -319,4 +319,61 @@
         return false;
     };
 
+    /**
+     * Create a keystore file compatible with stellarport.io.
+     * reference: https://github.com/stellarport/stellar-keystore/blob/master/src/index.js
+     * @function createKeystore
+     * @memberof Litemint.Core.Utils
+     * @param {String} password Keystore password.
+     * @param {Object} keys Keys to save.
+     * @param {Object} cb Callback.
+     */
+    namespace.Core.Utils.createKeystore = function (password, keys, cb) {
+        const version = "stellarport-1-20-2018";
+        const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+        const scryptOptions = {
+            "N": 16384,
+            "r": 8,
+            "p": 1,
+            "dkLen": nacl.secretbox.keyLength,
+            "encoding": "binary"
+        };
+        const salt = namespace.Core.Utils.getRandomBytes(32);
+        scrypt(password, salt, scryptOptions, function (key) {
+            const ciphertext = nacl.secretbox(nacl.util.decodeUTF8(keys.secret()), nonce, key);
+            const data = {
+                version,
+                address: keys.publicKey(),
+                crypto: {
+                    ciphertext: nacl.util.encodeBase64(ciphertext),
+                    nonce: nacl.util.encodeBase64(nonce),
+                    salt: nacl.util.encodeBase64(salt),
+                    scryptOptions
+                }
+            };
+            cb(data);
+        });
+    };
+
+    /**
+     * Read a keystore file from stellarport.io and retrieve the private key.
+     * reference: https://github.com/stellarport/stellar-keystore/blob/master/src/index.js
+     * @function readKeystore
+     * @memberof Litemint.Core.Utils
+     * @param {Object} data Keystore file data.
+     * @param {String} password Keystore password.
+     * @param {Object} cb Callback.
+     */
+    namespace.Core.Utils.readKeystore = function (data, password, cb) {
+        scrypt(password, nacl.util.decodeBase64(data.crypto.salt), data.crypto.scryptOptions, function (key) {
+            const secretKey = nacl.secretbox.open(nacl.util.decodeBase64(data.crypto.ciphertext), nacl.util.decodeBase64(data.crypto.nonce), key);
+            if (secretKey) {
+                cb(StellarSdk.Keypair.fromSecret(nacl.util.encodeUTF8(secretKey)));
+            }
+            else {
+                cb();
+            }
+        });
+    };
+
 })(window.Litemint = window.Litemint || {});

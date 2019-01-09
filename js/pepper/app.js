@@ -338,10 +338,12 @@
             }
         }
         else {
-            let x = canvas.width * 0.5;
-            let y = canvas.height * 0.5;
-            let w = Math.min(canvas.width, canvas.height) * 0.2;
-            context.drawImage(namespace.Pepper.Resources.rotateImage, x - w * 0.5, y - w * 0.5, w, w);
+            if (namespace.Pepper.Resources.rotateImage) {
+                let x = canvas.width * 0.5;
+                let y = canvas.height * 0.5;
+                let w = Math.min(canvas.width, canvas.height) * 0.2;
+                context.drawImage(namespace.Pepper.Resources.rotateImage, x - w * 0.5, y - w * 0.5, w, w);
+            }
         }
     }
 
@@ -2741,6 +2743,8 @@
         $("#asset-conditions-title").html(namespace.Pepper.Resources.localeText[129]);
         $("#rename").attr("placeholder", namespace.Pepper.Resources.localeText[146]);
         $("#import").attr("placeholder", namespace.Pepper.Resources.localeText[149]);
+        $("#about-page-rate").html(namespace.Pepper.Resources.localeText[158]);
+        $("#about-page-rate-text").html(namespace.Pepper.Resources.localeText[159]);
     }
 
     function domGenerateCode() {
@@ -2768,6 +2772,7 @@
 
     // Document has loaded.
     $(document).ready(function () {
+
         // Initialize Litemint.
         namespace.initialize();
     });
@@ -2781,6 +2786,14 @@
     // Prevent scrolling when moving.
     $(document).on("touchmove", function (e) {
         e.preventDefault();
+    });
+
+    
+    // Handle about rate button click.
+    $("#about-page-rate, #about-rate-icon").click(function (e) {
+        if (window.Android) {
+            window.Android.rate();
+        }
     });
 
     // Handle about-title click.

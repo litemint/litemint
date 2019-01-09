@@ -155,6 +155,13 @@
         namespace.Pepper.Resources.localeText = namespace.Pepper.Resources.languagePacks[languageId].text.slice();
         namespace.Pepper.Resources.languageId = languageId;
         namespace.Pepper.Resources.languageScale = namespace.Pepper.Resources.languagePacks[languageId].scale || 1;
+        // Default language (en) is used to fill missing entries.
+        const defaultLanguage = namespace.Pepper.Resources.languagePacks[namespace.Pepper.Resources.defaultLanguage].text.slice();
+        for (let i = 0; i < defaultLanguage.length; i += 1) {
+            if (!namespace.Pepper.Resources.localeText[i]) {
+                namespace.Pepper.Resources.localeText[i] = defaultLanguage[i];
+            }
+        }
         data.languageId = languageId;
         namespace.Pepper.saveWalletData(data);
         if (cb) {
@@ -1216,7 +1223,7 @@
         context.fillRect(this.viewport.x, this.viewport.y - namespace.Pepper.barHeight, this.viewport.width, this.viewport.height + namespace.Pepper.barHeight);
 
         if (this.modalStep <= namespace.Pepper.WizardType.BackupStep3) {
-
+            context.textAlign = "center";
             context.fillStyle = namespace.Pepper.Resources.primaryColor;
             context.fillRect(this.viewport.x, this.viewport.y - namespace.Pepper.barHeight, this.viewport.width, this.unit * 3.8 + namespace.Pepper.barHeight);
 
