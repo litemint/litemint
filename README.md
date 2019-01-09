@@ -109,6 +109,40 @@ Build on the shoulders of giants!
   </tr>
 </table>
 
+### scrypt-async-js
+
+<table>
+  <tr>
+    <td>URL</td>
+    <td>https://github.com/dchest/scrypt-async-js</td>
+  </tr>
+  <tr>
+    <td>License</td>
+    <td>MIT License</td>
+  </tr>
+  <tr>
+    <td>Local Modifications</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### tweetnacl-js
+
+<table>
+  <tr>
+    <td>URL</td>
+    <td>https://github.com/dchest/tweetnacl-js</td>
+  </tr>
+  <tr>
+    <td>License</td>
+    <td>MIT License</td>
+  </tr>
+  <tr>
+    <td>Local Modifications</td>
+    <td>None</td>
+  </tr>
+</table>
+
 ### js-stellar-sdk
 
 <table>
