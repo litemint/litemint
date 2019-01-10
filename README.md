@@ -135,7 +135,7 @@ Build on the shoulders of giants!
   </tr>
   <tr>
     <td>License</td>
-    <td>MIT License</td>
+    <td>The Unlicense</td>
   </tr>
   <tr>
     <td>Local Modifications</td>
