@@ -140,8 +140,16 @@
                         }
                     }
                 }
-                else {
-                    console.log(message);
+                else if (parent) {
+                    if (view.account) {
+                        if (!view.account.notoast) {
+                            parent.postMessage("litemint_toast:" + message, "*");
+                        }
+
+                        // TODO
+                        //if (!view.account.nonotif) {
+                        //}
+                    }
                 }
             }
         }, 1000);
@@ -158,10 +166,20 @@
      */
     namespace.Pepper.resetDisplay = function () {
         if (canvas) {
-            canvas.width = $(window).width() * pixelRatio;
-            canvas.height = $(window).height() * pixelRatio;
-            canvas.style.width = $(window).width() + "px";
-            canvas.style.height = $(window).height() + "px";
+            if (namespace.Pepper.isDesktop) {
+                const height = $(window).height();
+                canvas.height = height * pixelRatio;
+                canvas.width = canvas.height * 0.5;
+                canvas.style.height = height + "px";
+                canvas.style.width = canvas.style.height * 0.5 + "px";
+            }
+            else {
+                canvas.width = $(window).width() * pixelRatio;
+                canvas.height = $(window).height() * pixelRatio;
+                canvas.style.width = $(window).width() + "px";
+                canvas.style.height = $(window).height() + "px";
+            }
+
             canvas.getContext("2d").setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
             if (view) {
                 view.needRedraw = true;
@@ -231,6 +249,9 @@
             readyTrigger = true;
             if (window.Android) {
                 window.Android.setReady();
+            }
+            else if (parent) {
+                parent.postMessage("litemint_ready", "*");
             }
         }
     }
@@ -1303,6 +1324,9 @@
                     if (window.Android) {
                         window.Android.scanQRCode();
                     }
+                    else if(parent) {
+                        parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
+                    }
                 });
 
                 testElement(2, point, view.modalPasswordBtn, isPointerDown, function () {
@@ -1350,7 +1374,12 @@
                                     domShowAssetPage(true);
                                 }
                                 else {
-                                    window.location = namespace.Pepper.Resources.currentSponsor.link;
+                                    if (namespace.Pepper.isDesktop) {
+                                        window.open(namespace.Pepper.Resources.currentSponsor.link, "_blank");
+                                    }
+                                    else {
+                                        window.location = namespace.Pepper.Resources.currentSponsor.link;
+                                    }
                                 }
                             }
                         }
@@ -1427,11 +1456,21 @@
                                             let nothingUpMySleeve = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
                                             let result = namespace.Core.currentAccount.keys.sign(nothingUpMySleeve);
                                             let signedData = namespace.Core.Utils.bytesToHex(result);
-                                            window.location = "https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey();
+
+                                            if (namespace.Pepper.isDesktop) {
+                                                window.open("https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey(), "_blank");
+                                            }
+                                            else {
+                                                window.location = "https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey();
+                                            }
                                         }
                                         else {
                                             if (!namespace.Core.currentAccount.nobackup && window.Android) {
                                                 window.Android.copyToClipboard("address", namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
+                                            }
+                                            else if (!namespace.Core.currentAccount.nobackup && parent) {
+                                                parent.postMessage("litemint_copy:" + namespace.Core.currentAccount.friendlyAddress, "*");
+                                                parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
                                             }
                                         }
                                     }
@@ -1537,11 +1576,23 @@
                                                         namespace.Pepper.Resources.localeText[134] + " " + (carouselitem.asset.deposit || namespace.Core.currentAccount.keys.publicKey()),
                                                         namespace.Pepper.Resources.localeText[135]);
                                                 }
+                                                else if (parent) {
+                                                    parent.postMessage("litemint_copy:" +
+                                                        namespace.Pepper.Resources.localeText[126] + " " + carouselitem.asset.code + "\n" +
+                                                        namespace.Pepper.Resources.localeText[133] + " " + carouselitem.asset.issuer + "\n" +
+                                                        namespace.Pepper.Resources.localeText[134] + " " + (carouselitem.asset.deposit || namespace.Core.currentAccount.keys.publicKey()), "*");
+                                                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                }
                                             }
                                             break;
                                         case 4:
                                             if (carouselitem && carouselitem.asset) {
-                                                window.location = "https://" + carouselitem.asset.domain;
+                                                if (namespace.Pepper.isDesktop) {
+                                                    window.open("https://" + carouselitem.asset.domain, "_blank");
+                                                }
+                                                else {
+                                                    window.location = "https://" + carouselitem.asset.domain;
+                                                }
                                             }
                                             break;
                                         case 5:
@@ -1842,7 +1893,10 @@
                                 if (!called) {
                                    // called = true;
                                     if (window.Android) {
-                                        window.Android.showToast("COMING SOON!");
+                                        window.Android.showToast(namespace.Pepper.Resources.localeText[160]);
+                                    }
+                                    else if (parent) {
+                                        parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
                                     }
                                 }
 
@@ -1981,7 +2035,12 @@
                                                 domShowAssetPage(true);
                                             }
                                             else {
-                                                window.location = namespace.Pepper.Resources.currentSponsor.link;
+                                                if (namespace.Pepper.isDesktop) {
+                                                    window.open(namespace.Pepper.Resources.currentSponsor.link, "_blank");
+                                                }
+                                                else {
+                                                    window.location = namespace.Pepper.Resources.currentSponsor.link;
+                                                }
                                             }
                                         }
                                     }
@@ -2106,11 +2165,17 @@
                                             };
                                             window.Android.retrieveClipboardData();
                                         }
+                                        else if (parent) {
+                                            parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
+                                        }
                                     });
 
                                     testElement(2, point, view.qrBtn, isPointerDown, function () {
                                         if (window.Android) {
                                             window.Android.scanQRCode();
+                                        }
+                                        else if (parent) {
+                                            parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
                                         }
                                     });
                                 }
@@ -2119,6 +2184,10 @@
                                         let key = view.getActiveCarouselItem().asset.deposit || namespace.Core.currentAccount.keys.publicKey();
                                         if (window.Android) {
                                             window.Android.copyToClipboard("address", key, namespace.Pepper.Resources.localeText[122]);
+                                        }
+                                        else if (parent) {
+                                            parent.postMessage("litemint_copy:" + key, "*");
+                                            parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
                                         }
                                         console.info(key);
                                     }
@@ -2142,35 +2211,67 @@
                                             case namespace.Pepper.ListType.Transactions:
                                                 if (item.data.type !== "asset" && item.overLaunchBtn) {
                                                     item.overLaunchBtn = false;
-                                                    window.location = namespace.config.opsEndPoint + "/" + item.data.id;
+
+                                                    if (namespace.Pepper.isDesktop) {
+                                                        window.open(namespace.config.opsEndPoint + "/" + item.data.id, "_blank");
+                                                    }
+                                                    else {
+                                                        window.location = namespace.config.opsEndPoint + "/" + item.data.id;
+                                                    }
                                                 }
                                                 else if (item.data.memo && item.overMemoBtn) {
                                                     item.overMemoBtn = false;
                                                     if (window.Android) {
                                                         window.Android.copyToClipboard("memo", item.data.memo, namespace.Pepper.Resources.localeText[123] + item.data.memo);
                                                     }
+                                                    else if (parent) {
+                                                        parent.postMessage("litemint_copy:" + item.data.memo, "*");
+                                                        parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[123] + item.data.memo, "*");
+                                                    }
                                                     console.log(item.data.memo);
                                                 }
                                                 else if (item.overCopyBtn) {
                                                     item.overCopyBtn = false;
-                                                    if (window.Android) {
-                                                        switch (item.data.type) {
-                                                            case "payment":
+                                                    switch (item.data.type) {
+                                                        case "payment":
+                                                            if (window.Android) {
                                                                 if (item.data.to === namespace.Core.currentAccount.keys.publicKey()) {
                                                                     window.Android.copyToClipboard("address", item.data.from, namespace.Pepper.Resources.localeText[122]);
                                                                 }
                                                                 else {
                                                                     window.Android.copyToClipboard("address", item.data.to, namespace.Pepper.Resources.localeText[122]);
                                                                 }
-                                                                break;
-                                                            case "create_account":
+                                                            }
+                                                            else if (parent) {
+                                                                if (item.data.to === namespace.Core.currentAccount.keys.publicKey()) {
+                                                                    parent.postMessage("litemint_copy:" + item.data.from, "*");
+                                                                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                                }
+                                                                else {
+                                                                    parent.postMessage("litemint_copy:" + item.data.to, "*");
+                                                                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                                }
+                                                            }
+                                                            break;
+                                                        case "create_account":
+                                                            if (window.Android) {
                                                                 window.Android.copyToClipboard("address", item.data.source_account, namespace.Pepper.Resources.localeText[122]);
-                                                                break;
-                                                            case "change_trust":
-                                                            case "allow_trust":
+                                                            }
+                                                            else if (parent) {
+                                                                parent.postMessage("litemint_copy:" + item.data.source_account, "*");
+                                                                parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                            }
+                                                            break;
+                                                        case "change_trust":
+                                                        case "allow_trust":
+                                                            if (window.Android) {
                                                                 window.Android.copyToClipboard("address", item.data.asset_issuer, namespace.Pepper.Resources.localeText[122]);
-                                                                break;
-                                                        }
+                                                            }
+                                                            else if (parent) {
+                                                                parent.postMessage("litemint_copy:" + item.data.asset_issuer, "*");
+                                                                parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                            }
+                                                            break;
                                                     }
                                                 }
                                                 break;
@@ -2480,9 +2581,9 @@
         if (view && view.needDomUpdate) {
             view.needDomUpdate = false;
 
-            $("textarea, input, button").css("fontSize", view.baseFontSize * 0.8 / pixelRatio + "px");
+            $("textarea, input, button").not(".spear").css("fontSize", view.baseFontSize * 0.8 / pixelRatio + "px");
             $("#asset-page").css("fontSize", view.baseFontSize * 0.8 / pixelRatio + "px");
-            $("textarea, input, button").css("padding",
+            $("textarea, input, button").not(".spear").css("padding",
                 view.baseFontSize * 0.5 / pixelRatio + "px "
                 + view.baseFontSize * 0.5 / pixelRatio + "px "
                 + view.baseFontSize * 0.5 / pixelRatio + "px "
@@ -2794,6 +2895,9 @@
         if (window.Android) {
             window.Android.rate();
         }
+        else {
+            window.open("https://www.facebook.com/litemint/reviews/", "_blank");
+        }
     });
 
     // Handle about-title click.
@@ -2925,6 +3029,10 @@
                 if (window.Android) {
                     window.Android.copyToClipboard("qrcode", code, namespace.Pepper.Resources.localeText[121]);
                 }
+                else if (parent) {
+                    parent.postMessage("litemint_copy:" + code, "*");
+                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[121], "*");
+                }
             }
         }
     };
@@ -2933,6 +3041,10 @@
     window.copyIssuer = function (issuer) {
         if (window.Android) {
             window.Android.copyToClipboard("issuer", issuer, namespace.Pepper.Resources.localeText[122]);
+        }
+        else if (parent) {
+            parent.postMessage("litemint_copy:" + issuer, "*");
+            parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
         }
     };
 

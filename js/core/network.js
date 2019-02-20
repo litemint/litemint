@@ -164,7 +164,7 @@
                         };
 
                         if (namespace.config.useNetworkPolling) {
-                            console.info("Polling stream started for account:" + namespace.Core.currentAccount.keys.publicKey());
+                            console.log("Polling stream started for account:" + namespace.Core.currentAccount.keys.publicKey());
                             streamId = setInterval(() => {
                                 // Will do well up to 3 operations per seconds.
                                 queryTx(15);
@@ -332,6 +332,7 @@
                                         amount: amount
                                     }))
                                     .addMemo(localMemo)
+                                    .setTimeout(60)
                                     .build();
                                 transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
                                 return stellarServer.submitTransaction(transaction);
@@ -365,6 +366,7 @@
                         startingBalance: amount
                     }))
                     .addMemo(memo)
+                    .setTimeout(60)
                     .build();
                 transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
                     return stellarServer.submitTransaction(transaction);
@@ -385,6 +387,7 @@
                     .addOperation(StellarSdk.Operation.changeTrust({
                         asset: asset
                     }))
+                    .setTimeout(60)
                     .build();
                 transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
                 return stellarServer.submitTransaction(transaction);
@@ -406,6 +409,7 @@
                         asset: asset,
                         limit: "0" // Remove trustline.
                     }))
+                    .setTimeout(60)
                     .build();
                 transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
                 return stellarServer.submitTransaction(transaction);

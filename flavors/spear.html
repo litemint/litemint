@@ -3,7 +3,6 @@
 <head>
     <!-- License MIT.
          copyright 2018 Frederic Rezeau, Litemint LLC. -->
-
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-127548934-1"></script>
     <script>
@@ -25,146 +24,162 @@
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     <link rel="stylesheet" type="text/css" href="res/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="res/css/bulma.min.css" />
-    <link rel="stylesheet" type="text/css" href="res/css/bulma-tooltip.min.css" />
+    <link rel="stylesheet" type="text/css" href="res/css/all.css">
     <link rel="stylesheet" type="text/css" href="res/css/spear.css" />
     <link rel="icon" type="image/x-icon" href="res/img/favicon.ico" />
 
     <title>Litemint - Explore the crypto world.</title>
 </head>
 <body>
-    <section class="hero is-white">
-        <header>
-            <nav id="navbar" class="navbar is-fixed-top site-navbar">
-                <div class="container">
-                    <div class="navbar-brand">
-                        <div class="navbar-item">
-                            <a id="sign-out" class="button is-danger is-hidden">
-                                <span class="icon">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                </span>
-                                <span id="sign-out-label"></span>
-                            </a>
-                        </div>
-                        <div class="navbar-item">
-                            <div class="field">
-                                <div class="control has-icons-left">
-                                    <div class="select">
-                                        <select id="language-select"></select>
-                                    </div>
-                                    <div class="icon is-small is-left">
-                                        <i class="fas fa-globe"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-        </header>
-    </section>
-    <section id="sign-in" class="spear-page hero is-fullheight is-white">
+    <div id="marketview">
+        <iframe id="dashboard" src="https://dashboard.litemint.com"></iframe>
+        <div class="toggle-wallet-wrapper">
+            <img id="open-wallet-button" src="res/img/openwallet.png" style="display:none;" />
+            <img id="close-wallet-button" src="res/img/closewallet.png" />
+        </div>
+    </div>
+    <canvas id="mainview"></canvas>
+
+    <section id="loader" class="hero is-fullheight is-white">
         <div class="hero-body">
             <div class="container">
                 <div class="has-text-centered">
-                    <img src="res/img/homelogo.png" />
-                    <p id="sign-in-instructions"></p><br />
-                </div>
-                <div id="sign-in-error" class="is-centered is-hidden">
-                    <div class="has-text-centered has-text-danger is-size-6">
-                        <span class="icon has-text-danger">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </span>
-                        <span id="sign-in-error-text"></span>
-                    </div>
-                </div>
-                <div class="columns is-centered">
-                    <div class="column is-half">
-                        <div class="field has-addons">
-                            <div class="control is-expanded has-icons-left">
-                                <input id="account-data" class="input is-rounded is-fullwidth is-info is-medium" type="password" placeholder="">
-                                <span class="icon is-small is-left has-text-info">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                            </div>
-                            <div class="control">
-                                <button class="button is-rounded is-static is-medium" type="submit">Coming Soon</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="footer hero-foot">
-            <div class="container">
-                <div class="level is-size-7">
-                    <div class="level-left">
-                        <div class="level-item intern-logo">
-                            <svg width="35" height="35" id="litemint" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 952.9 961.36"><title>Litemint Logo</title><path d="M895.65,129.64v1c-166.36,26.43-183.28,231.41-308,372.24C431.23,679.49,254.25,666.62,162.33,884.32c-16.72-426.95,309.32-666,375.33-702.67-189,55-441.34,368.61-424.28,671.06C92.86,823.24-156.76,367.51,259.23,88.84,426.57-23.26,700,9.94,895.65,129.64Z" transform="translate(-20.46 -20.13)" style="fill:#2ac1bc;fill-rule:evenodd" /><path d="M827.31,197C934.47,286,1000,448.31,963,639.56L827.31,605.91C870.24,444,765.69,324.14,748.78,315.25,749,304.69,801.7,211.66,827.31,197ZM718.18,370.32C905.81,601.16,615.31,910.36,362.24,714,472.82,656.83,653,538.2,718.18,370.32Zm98.93,267.2,136.67,33.66C852.26,944.34,595.86,1008.83,434.65,972l38.76-136.66C639.09,863,777,749.05,817.11,637.52ZM307.16,748.68c41.87,34.76,81.39,62.39,134.63,80.57L403,963.87C339.11,948.8,252.16,896,211.29,854.75,227.22,815.33,282.32,761.46,307.16,748.68Z" transform="translate(-20.46 -20.13)" style="fill:#ffdd57;fill-rule:evenodd" /></svg>
-                        </div>
-                        <div class="level-item">
-                            <span class="copyright">
-                                &copy; 2019 <a class="has-text-link" href="https://litemint.com">LITEMINT LLC</a>.
-                            </span>
-                        </div>
-                    </div>
-                    <div class="level-right">
-                        <div class="level-item">
-                            <a href="https://litemint.com/privacy.html" alt="Privacy Privacy">Privacy Policy</a>
-                        </div>
-                        <div class="level-item">
-                            <a href="https://litemint.com/terms.html" alt="Terms of Service">Terms of Service</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="dashboard" class="spear-page section is-hidden">
-        <div class="hero-body">
-            <div class="container">
-                <div class="tabs is-boxed is-fullwidth">
-                    <ul>
-                        <li class="is-active">
-                            <a>
-                                <span class="icon is-small"><i class="fas fa-coins" aria-hidden="true"></i></span>
-                                <span id="assets-tab-label"></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a>
-                                <span class="icon is-small"><i class="fas fa-history" aria-hidden="true"></i></span>
-                                <span id="activity-tab-label"></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a>
-                                <span class="icon is-small has-text-danger"><i class="fas fa-user" aria-hidden="true"></i></span>
-                                <span id="account-tab-label" class="has-text-danger"></span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div id="assets">
-                </div>
-                <div id="activity">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="loader" class="spear-page hero is-fullheight is-white is-hidden">
-        <div class="hero-body">
-            <div class="container">
-                <div class="has-text-centered">
+                    <img src="res/img/homelogo.png" width="200" />
+                    <br />
                     <img src="res/img/loader.gif" />
                 </div>
             </div>
         </div>
     </section>
 
+    <section id="mobile" class="hero is-fullheight is-white is-hidden">
+        <div class="hero-body">
+            <div class="container">
+                <div class="has-text-centered">
+                    <img src="res/img/homelogo.png" width="200" />
+                    <br />
+                    <br />
+                    <p>Launch this page from your Destop PC/MAC</p>
+                    <p>or download Litemint on your mobile.</p>
+                    <br />
+                    <p><a href="https://play.google.com/store/apps/details?id=com.litemint.app"><img src="https://litemint.com/img/badge_playstore.png" /></a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="snackbar">This is a test message</div>
+
+    <canvas id="qrcode" width="720" height="720"></canvas>
+
+    <div id="chart-container"></div>
+    <div id="import-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input id="import" type="password">
+            </div>
+        </form>
+    </div>
+    <div id="verification-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input id="words" type="text">
+            </div>
+        </form>
+    </div>
+    <div id="rename-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input class="opaque-input" id="rename" type="text" maxlength="24">
+            </div>
+        </form>
+    </div>
+    <div id="address-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input id="address" type="text">
+            </div>
+            <div class="group">
+                <input id="memo" type="text" maxlength="28">
+            </div>
+        </form>
+    </div>
+    <div id="domain-form" class="form hidden" novalidate>
+        <form>
+            <div class="group">
+                <input class="no-border-input" id="domain" type="search">
+            </div>
+        </form>
+    </div>
+    <div id="asset-page" class="page hidden">
+        <div id="asset-issuer-title" class="asset-box-title"></div>
+        <div id="asset-issuer" class="asset-box"></div>
+        <div id="asset-description-title" class="asset-box-title"></div>
+        <div id="asset-description" class="asset-box"></div>
+        <div id="asset-conditions-title" class="asset-box-title"></div>
+        <div id="asset-conditions" class="asset-box"></div>
+    </div>
+    <div id="about-page" class="page hidden">
+        <div id="about-title" class="header"></div>
+        <div id="about-content" class="content">
+            <div class="box-top"><p style="text-align:center;"><span id="about-page-devby"></span><a href="https://twitter.com/FredericRezeau">Frederic Rezeau</a><br /><br /><span id="about-page-distby"></span><a href="https://litemint.com">Litemint LLC</a><br /><span id="about-page-license"></span><a href="https://github.com/litemint/litemint/blob/master/LICENSE">MIT</a><br /><br /><span id="about-page-version"></span><br /><span style="font-size:0.8em">Copyright © 2019 Litemint LLC.</span></p></div>
+            <div class="box-contact"><a href="https://www.facebook.com/litemint/"><img src="res/img/fb.png" class="social-big" /></a><a href="https://twitter.com/LitemintHQ"><img src="res/img/twitter.png" class="social-big" /></a><a href="mailto:hello@litemint.com"><img src="res/img/email.png" class="social-big" /></a></div>
+            <div class="shadow box"><img id="about-rate-icon" src="res/img/rate.png" class="social" /><a id="about-page-rate"></a><br /><span id="about-page-rate-text" style="color:rgba(36, 41, 46, 0.5)"></span></div>
+            <div class="shadow box"><img src="res/img/github.png" class="social" /><a id="about-page-view-git" href="https://github.com/litemint/litemint"></a><br /><span id="about-page-available-git" style="color:rgba(36, 41, 46, 0.5)"></span></div>
+            <div class="shadow box"><b><span id="about-page-help"></span></b><br /><br /><a href="https://litemint.com">https://litemint.com</a><br /><span id="about-page-support"></span><a href="mailto:support@litemint.com">support@litemint.com</a><br /><span id="about-page-security"></span><a href="mailto:security@litemint.com">security@litemint.com</a></div>
+            <div class="shadow box"><b><span id="about-page-legal"></span></b><br /><br /><a href="https://litemint.com/terms.html"><span id="about-page-terms"></span></a><br /><a href="https://litemint.com/privacy.html"><span id="about-page-privacy"></span></a></div>
+            <div class="shadow box"><b><span id="about-page-warning"></span></b><br /><br /><span id="about-page-trade-warning"></span></div>
+            <div class="shadow box">
+                <b><span id="about-page-depends"></span></b><br />
+                <br />
+                <b>js-stellar-sdk</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">Apache-2.0 License</span><br />
+                https://github.com/stellar/js-stellar-sdk<br />
+                <br />
+                <b>aes-js</b> (Advanced Encryption Standard)<br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/ricmoo/aes-js<br />
+                <br />
+                <b>elliptic</b> (Elliptic Curve Cryptography)<br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/indutny/elliptic<br />
+                <br />
+                <b>scrypt-async-js</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/dchest/scrypt-async-js<br />
+                <br />
+                <b>tweetnacl-js</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">The Unlicense</span><br />
+                https://github.com/dchest/tweetnacl-js<br />
+                <br />
+                <b>bip39</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/iancoleman/bip39<br />
+                <br />
+                <b>jquery</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/jquery/jquery<br />
+                <br />
+                <b>material-design-icons</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">Apache-2.0 License</span><br />
+                https://github.com/google/material-design-icons<br />
+                <br />
+                <b>Chart.js</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/chartjs/Chart.js<br />
+                <br />
+                <b>jquery-qrcode</b><br />
+                <span style="color:rgba(36, 41, 46, 0.5)">MIT License</span><br />
+                https://github.com/jeromeetienne/jquery-qrcode<br />
+            </div>
+        </div>
+    </div>
+
+    <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
     <script src="config.js"></script>
     <script src="core.min.js"></script>
+    <script src="pepper.min.js"></script>
     <script src="spear.min.js"></script>
+    <script>if (window.module) module = window.module;</script>
 </body>
 </html>

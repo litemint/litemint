@@ -173,7 +173,8 @@
         "Get Your Friendly Address",
         "Marketplace",
         "Give Us Some Love",
-        "Help us grow and rate us if you enjoy Litemint!"
+        "Help us grow and rate us if you enjoy Litemint!",
+        "Not Supported Yet!" // 160
     ];
 
     /**
@@ -507,7 +508,8 @@
         "Obtenez une Friendly Address",
         "Commerce",
         "Coup de coeur?",
-        "Si vous aimez Litemint, aidez-nous à grandir et faites passer le message."
+        "Si vous aimez Litemint, aidez-nous à grandir et faites passer le message.",
+        "Pas encore supporté!"
     ];
 
     /**
@@ -675,7 +677,8 @@
         "Получить Ваш дружеский адрес",
         "Рынок",
         "Оценить это приложение",
-        "Если Вам нравится наше приложение, поставьте хорошую оценку, это очень вдохновит нас!"
+        "Если Вам нравится наше приложение, поставьте хорошую оценку, это очень вдохновит нас!",
+        "Пока не поддерживается"
     ];
 
     /**
@@ -843,7 +846,8 @@
         "나만의 주소를 만들어보세요.",
         "마켓플레이스",
         "우리를 평가해라",
-        "앱을 좋아하니? 우리를 평가해라!"
+        "앱을 좋아하니? 우리를 평가해라!",
+        "현재 지원되지 않음"
     ];
 
     /**

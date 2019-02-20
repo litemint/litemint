@@ -7,423 +7,92 @@
 
 "use strict";
 
-// Litemint core customization.
+// Litemint Pepper settings.
 (function (namespace) {
-
-    // Replace local core storage with in-memory storage.
-    // so account data do not get stored in the browser local storage.
-    const transientStorage = {
-        "map": {},
-        "setItem": function (key, value) {
-            return this.map[key] = value;
-        },
-        "getItem": function (key) {
-            return this.map.hasOwnProperty(key) ? this.map[key] : null;
-        }
-    };
-
-    namespace.Core.getData = function (location) {
-        return transientStorage.getItem(location);
-    };
-
-    namespace.Core.setData = function (location, data) {
-        transientStorage.setItem(location, data);
-    };
-
-    namespace.Core.wipeStorage = function () {
-        transientStorage.map = {};
-    };
-
-    namespace.Core.KeyTool.prototype.keyFromPin = function (key) {
-        // On Spear we do not need to use PBKDF2
-        // as the key is randomly generated and never re-used across sessions.
-        return namespace.Core.Utils.hexToBytes(key);
-    };
+    namespace.Pepper.isDesktop = true;
+    namespace.Pepper.showWallet = true;
 })(window.Litemint = window.Litemint || {});
 
 // Spear.
 (function (namespace) {
 
-    const hasStorage = typeof window.localStorage !== "undefined";
+    let snackTimerId = 0;
 
-    namespace.SignInErrorType = {
-        "None": 0,
-        "AccountNotCreated": 1,
-        "AccountNotAvailable": 2
+    const isMobile = function () {
+        var check = false;
+        (function (a) { if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4))) check = true; })(navigator.userAgent || navigator.vendor || window.opera);
+        return check;
     };
 
-    let retryId = 0;
-    let signInError = namespace.SignInErrorType.None;
-
-    // This secret is used to encrypt the transient storage. Paranoid?
-    namespace.secret = Litemint.Core.Utils.getRandomBytes(16);
-
-    namespace.defaultAsset = new Litemint.Core.Asset("native", "XLM", "0");
-
-    namespace.setLang = function (lang) {
-        if (hasStorage) {
-            window.localStorage.setItem("litemint-language", lang);
-        }
-    };
-
-    namespace.getLang = function () {
-        const def = namespace.defaultLanguage;
-        if (!hasStorage) {
-            return def;
-        }
-        return window.localStorage.getItem("litemint-language")
-            || namespace.defaultLanguage;
-    };
-
-    namespace.updateLanguage = function (lang) {
-        namespace.setLang(lang);
-        $("#sign-out-label").html(namespace.languagePacks[lang].text[0]);
-        $("#sign-in-instructions").html(namespace.languagePacks[lang].text[1]);
-        $("#sign-in-error-text").html(namespace.languagePacks[lang].text[2]);
-        $("#account-data").attr("placeholder", namespace.languagePacks[lang].text[3]);
-        $("#load-account").html(namespace.languagePacks[lang].text[4]);
-        $("#create-account").html(namespace.languagePacks[lang].text[5]);
-        $("#security-warning-title").html(namespace.languagePacks[lang].text[6]);
-        $("#security-warning").html(namespace.languagePacks[lang].text[7]);
-        $("#assets-tab-label").html(namespace.languagePacks[lang].text[8]);
-        $("#activity-tab-label").html(namespace.languagePacks[lang].text[9]);
-        $("#account-tab-label").html(namespace.languagePacks[lang].text[10]);
-        $(".send-label").html(namespace.languagePacks[lang].text[11]);
-        $(".receive-label").html(namespace.languagePacks[lang].text[12]);
-        $(".trade-label").html(namespace.languagePacks[lang].text[13]);
-        $(".balance-label").html(namespace.languagePacks[lang].text[14]);
-        $(".addasset-label").html(namespace.languagePacks[lang].text[15]);
-        $(".verified-tooltip").attr("data-tooltip", namespace.languagePacks[lang].text[17]);
-        $(".verified-image").attr("alt", namespace.languagePacks[lang].text[17]);
-    };
-
-    namespace.loadWalletData = function () {
-        let data = {
-            "accounts": [],
-            "lastaccount": -1
-        };
-
-        let currData = Litemint.Core.getData(Litemint.config.storageId);
-        if (currData) {
-            data = JSON.parse(currData);
-        }
-        return data;
-    };
-
-    namespace.saveWalletData = function (data) {
-        Litemint.Core.setData(Litemint.config.storageId, JSON.stringify(data));
-    };
-
-    namespace.formatPrice = function (price, decimals) {
-        return Number(price).toFixed(decimals || 7);
-    };
-
-    function signIn(cb) {
-        const stellarNet = new Litemint.Core.StellarNetwork();
-        let timeoutId = 0;
-        let firstUpdate = true;
-
-        function reloadAccount(indexes) {
-            function compare(a, b) {
-                const ca1 = a.balance ? 0 : 1;
-                const ca2 = b.balance ? 0 : 1;
-                const cb1 = Number(a.balance) ? 0 : 1;
-                const cb2 = Number(b.balance) ? 0 : 1;
-                const cc1 = a.name;
-                const cc2 = b.name;
-                if (ca1 < ca2) return -1;
-                if (ca1 > ca2) return 1;
-                if (cb1 < cb2) return -1;
-                if (cb1 > cb2) return 1;
-                if (cc1 < cc2) return -1;
-                if (cc1 > cc2) return 1;
-                return 0;
-            }
-
-            let items = [];
-
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
-
-            for (let i = 0; i < Litemint.Core.currentAccount.assets.length; i += 1) {
-                items.push(Litemint.Core.currentAccount.assets[i]);
-            }
-
-            if (Litemint.Core.currentAccount.assets.length === 0) {
-                items.push(namespace.defaultAsset);
-            }
-
-            items.sort(compare);
-
-            let loadingAssets = [];
-            let columns = "<div class='is-centered has-text-centered'><button class='button is-primary'><span class='icon is-medium'><i class='fas fa-plus'></i></span><span class='addasset-label'></span></button></div><br />";
-
-            for (let i = 0; i < items.length;) {
-                let item = items[i];
-                if (!(i % 2)) {
-                    columns += "<div class='columns'>";
-                }
-
-                loadingAssets.push(item);
-
-                columns += "<div class='column is-6'>";
-                columns += "<div class='card'>" +
-                                "<div class='card-image'>" +
-                                    "<div class='has-text-centered notification is-radiusless'>" +
-                                        "<p class='balance-label'></p>" +
-                                        "<p id= '" + item.code + "_" + item.issuer + "_balance" + "' class='has-text-weight-bold is-size-4'></p>" +
-                                    "</div>" +
-                                "</div>" +
-                                "<div class='card-content'>" +
-                                "<div id= '" + item.code + "_" + item.issuer + "_content" + "' class='media'>" +
-                                    "</div>" +
-                                "</div>";
-                columns += "<footer class='card-footer'>" +
-                                "<a class='card-footer-item is-clipped'>" +
-                                    "<img class='image is-32x32' src='res/img/send.png' />" +
-                                    "<span class='send-label'></span>" +
-                                "</a>" +
-                                "<a class='card-footer-item is-clipped'>" +
-                                    "<img class='image is-32x32' src='res/img/receive.png' />" +
-                                    "<span class='receive-label'></span>" +
-                                "</a>" +
-                                "<a class='card-footer-item is-clipped'>" +
-                                    "<img class='image is-32x32' src='res/img/trade.png' />" +
-                                    "<span class='trade-label'></span>" +
-                                "</a>" +
-                            "</footer>";
-                columns += "</div></div>";
-
-                i += 1;
-                if (!(i % 2) || i === items.length) {
-                    columns += "</div>";
-                    $("#assets").html(columns);
-                }
-            }
-
-            function updateContent() {
-                let newItemsAdded = false;
-                for (let i = 0; i < loadingAssets.length;) {
-                    if (loadingAssets[i].loaded) {
-                        $("#" + loadingAssets[i].code + "_" + loadingAssets[i].issuer + "_content").html(
-                            "<div class='media-left'>" +
-                            "<figure class='image is-64x64'>" +
-                            "<img src='" + (loadingAssets[i].image ? loadingAssets[i].image.src : "res/img/stellar.png") + "' />" +
-                            "</figure>" +
-                            "</div>" +
-                            "<div class='media-content'>" +
-                            "<span class='title is-6'>" + loadingAssets[i].name + "</span><br />" +
-                            "<a href='https://" + loadingAssets[i].domain + "' class='has-text-link subtitle is-6'>" + loadingAssets[i].domain + "</a>" +
-                            "</div>" +
-                            "<div class='verified-tooltip media-right is-pulled-right has-text-centered tooltip' data-tooltip=''>" +
-                            "<img class='image is-32x32' src='res/img/shield.png' alt='' />" +
-                            "</div>"
-                        );
-                        $("#" + loadingAssets[i].code + "_" + loadingAssets[i].issuer + "_balance").html(
-                            loadingAssets[i].code + " " + namespace.formatPrice(loadingAssets[i].balance, loadingAssets[i].decimals)
-                        );
-                        loadingAssets.splice(i, 1);
-                        newItemsAdded = true;
-                    }
-                    else {
-                        i += 1;
-                    }
-                }
-                if (loadingAssets.length) {
-                    timeoutId = setTimeout(updateContent, 500);
-                }
-
-                if (newItemsAdded) {
-                    namespace.updateLanguage($("#language-select").val());
-                }
-            }
-            timeoutId = setTimeout(updateContent, 500);
-        }
-
-        function refreshAccount() {
-            let items = [];
-            for (let i = 0; i < Litemint.Core.currentAccount.assets.length; i += 1) {
-                const item = Litemint.Core.currentAccount.assets[i];
-                $("#" + item.code + "_" + item.issuer + "_balance").html(
-                    item.code + " " + namespace.formatPrice(item.balance, item.decimals)
-                );
-            }
-        }
-
-        stellarNet.loadDefaultAssets();
-        stellarNet.attachAccount((full, indexes) => {
-            stellarNet.updateAccount(full && !firstUpdate).then((account) => {
-                if (!full || firstUpdate) {
-                    firstUpdate = false;
-                    refreshAccount();
-                }
-                else {
-                    reloadAccount(indexes);
-                }
-            });
-        }).then(function () {
-                reloadAccount();
-                $("#sign-out").removeClass("is-hidden");
-                if (cb) {
-                    cb();
-                }
-            }).catch(function (err) {
-                reloadAccount();
-                $("#sign-out").removeClass("is-hidden");
-                if (cb) {
-                    cb(err);
-                }
-        });
-    }
-
-    function handleSignInError(error) {
-        if (error) {
-            if (Litemint.Core.currentAccount.keys) {
-                if (error.response && error.response.status === 404) {
-                    signInError = namespace.SignInErrorType.AccountNotCreated;
-                    // Install a watch on the account to get notified of creation.
-                    const stellarNet = new Litemint.Core.StellarNetwork();
-                    stellarNet.watchAccount(Litemint.Core.currentAccount.keys.publicKey(),
-                        () => {
-                            signIn((error) => {
-                                handleSignInError(error);
-                            });
-                        }
-                    );
-                }
-                else {
-                    signInError = namespace.SignInErrorType.AccountNotAvailable;
-                    // Retry every 10 seconds.
-                    retryId = setTimeout(() => {
-                        signIn((error) => {
-                            handleSignInError(error);
-                        });
-                    }, 10000);
-                }
-            }
-        }
-    }
-
-    function signOutCb() {
-        if (retryId) {
-            clearTimeout(retryId);
-        }
-        new Litemint.Core.StellarNetwork().detachAccount();
-        namespace.loadSection($("#sign-in"));
-    }
-
-    $("#create-account").click(() => {
-        $("#account-data").val("");
-
-        namespace.loadSection();
-        setTimeout(() => {
-            Litemint.Core.currentAccount.create(
-                namespace.secret, "new_account",
-                false, {
-                    "load": namespace.loadWalletData,
-                    "save": namespace.saveWalletData
-                });
-
-            signIn((error) => {
-                namespace.loadSection($("#dashboard"));
-                handleSignInError(error);
-            });
-        }, 500);
-    });
-
-    $("#load-account").click(() => {
-        function setError(active) {
-            if (active) {
-                $("#account-data").trigger("focus");
-                $("#account-data").removeClass("is-info");
-                $("#account-data").addClass("is-danger");
-                $("#sign-in-error").removeClass("is-hidden");
-            }
-            else {
-                $("#account-data").removeClass("is-danger");
-                $("#account-data").addClass("is-info");
-                $("#sign-in-error").addClass("is-hidden");
-            }
-        }
-        $("#account-data").on("input", function () {
-            setError(false);
-        });
-        const accountData = $("#account-data").val();
-        $("#account-data").val("");
-        if (accountData === "") {
-            setError(true);
+    const onResize = function () {
+        if (Litemint.Pepper.showWallet) {
+            $("#marketview").width($(window).width() - $(window).height() * 0.5);
         }
         else {
-            if (new Litemint.Core.Account().getPublicFromMnemonic(accountData)
-                || StellarSdk.StrKey.isValidEd25519PublicKey(accountData)
-                || StellarSdk.StrKey.isValidEd25519SecretSeed(accountData)) {
-                namespace.loadSection();
-                setTimeout(() => {
-                    Litemint.Core.currentAccount.create(
-                        namespace.secret, "new_account",
-                        false, {
-                            "load": namespace.loadWalletData,
-                            "save": namespace.saveWalletData
-                        }, accountData);
-
-                    signIn((error) => {
-                        namespace.loadSection($("#dashboard"));
-                        handleSignInError(error);
-                    });
-                }, 500);
-            }
-            else {
-                setError(true);
-            }
+            $("#marketview").width($(window).width());
         }
-    });
+    };
 
-    $("#sign-out").click(() => {
-        namespace.loadSection();
-        Litemint.Core.wipeStorage();
-        $("#sign-out").addClass("is-hidden");
-        setTimeout(() => {
-            Litemint.Core.currentAccount.unload(signOutCb);
-        }, 500);
-    });
-
-    $("#language-select").change(function () {
-        namespace.updateLanguage($("#language-select").val());
-    });
-
-    namespace.loadSection = function (element) {
-        const el = element || $("#loader");
-        if (el.is(":hidden")) {
-            $(".spear-page").hide();
-            $(".spear-page").removeClass("is-hidden");
-            el.fadeIn();
+    const copyTextToClipboard = function (text) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(
+                function () { }, function (err) { });
         }
     };
 
     $(document).ready(function () {
-        $(window).scroll(function () {
-            var pos = $(window).scrollTop();
-            if (pos === 0) {
-                $(".navbar").removeClass('site-navbar-scrolled');
-            }
-            else {
-                $(".navbar").addClass('site-navbar-scrolled');
-            }
-        });
+        onResize();
 
-        // Initialize the language.
-        const currLang = namespace.getLang();
-        namespace.updateLanguage(currLang);
-        for (let lang in namespace.languagePacks) {
-            if (namespace.languagePacks.hasOwnProperty(lang)) {
-                const pack = namespace.languagePacks[lang];
-                $("#language-select").append(new Option(pack.name, lang, currLang === lang, currLang === lang));
-            }
+        if (isMobile()) {
+            $("#marketview").hide();
+            $("#mainview").hide();
+            $("#mobile").removeClass("is-hidden");
         }
+    });
 
-        // Load the sign in page.
-        namespace.loadSection($("#sign-in"));
+    $(window).resize(function () {
+        onResize();
+    });
+
+    window.addEventListener("message", function (event) {
+        if (event.data === "litemint_ready") {
+            $("#loader").fadeOut();
+        }
+        else if (event.data.indexOf("litemint_toast:") === 0) {
+            if (snackTimerId) {
+                clearTimeout(snackTimerId);
+                snackTimerId = 0;
+            }
+
+            let x = $("#snackbar")[0];
+            x.className = "show";
+            $("#snackbar").html(event.data.substr(15));
+            snackTimerId = setTimeout(function () { x.className = x.className.replace("show", ""); }, 2000);
+        }
+        else if (event.data.indexOf("litemint_copy:") === 0) {
+            copyTextToClipboard(event.data.substr(14));
+        }
+    });
+
+    $(".toggle-wallet-wrapper").click(function () {
+        if (Litemint.Pepper.showWallet) {
+            Litemint.Pepper.showWallet = false;
+            $("#marketview").animate({
+                width: "100%"
+            }, 350, "swing", function () {
+                $("#close-wallet-button").hide();
+                $("#open-wallet-button").show();
+            });
+        }
+        else {
+            Litemint.Pepper.showWallet = true;
+            $("#marketview").animate({
+                width: $(window).width() - $(window).height() * 0.5 + "px"
+            }, 350, "swing", function () {
+                $("#open-wallet-button").hide();
+                $("#close-wallet-button").show();
+            });
+        }
     });
 
 })(window.Litemint.Spear = window.Litemint.Spear || {});

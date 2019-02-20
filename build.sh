@@ -97,8 +97,9 @@ java -jar $COMPILER \
 --compilation_level SIMPLE_OPTIMIZATIONS \
 --hide_warnings_for js/thirdparty \
 --js js/license.js \
---js js/thirdparty/ui/jquery-2.1.1.min.js \
---js js/thirdparty/ui/jquery.mobile.custom.min.js \
+--js js/thirdparty/ui/jquery-3.3.1.min.js \
+--js js/thirdparty/ui/jquery-migrate-3.0.0.min.js \
+--js js/thirdparty/ui/jquery.mobile.1.4.5.custom.min.js \
 --js js/thirdparty/ui/jquery-qrcode.min.js \
 --js js/thirdparty/ui/chart.min.js \
 --js js/pepper/decl.js \
@@ -114,14 +115,7 @@ java -jar $COMPILER \
 echo "Compiling litemint spear flavor..."
 java -jar $COMPILER \
 --compilation_level SIMPLE_OPTIMIZATIONS \
---hide_warnings_for js/thirdparty \
 --js js/license.js \
---js js/thirdparty/ui/jquery-3.3.1.min.js \
---js js/thirdparty/ui/jquery-migrate-3.0.0.min.js \
---js js/thirdparty/ui/jquery.mobile.1.4.5.custom.min.js \
---js js/thirdparty/ui/jquery-qrcode.min.js \
---js js/thirdparty/ui/chart.min.js \
---js js/spear/languages.js \
 --js js/spear/index.js \
 --js_output_file=${OUT}spear.min.js
 

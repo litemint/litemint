@@ -11,7 +11,7 @@
 (function (namespace) {
 
     namespace.config = {
-        "version": "1.1.1",
+        "version": "1.1.2",
         "storageId": "1a442083-acd8-4ba7-9f0e-3c4e8d4a611k-0",
         "debug": false,
         "maxOperations": 100,
