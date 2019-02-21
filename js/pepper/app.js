@@ -1282,35 +1282,38 @@
                             namespace.Pepper.importData = $("#import").val();
                             namespace.Pepper.importType = 0;
 
-                            const account = new namespace.Core.Account();
-                            const publicKey = account.getPublicFromMnemonic(namespace.Pepper.importData);
-                            if (publicKey) {
-                                namespace.Pepper.importType = 1;
-                                namespace.Pepper.importKey = publicKey;
-                            }
-                            else if (StellarSdk.StrKey.isValidEd25519PublicKey(namespace.Pepper.importData)) {
-                                namespace.Pepper.importType = 2;
-                                namespace.Pepper.importKey = namespace.Pepper.importData;
-                            }
-                            else if (StellarSdk.StrKey.isValidEd25519SecretSeed(namespace.Pepper.importData)) {
-                                namespace.Pepper.importType = 3;
-                                namespace.Pepper.importKey = account.getPublicFromSecret(namespace.Pepper.importData);
-                            }
+                            namespace.Core.Account.ResolveAddress(namespace.Pepper.importData, (address) => {
+                                const account = new namespace.Core.Account();
+                                namespace.Pepper.importData = address || namespace.Pepper.importData;
+                                let publicKey = address ? 0 : account.getPublicFromMnemonic(namespace.Pepper.importData);
+                                if (publicKey) {
+                                    namespace.Pepper.importType = 1;
+                                    namespace.Pepper.importKey = publicKey;
+                                }
+                                else if (StellarSdk.StrKey.isValidEd25519PublicKey(namespace.Pepper.importData)) {
+                                    namespace.Pepper.importType = 2;
+                                    namespace.Pepper.importKey = namespace.Pepper.importData;
+                                }
+                                else if (StellarSdk.StrKey.isValidEd25519SecretSeed(namespace.Pepper.importData)) {
+                                    namespace.Pepper.importType = 3;
+                                    namespace.Pepper.importKey = account.getPublicFromSecret(namespace.Pepper.importData);
+                                }
 
-                            if (namespace.Pepper.importType > 0) {
-                                domShowImportForm(false);
-                                domShowModalPage(false, namespace.Pepper.WizardType.None);
+                                if (namespace.Pepper.importType > 0) {
+                                    domShowImportForm(false);
+                                    domShowModalPage(false, namespace.Pepper.WizardType.None);
 
-                                const data = namespace.Pepper.loadWalletData();
-                                data.lastaccount = -1;
-                                namespace.Pepper.saveWalletData(data);
-                                view.resetPinPage(true);
-                            }
-                            else {
-                                $("#import").val("");
-                                $("#import").trigger("focus");
-                                namespace.Pepper.importData = null;
-                            }
+                                    const data = namespace.Pepper.loadWalletData();
+                                    data.lastaccount = -1;
+                                    namespace.Pepper.saveWalletData(data);
+                                    view.resetPinPage(true);
+                                }
+                                else {
+                                    $("#import").val("");
+                                    $("#import").trigger("focus");
+                                    namespace.Pepper.importData = null;
+                                }
+                            });
                         }
                         else {
                             $("#import").trigger("focus");
