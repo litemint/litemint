@@ -95,4 +95,13 @@
         }
     });
 
+    $(window).bind("mousewheel DOMMouseScroll", function (event) {
+        if (event.originalEvent.wheelDelta > 0 || event.originalEvent.detail < 0) {
+            Litemint.Pepper.onScroll(false);
+        }
+        else {
+            Litemint.Pepper.onScroll(true);
+        }
+    });
+
 })(window.Litemint.Spear = window.Litemint.Spear || {});

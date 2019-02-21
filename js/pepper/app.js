@@ -243,6 +243,33 @@
         return "exit";
     };
 
+    namespace.Pepper.onScroll = function (down) {
+
+        if (rotateScreen || !view || showLoader ||
+            view.scrollerTime || view.scrollerEndTime || view.showPinLoader
+            || view.modalPageEndTime) {
+            return;
+        }
+
+        if (view.showScroller) {
+            if (down && view.scroller.offset < view.scroller.maxOffset) {
+                view.scroller.offset += view.unit;
+            }
+            else if (!down && view.scroller.offset > 0) {
+                view.scroller.offset -= view.unit;
+            }
+        }
+        else if (!view.isSendMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout) {
+            if (down && view.list.offset < view.list.maxOffset) {
+                view.list.offset += view.unit;
+            }
+            else if (!down && view.list.offset > 0) {
+                view.list.offset -= view.unit;
+            }
+        }
+        view.needRedraw = true;
+    };
+
     function onLoad(current, total) {
         loadingstate = { "current": current, "total": total };
         if (!readyTrigger) {
