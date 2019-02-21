@@ -1313,6 +1313,7 @@
                                     $("#import").trigger("focus");
                                     namespace.Pepper.importData = null;
                                 }
+                                view.needRedraw = true;
                             });
                         }
                         else {
