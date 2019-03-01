@@ -281,7 +281,7 @@
     };
 
     namespace.Pepper.isWebkitHost = function () {
-        return webkit && webkit.messageHandlers && webkit.messageHandlers.callbackHandler;
+        return typeof window.webkit !== "undefined" && webkit.messageHandlers && webkit.messageHandlers.callbackHandler;
     };
 
     function onLoad(current, total) {
