@@ -140,6 +140,16 @@
                         }
                     }
                 }
+                else if (namespace.Pepper.isWebkitHost()) {
+                    if (view.account) {
+                        if (!view.account.notoast) {
+                            webkit.messageHandlers.callbackHandler.postMessage({ "name": "showToast", "message": message });
+                        }
+                        if (!view.account.nonotif) {
+                            webkit.messageHandlers.callbackHandler.postMessage({ "name": "showNotification", "message": message });
+                        }
+                    }
+                }
                 else if (parent) {
                     if (view.account) {
                         if (!view.account.notoast) {
@@ -270,12 +280,19 @@
         view.needRedraw = true;
     };
 
+    namespace.Pepper.isWebkitHost = function () {
+        return webkit && webkit.messageHandlers && webkit.messageHandlers.callbackHandler;
+    };
+
     function onLoad(current, total) {
         loadingstate = { "current": current, "total": total };
         if (!readyTrigger) {
             readyTrigger = true;
             if (window.Android) {
                 window.Android.setReady();
+            }
+            else if (namespace.Pepper.isWebkitHost()) {
+                webkit.messageHandlers.callbackHandler.postMessage({ "name": "ready" });
             }
             else if (parent) {
                 parent.postMessage("litemint_ready", "*");
@@ -1355,6 +1372,9 @@
                     if (window.Android) {
                         window.Android.scanQRCode();
                     }
+                    else if (namespace.Pepper.isWebkitHost()) {
+                        webkit.messageHandlers.callbackHandler.postMessage({ "name": "scanQRCode" });
+                    }
                     else if(parent) {
                         parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
                     }
@@ -1499,6 +1519,9 @@
                                             if (!namespace.Core.currentAccount.nobackup && window.Android) {
                                                 window.Android.copyToClipboard("address", namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
                                             }
+                                            else if (!namespace.Core.currentAccount.nobackup && namespace.Pepper.isWebkitHost()) {
+                                                webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": namespace.Core.currentAccount.friendlyAddress, "message": namespace.Pepper.Resources.localeText[122] });
+                                            }
                                             else if (!namespace.Core.currentAccount.nobackup && parent) {
                                                 parent.postMessage("litemint_copy:" + namespace.Core.currentAccount.friendlyAddress, "*");
                                                 parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
@@ -1606,6 +1629,15 @@
                                                         namespace.Pepper.Resources.localeText[133] + " " + carouselitem.asset.issuer,
                                                         namespace.Pepper.Resources.localeText[134] + " " + (carouselitem.asset.deposit || namespace.Core.currentAccount.keys.publicKey()),
                                                         namespace.Pepper.Resources.localeText[135]);
+                                                }
+                                                else if (namespace.Pepper.isWebkitHost()) {
+                                                    webkit.messageHandlers.callbackHandler.postMessage({
+                                                        "name": "share",
+                                                        "code": namespace.Pepper.Resources.localeText[126] + " " + carouselitem.asset.code,
+                                                        "issuer": namespace.Pepper.Resources.localeText[133] + " " + carouselitem.asset.issuer,
+                                                        "deposit": namespace.Pepper.Resources.localeText[134] + " " + (carouselitem.asset.deposit || namespace.Core.currentAccount.keys.publicKey()),
+                                                        "title": namespace.Pepper.Resources.localeText[135]
+                                                    });
                                                 }
                                                 else if (parent) {
                                                     parent.postMessage("litemint_copy:" +
@@ -1926,6 +1958,12 @@
                                     if (window.Android) {
                                         window.Android.showToast(namespace.Pepper.Resources.localeText[160]);
                                     }
+                                    else if (namespace.Pepper.isWebkitHost()) {
+                                        webkit.messageHandlers.callbackHandler.postMessage({
+                                            "name": "showToast",
+                                            "message": namespace.Pepper.Resources.localeText[160]
+                                        });
+                                    }
                                     else if (parent) {
                                         parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
                                     }
@@ -2188,13 +2226,17 @@
                                         view.loadScroller(namespace.Pepper.ScrollerType.Addresses);
                                     });
 
+                                    window.onRetrieveClipboardData = function (data) {
+                                        $("#address").val(data);
+                                        $("#address").trigger("focus");
+                                    };
+
                                     testElement(2, point, view.pasteBtn, isPointerDown, function () {
                                         if (window.Android) {
-                                            window.onRetrieveClipboardData = function (data) {
-                                                $("#address").val(data);
-                                                $("#address").trigger("focus");
-                                            };
                                             window.Android.retrieveClipboardData();
+                                        }
+                                        else if (namespace.Pepper.isWebkitHost()) {
+                                            webkit.messageHandlers.callbackHandler.postMessage({ "name": "retrieveClipboardData" });
                                         }
                                         else if (parent) {
                                             parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
@@ -2204,6 +2246,9 @@
                                     testElement(2, point, view.qrBtn, isPointerDown, function () {
                                         if (window.Android) {
                                             window.Android.scanQRCode();
+                                        }
+                                        else if (namespace.Pepper.isWebkitHost()) {
+                                            webkit.messageHandlers.callbackHandler.postMessage({ "name": "scanQRCode" });
                                         }
                                         else if (parent) {
                                             parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
@@ -2215,6 +2260,9 @@
                                         let key = view.getActiveCarouselItem().asset.deposit || namespace.Core.currentAccount.keys.publicKey();
                                         if (window.Android) {
                                             window.Android.copyToClipboard("address", key, namespace.Pepper.Resources.localeText[122]);
+                                        }
+                                        else if (namespace.Pepper.isWebkitHost()) {
+                                            webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": key, "message": namespace.Pepper.Resources.localeText[122] });
                                         }
                                         else if (parent) {
                                             parent.postMessage("litemint_copy:" + key, "*");
@@ -2255,6 +2303,9 @@
                                                     if (window.Android) {
                                                         window.Android.copyToClipboard("memo", item.data.memo, namespace.Pepper.Resources.localeText[123] + item.data.memo);
                                                     }
+                                                    else if (namespace.Pepper.isWebkitHost()) {
+                                                        webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "memo", "data": item.data.memo, "message": namespace.Pepper.Resources.localeText[123] + item.data.memo });
+                                                    }
                                                     else if (parent) {
                                                         parent.postMessage("litemint_copy:" + item.data.memo, "*");
                                                         parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[123] + item.data.memo, "*");
@@ -2273,6 +2324,14 @@
                                                                     window.Android.copyToClipboard("address", item.data.to, namespace.Pepper.Resources.localeText[122]);
                                                                 }
                                                             }
+                                                            else if (namespace.Pepper.isWebkitHost()) {
+                                                                if (item.data.to === namespace.Core.currentAccount.keys.publicKey()) {
+                                                                    webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": item.data.from, "message": namespace.Pepper.Resources.localeText[122] });
+                                                                }
+                                                                else {
+                                                                    webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": item.data.to, "message": namespace.Pepper.Resources.localeText[122] });
+                                                                }
+                                                            }
                                                             else if (parent) {
                                                                 if (item.data.to === namespace.Core.currentAccount.keys.publicKey()) {
                                                                     parent.postMessage("litemint_copy:" + item.data.from, "*");
@@ -2288,6 +2347,9 @@
                                                             if (window.Android) {
                                                                 window.Android.copyToClipboard("address", item.data.source_account, namespace.Pepper.Resources.localeText[122]);
                                                             }
+                                                            else if (namespace.Pepper.isWebkitHost()) {
+                                                                webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": item.data.source_account, "message": namespace.Pepper.Resources.localeText[122] });
+                                                            }
                                                             else if (parent) {
                                                                 parent.postMessage("litemint_copy:" + item.data.source_account, "*");
                                                                 parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
@@ -2297,6 +2359,9 @@
                                                         case "allow_trust":
                                                             if (window.Android) {
                                                                 window.Android.copyToClipboard("address", item.data.asset_issuer, namespace.Pepper.Resources.localeText[122]);
+                                                            }
+                                                            else if (namespace.Pepper.isWebkitHost()) {
+                                                                webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": item.data.asset_issuer, "message": namespace.Pepper.Resources.localeText[122] });
                                                             }
                                                             else if (parent) {
                                                                 parent.postMessage("litemint_copy:" + item.data.asset_issuer, "*");
@@ -2920,11 +2985,13 @@
         e.preventDefault();
     });
 
-    
     // Handle about rate button click.
     $("#about-page-rate, #about-rate-icon").click(function (e) {
         if (window.Android) {
             window.Android.rate();
+        }
+        else if (namespace.Pepper.isWebkitHost()) {
+            webkit.messageHandlers.callbackHandler.postMessage({ "name": "rate" });
         }
         else {
             window.open("https://www.facebook.com/litemint/reviews/", "_blank");
@@ -3060,6 +3127,9 @@
                 if (window.Android) {
                     window.Android.copyToClipboard("qrcode", code, namespace.Pepper.Resources.localeText[121]);
                 }
+                else if (namespace.Pepper.isWebkitHost()) {
+                    webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "qrcode", "data": code, "message": namespace.Pepper.Resources.localeText[121] });
+                }
                 else if (parent) {
                     parent.postMessage("litemint_copy:" + code, "*");
                     parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[121], "*");
@@ -3072,6 +3142,9 @@
     window.copyIssuer = function (issuer) {
         if (window.Android) {
             window.Android.copyToClipboard("issuer", issuer, namespace.Pepper.Resources.localeText[122]);
+        }
+        else if (namespace.Pepper.isWebkitHost()) {
+            webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "issuer", "data": issuer, "message": namespace.Pepper.Resources.localeText[122] });
         }
         else if (parent) {
             parent.postMessage("litemint_copy:" + issuer, "*");
