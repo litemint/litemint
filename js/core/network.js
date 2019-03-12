@@ -321,28 +321,32 @@
                 }
 
                 stellarServer.loadAccount(destinationKey)
-                    .then(function (destAccount) {
-                        // TODO: test for asset trustline if not native.
-                        stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
-                            .then(function (sourceAccount) {
-                                let transaction = new StellarSdk.TransactionBuilder(sourceAccount)
-                                    .addOperation(StellarSdk.Operation.payment({
-                                        destination: destinationKey,
-                                        asset: asset,
-                                        amount: amount
-                                    }))
-                                    .addMemo(localMemo)
-                                    .setTimeout(60)
-                                    .build();
-                                transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
-                                return stellarServer.submitTransaction(transaction);
-                            })
-                            .then(function (result) {
-                                cb(true, result);
-                            })
-                            .catch(function (error) {
-                                cb(false, error);
-                            });
+                    .then((destAccount) => {
+                        if (this.hasTrustline(destAccount, asset)) {
+                            stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
+                                .then(function (sourceAccount) {
+                                    let transaction = new StellarSdk.TransactionBuilder(sourceAccount)
+                                        .addOperation(StellarSdk.Operation.payment({
+                                            destination: destinationKey,
+                                            asset: asset,
+                                            amount: amount
+                                        }))
+                                        .addMemo(localMemo)
+                                        .setTimeout(60)
+                                        .build();
+                                    transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
+                                    return stellarServer.submitTransaction(transaction);
+                                })
+                                .then(function (result) {
+                                    cb(true, result);
+                                })
+                                .catch(function (error) {
+                                    cb(false, error);
+                                });
+                        }
+                        else {
+                            cb(false, "Trustline not set.");
+                        }
                     }).catch((error) => {
                         if (error && error.response.status === 404 && !asset.issuer) {
                             // Try to create the account.
@@ -377,6 +381,17 @@
             .catch(function (error) {
                 cb(false, error);
             });
+    };
+
+    // Check the account has established a trustline to the asset.
+    namespace.Core.StellarNetwork.prototype.hasTrustline = function (account, asset) {
+        const trusted =
+            asset.code === "XLM" || // Native is always trusted.
+            asset.issuer === account.id || // Issuer is always trusted.
+            account.balances.some((balance) => { // An explicit balance must exist.
+                return balance.asset_code === asset.code && balance.asset_issuer === asset.issuer;
+            });
+        return trusted;
     };
 
     // Set a trustline on the account.
