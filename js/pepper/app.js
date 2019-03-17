@@ -71,6 +71,48 @@
             getRates();
         }, 1000 * 60 * namespace.config.marketDataInterval);
 
+        // Periodically refresh the current orderbook.
+        namespace.Pepper.orderBooks = {"skipCount" : 0, "oldBook": "" };
+        setInterval(() => {
+            if (view && view.isSendMode && view.sendStep === 6) {
+                const base = view.getActiveCarouselItem().asset;
+                if (base) {
+                    const quote = view.quoteAssets[base.code + base.issuer];
+                    if (quote && (quote.code !== base.code || quote.issuer !== base.issuer)) {
+                        namespace.Pepper.orderBooks.skipCount += 1;
+                        let propId = base.code + base.issuer + quote.code + quote.issuer;
+                        if (namespace.Pepper.orderBooks.skipCount > 7
+                            || namespace.Pepper.orderBooks.oldBook !== propId) {
+
+                            const stellarnetwork = new namespace.Core.StellarNetwork();
+                            const baseAsset = base.issuer === "native" ? StellarSdk.Asset.native() : new StellarSdk.Asset(base.code, base.issuer);
+                            const quoteAsset = quote.issuer === "native" ? StellarSdk.Asset.native() : new StellarSdk.Asset(quote.code, quote.issuer);
+
+                            namespace.Pepper.orderBooks.oldBook = propId;
+                            namespace.Pepper.orderBooks.skipCount = 0;
+
+                            // Preserve the history.
+                            let history = namespace.Pepper.orderBooks[propId] ? namespace.Pepper.orderBooks[propId].history : null;
+
+                            stellarnetwork.getOrderBook(baseAsset, quoteAsset, history, (err, book) => {
+                                if (!err) {
+                                    let newBook = namespace.Pepper.orderBooks[propId] ? false : true;
+                                    namespace.Pepper.orderBooks[propId] = book;
+                                    console.log(namespace.Pepper.orderBooks[propId]);
+                                    loadOrderBook(newBook);
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        view.resetBook();
+                        view.book.items = [];
+                        view.needRedraw = true;
+                    }
+                }
+            }
+        }, 1000 * namespace.config.marketDataInterval);
+
         // Download the network message.
         namespace.Pepper.networkMessage = namespace.config.version;
         const getmessage = function () {
@@ -269,6 +311,14 @@
                 view.scroller.offset -= view.unit;
             }
         }
+        else if (view.isSendMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout && view.sendStep === 6) {
+            if (down && view.book.offset < view.book.maxOffset) {
+                view.book.offset += view.unit;
+            }
+            else if (!down && view.book.offset > 0) {
+                view.book.offset -= view.unit;
+            }
+        }
         else if (!view.isSendMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout) {
             if (down && view.list.offset < view.list.maxOffset) {
                 view.list.offset += view.unit;
@@ -317,6 +367,7 @@
                 domShowAboutPage(false);
                 view.onCarouselItemChanged = function () {
                     domGenerateCode();
+                    loadOrderBook(true);
                 };
             });
     }
@@ -593,6 +644,69 @@
         }
     }
 
+    function testBook(testType, point, list, isDown, callback) {
+        for (let i = 0; i < list.items.length; i += 1) {
+            const item = list.items[i];
+
+            let y = item.data.spot ? item.y - view.book.offset + view.unit * 0.2 < view.book.y ? view.book.y + view.book.offset - view.unit * 0.2 : item.y : item.y;
+            y = item.data.spot ? item.y + item.height - view.book.offset + view.unit * 0.2 > view.book.y + view.book.height ? view.book.y + view.book.height + view.book.offset - item.height : y : y;
+
+            switch (testType) {
+                case 0:
+                    item.selected = false;
+                    item.hover = false;
+                    item.hasClick = false;
+                    item.overAddBtn = false;
+                    item.overCopyBtn = false;
+                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.book.offset, item.x + item.width, y + item.height - view.book.offset)) {
+                        item.selected = true;
+                        item.hasClick = true;
+
+                        if (item.data.spot) {
+                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - view.unit * 3, y - view.book.offset, item.x + item.width, y + item.height - view.book.offset)) {
+                                item.overHistBtn = true;
+                            }
+                        }
+                    }
+                    break;
+                case 1:
+                    item.hover = false;
+                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.book.offset, item.x + item.width, y + item.height - view.book.offset)) {
+                        if (isDown) {
+                            if (item.hasClick) {
+                                item.selected = true;
+                                item.hover = true;
+
+                                if (item.data.spot) {
+                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - view.unit * 3, y - view.book.offset, item.x + item.width, y + item.height - view.book.offset)) {
+                                        item.overHistBtn = false;
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            item.hover = true;
+                        }
+                    }
+                    else if (item.selected) {
+                        item.hasClick = false;
+                        item.selected = false;
+                    }
+                    break;
+                case 2:
+                    if (item.selected) {
+                        item.selected = false;
+                        item.hover = false;
+
+                        if (item.hasClick) {
+                            callback(item, i);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
     function testCarousel(testType, point, carousel, isDown, callback) {
         let clicked = false;
         for (let i = 0; i < carousel.items.length; i += 1) {
@@ -688,6 +802,39 @@
             catch (err) {
                 if (event.originalEvent.pointerId) {
                     console.log(err);
+                }
+            }
+        }
+    }
+
+    function loadOrderBook(reset) {
+        if (view && view.sendStep === 6 && view.isSendMode && view.book) {
+            const base = view.getActiveCarouselItem().asset;
+            if (base) {
+                const quote = view.quoteAssets[base.code + base.issuer];
+                if (quote) {
+                    if (reset) {
+                        view.resetBook();
+                    }
+                    view.book.items = [];
+                    view.book.id = base.code + base.issuer + quote.code + quote.issuer;
+                    let book = namespace.Pepper.orderBooks[view.book.id];
+                    if (book) {
+
+                        for (let i = book.asks.length - 1; i >= 0; i -= 1) {
+                            view.book.items.push({ "data": book.asks[i] });
+                        }
+
+                        if (book.asks.length || book.bids.length) {
+                            view.book.items.push({ "data": { "spot": true } });
+                        }
+
+                        for (let i = 0; i < book.bids.length; i += 1) {
+                            view.book.items.push({ "data": book.bids[i] });
+                        }
+
+                        view.needRedraw = true;
+                    }
                 }
             }
         }
@@ -940,7 +1087,10 @@
                 const selected = testScroller(0, point, view.scroller, false);
                 if (!selected
                     && (view.scroller.type === namespace.Pepper.ScrollerType.AssetsMenu
-                    || view.scroller.type === namespace.Pepper.ScrollerType.FilterMenu
+                        || view.scroller.type === namespace.Pepper.ScrollerType.FilterMenu
+                        || view.scroller.type === namespace.Pepper.ScrollerType.QuotesMenu
+                        || view.scroller.type === namespace.Pepper.ScrollerType.LastTrades
+                        || view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders
                         || view.scroller.type === namespace.Pepper.ScrollerType.AccountSettings)) {
                     if (view.scroller.type !== namespace.Pepper.ScrollerType.AccountSettings) {
                         view.scrollerEndTime = 0.3;
@@ -1020,6 +1170,18 @@
                     if (!clicked && !view.isSendMode) {
                         clicked = testElement(0, point, view.chartBtn, false);
                     }
+                    if (!clicked && view.isSendMode && view.sendStep === 6 && view.getActiveCarouselItem() !== view.placeHolderAsset) {
+                        clicked = testElement(0, point, view.quoteBtn, false);
+                    }
+                    if (!clicked && view.isSendMode && view.sendStep === 6) {
+                        clicked = testElement(0, point, view.buyBtn, false);
+                    }
+                    if (!clicked && view.isSendMode && view.sendStep === 6) {
+                        clicked = testElement(0, point, view.sellBtn, false);
+                    }
+                    if (!clicked && view.isSendMode && view.sendStep === 6 && namespace.Core.currentAccount.offers.length) {
+                        clicked = testElement(0, point, view.ordersBtn, false);
+                    }
                     if (!clicked && !view.isSendMode) {
                         clicked = testElement(0, point, view.filterBtn, false);
                     }
@@ -1032,8 +1194,11 @@
                     if (!clicked) {
                         clicked = testElement(0, point, view.accountBtn, false);
                     }
+                    if (!clicked) {
+                        clicked = testElement(0, point, view.marketBtn, false);
+                    }
                     if (!clicked && view.carousel.offset === view.carousel.anchor) {
-                        if (!view.isSendMode || view.sendStep === 0 || view.sendStep === 5 || view.sendStep === 6) {
+                        if (!view.isSendMode || view.sendStep === 0 || view.sendStep === 5 || view.sendStep === 6 || view.sendStep === 7) {
                             view.carousel.downDistance = 0;
                             view.carousel.isDown = true;
                             view.carousel.canClick = true;
@@ -1060,6 +1225,18 @@
                                 testElement(0, point, view.bookBtn, false);
                                 testElement(0, point, view.pasteBtn, false);
                                 testElement(0, point, view.qrBtn, false);
+                            }
+                            else if (view.sendStep === 6) {
+                                if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
+                                    view.book.x, view.book.y, view.book.x + view.book.width, view.book.y + view.book.height)) {
+                                    view.book.downDistance = 0;
+                                    view.book.isDown = true;
+                                    view.book.canClick = true;
+                                    view.book.downTime = 0;
+                                    view.book.point = { "x": point.x, "y": point.y };
+                                    view.book.scrollTime = 1.5;
+                                    testBook(0, point, view.book, false);
+                                }
                             }
                         }
                         else if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
@@ -1176,11 +1353,13 @@
                     else {
                         testElement(1, point, view.menuBtn, isPointerDown);
                         testElement(1, point, view.accountBtn, isPointerDown);
+                        testElement(1, point, view.marketBtn, isPointerDown);
                         testElement(1, point, view.assetPicker, isPointerDown);
 
                         if (view.isSendMode) {
                             testElement(1, point, view.numPadSendBtn, isPointerDown);
                             testElement(1, point, view.numPadCloseBtn, isPointerDown);
+                            testElement(1, point, view.quoteBtn, isPointerDown);
 
                             if (view.sendStep === 0) {
                                 for (let i = 0; i < view.numPad.length; i += 1) {
@@ -1191,6 +1370,32 @@
                                 testElement(1, point, view.bookBtn, isPointerDown);
                                 testElement(1, point, view.pasteBtn, isPointerDown);
                                 testElement(1, point, view.qrBtn, isPointerDown);
+                            }
+                            else if (view.sendStep === 6) {
+                                testElement(1, point, view.buyBtn, isPointerDown);
+                                testElement(1, point, view.sellBtn, isPointerDown);
+                                testElement(1, point, view.ordersBtn, isPointerDown);
+
+                                testBook(1, point, view.book, isPointerDown);
+                                if (view.book.maxOffset > 0) {
+                                    if (view.book.isDown && view.book.hasBar) {
+                                        let multiplier = 1;
+                                        if (view.book.offset < view.book.minOffset) {
+                                            multiplier = 0.35;
+                                        }
+                                        else if (view.book.offset > view.book.maxOffset) {
+                                            multiplier = 0.35;
+                                        }
+
+                                        if (Math.abs(view.book.point.y - point.y) > view.book.rowHeight * 0.05) {
+                                            view.book.offset += (view.book.point.y - point.y) * multiplier;
+                                            view.book.downDistance += view.book.point.y - point.y;
+                                            view.book.point = { "x": point.x, "y": point.y };
+                                            view.book.canClick = false;
+                                        }
+                                    }
+                                }
+                                view.book.scrollTime = 1.5;
                             }
                         }
                         else {
@@ -1667,6 +1872,13 @@
                                                     (success, msg) => {
                                                         if (success) {
                                                             console.log(carouselitem.asset.code + " asset removed");
+
+                                                            // Clear quote asset if needed.
+                                                            const propId = view.carousel.items[0].asset.code + view.carousel.items[0].asset.issuer;
+                                                            const quote = view.quoteAssets[propId];
+                                                            if (quote && quote.code === carouselitem.asset.code && quote.issuer === carouselitem.asset.issuer) {
+                                                                view.quoteAssets[propId] = null;
+                                                            }
                                                         }
                                                         else {
                                                             carouselitem.asset.loaded = true;
@@ -1677,6 +1889,57 @@
                                             }
                                             break;
                                     }
+                                }
+                                break;
+                            case namespace.Pepper.ScrollerType.LastTrades:
+                                break;
+                            case namespace.Pepper.ScrollerType.LiveOrders:
+                                if (!view.cancellingOffer) {
+                                    for (let v = 0; v < view.scroller.items.length; v += 1) {
+                                        if (v !== item.id) {
+                                            if (view.scroller.items[v].delete) {
+                                                view.scroller.items[v].slideTime = 0.3;
+                                            }
+                                            view.scroller.items[v].delete = false;
+                                        }
+                                    }
+
+                                    let offer = view.scroller.items[item.id];
+                                    const isConfirmed = point.x > offer.x + offer.width - view.unit * 15 * 0.3;
+                                    if (offer.delete && isConfirmed) {
+                                        view.cancellingOffer = offer.data.id;
+                                        stellarNet.cancelOffer(offer.data, (success, message) => {
+                                            if (!success) {
+                                                console.error(message);
+                                                view.cancellingOffer = 0;
+                                            }
+                                        });
+                                    }
+                                    else if (offer.delete && !isConfirmed) {
+                                        offer.delete = false;
+                                        offer.slideTime = 0.3;
+                                    }
+                                    else {
+                                        offer.delete = true;
+                                        offer.slideTime = 0.3;
+                                    }
+                                }
+                                break;
+                            case namespace.Pepper.ScrollerType.QuotesMenu:
+                                view.scrollerEndTime = 0.3;
+                                view.discardedPanel = true;
+
+                                if (item.asset) {
+                                    let activeItem = view.getActiveCarouselItem();
+                                    view.quoteAssets[activeItem.asset.code + activeItem.asset.issuer] = item.asset;
+                                    loadOrderBook(true);
+                                }
+                                else {
+                                    view.closeSendPage(() => {
+                                        domShowAddressForm(false);
+                                    });
+                                    view.resetList(namespace.Pepper.ListType.Assets);
+                                    reloadAssets();
                                 }
                                 break;
                             case namespace.Pepper.ScrollerType.FilterMenu:
@@ -1871,12 +2134,24 @@
                                     view.loadScroller(namespace.Pepper.ScrollerType.AccountSettings);
                                     break;
                                 case 1:
-                                    view.loadScroller(namespace.Pepper.ScrollerType.Languages);
+                                    view.isDashboardMenu = false;
+                                    if (view.isSendMode) {
+                                        view.closeSendPage(() => {
+                                            domShowAddressForm(false);
+                                            showMarketplace();
+                                        });
+                                    }
+                                    else {
+                                        showMarketplace();
+                                    }
                                     break;
                                 case 2:
-                                    domShowAboutPage(true);
+                                    view.loadScroller(namespace.Pepper.ScrollerType.Languages);
                                     break;
                                 case 3:
+                                    domShowAboutPage(true);
+                                    break;
+                                case 4:
                                     view.closeSendPage(() => { domShowAddressForm(false); }, true);
                                     namespace.Core.currentAccount.unload(signOutCb);
                                     break;
@@ -1930,7 +2205,6 @@
                         testElement(2, point, view.receiveBtn, isPointerDown, function () {
                             if (!called) {
                                 called = true;
-                                view.clickedReceived = true;
                                 view.sendStep = 5;
                                 view.isSendMode = true;
                                 view.sendFormTime = 0.5;
@@ -1954,28 +2228,11 @@
                         if (!namespace.Core.currentAccount.watchOnly) {
                             testElement(2, point, view.tradeBtn, isPointerDown, function () {
                                 if (!called) {
-                                   // called = true;
-                                    if (window.Android) {
-                                        window.Android.showToast(namespace.Pepper.Resources.localeText[160]);
-                                    }
-                                    else if (namespace.Pepper.isWebkitHost()) {
-                                        webkit.messageHandlers.callbackHandler.postMessage({
-                                            "name": "showToast",
-                                            "message": namespace.Pepper.Resources.localeText[160]
-                                        });
-                                    }
-                                    else if (parent) {
-                                        parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
-                                    }
-                                }
-
-                                if (!called) {
                                     called = true;
-                                    view.clickedReceived = true;
                                     view.sendStep = 6;
                                     view.isSendMode = true;
                                     view.sendFormTime = 0.5;
-
+                                    loadOrderBook(true);
                                     domGenerateCode();
 
                                     for (let i = 0; i < view.carousel.items.length; i += 1) {
@@ -2015,6 +2272,23 @@
                                 view.loadScroller(namespace.Pepper.ScrollerType.AccountSettings);
                             }
                         });
+
+                        if (!namespace.Core.currentAccount.watchOnly) {
+                            testElement(2, point, view.marketBtn, isPointerDown, function () {
+                                if (!called) {
+                                    called = true;
+                                    if (view.isSendMode) {
+                                        view.closeSendPage(() => {
+                                            domShowAddressForm(false);
+                                            showMarketplace();
+                                        });
+                                    }
+                                    else {
+                                        showMarketplace();
+                                    }
+                                }
+                            });
+                        }
 
                         if (!namespace.Core.currentAccount.watchOnly) {
                             testElement(2, point, view.addAssetBtn, isPointerDown, function () {
@@ -2078,6 +2352,10 @@
                         if (!called) {
                             if (view.isSendMode) {
 
+                                testElement(2, point, view.quoteBtn, isPointerDown, function () {
+                                    view.loadScroller(namespace.Pepper.ScrollerType.QuotesMenu);
+                                });
+
                                 let close = false;
                                 testElement(2, point, view.numPadCloseBtn, isPointerDown, function () {
                                     view.closeSendPage(() => { domShowAddressForm(false); });
@@ -2121,7 +2399,7 @@
                                     switch (view.sendStep) {
                                         case 0:
                                             if (!Number.isNaN(Number(view.sendAmount)) && Number(view.sendAmount) > 0) {
-                                                if (Number(namespace.Core.currentAccount.getMaxSend(view.getActiveCarouselItem().asset.balance, !view.carousel.active)) < view.sendAmount) {
+                                                if (Number(namespace.Core.currentAccount.getMaxSend(view.getActiveCarouselItem().asset.balance, view.getActiveCarouselItem().asset)) < view.sendAmount) {
                                                     view.amountErrorTime = 1;
                                                 }
                                                 else {
@@ -2270,6 +2548,53 @@
                                         }
                                         console.info(key);
                                     }
+                                }
+                                else if (view.sendStep === 6) {
+                                    if (view.book.isDown && view.book.hasBar) {
+                                        if (Math.abs(view.book.point.y - point.y) > view.book.rowHeight * 0.2) {
+                                            view.book.offset += (view.book.point.y - point.y) * 0.6;
+                                            view.book.downDistance += view.book.point.y - point.y;
+                                            view.book.point = { "x": point.x, "y": point.y };
+                                        }
+                                    }
+                                    view.book.isDown = false;
+                                    view.book.scrollTime = 1.5;
+
+                                    testBook(2, point, view.book, isPointerDown, function (item, index) {
+                                        if (view.book.canClick) {
+                                            if (item.overHistBtn) {
+                                                item.overHistBtn = false;
+                                                let base = view.getActiveCarouselItem().asset;
+                                                if (base) {
+                                                    let quote = view.quoteAssets[base.code + base.issuer];
+                                                    if (quote) {
+                                                        let propId = base.code + base.issuer + quote.code + quote.issuer;
+                                                        let book = namespace.Pepper.orderBooks[propId];
+                                                        if (book && book.history && book.history.length) {
+                                                            view.loadScroller(namespace.Pepper.ScrollerType.LastTrades);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            item.overHistBtn = false;
+                                        }
+                                    });
+
+                                    testElement(2, point, view.sellBtn, isPointerDown, function () {
+                                        console.log("sell button clicked");
+                                    });
+
+                                    testElement(2, point, view.buyBtn, isPointerDown, function () {
+                                        console.log("buy button clicked");
+                                    });
+
+                                    testElement(2, point, view.ordersBtn, isPointerDown, function () {
+                                        if (namespace.Core.currentAccount.offers.length) {
+                                            view.loadScroller(namespace.Pepper.ScrollerType.LiveOrders);
+                                        }
+                                    });
                                 }
                             }
                             else {
@@ -2533,7 +2858,7 @@
             if (!namespace.Core.currentAccount.assets.find(x => x.code === item.code && x.issuer === item.issuer)) {
                 if (applyFilter(item.asset, false)) {
                     let canAdd = nativeAsset && namespace.Core.currentAccount.assets.length
-                        && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, true) >= namespace.Core.currentAccount.getTrustBaseFee()
+                        && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee()
                         ? true : false;
                     view.list.items.push({
                         "data": item.asset,
@@ -2554,7 +2879,7 @@
                 }
 
                 let canAdd = nativeAsset && namespace.Core.currentAccount.assets.length
-                    && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, true) >= namespace.Core.currentAccount.getTrustBaseFee()
+                    && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee()
                     ? true : false;
                 view.scroller.items[i].hasAdd = canAdd;
             }
@@ -2588,9 +2913,33 @@
         const stellarNet = new namespace.Core.StellarNetwork();
 
         view.account = data.accounts[data.lastaccount];
+        view.quoteAssets = {};
 
         view.resetCarousel();
         view.page = namespace.Pepper.PageType.Dashboard;
+
+        view.resetBook();
+
+        namespace.Pepper.orderBooks = { "skipCount": 0, "oldBook": "" };
+
+        namespace.Core.StellarNetwork.onOrdersUpdated = () => {
+            if (view.showScroller && view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders) {
+                view.cancellingOffer = 0;
+                view.scroller.items = [];
+                for (let i = 0; i < namespace.Core.currentAccount.offers.length; i += 1) {
+                    view.scroller.items.push({
+                        "id": i,
+                        "data": namespace.Core.currentAccount.offers[i],
+                        "delete": view.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? true : false,
+                        "slideTime": view.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? 0.3 : 0
+                    });
+                }
+
+                if (!namespace.Core.currentAccount.offers.length) {
+                    view.scrollerEndTime = 0.3;
+                }
+            }
+        };
 
         stellarNet.loadDefaultAssets();
         stellarNet.attachAccount((full, indexes) => {
@@ -2626,6 +2975,38 @@
                 cb(err);
             }
         });
+    }
+
+    function showMarketplace() {
+
+        if (window.Android) {
+            window.Android.showToast(namespace.Pepper.Resources.localeText[160]);
+        }
+        else if (namespace.Pepper.isWebkitHost()) {
+            webkit.messageHandlers.callbackHandler.postMessage({
+                "name": "showToast",
+                "message": namespace.Pepper.Resources.localeText[160]
+            });
+        }
+        else if (parent) {
+            parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
+        }
+
+        view.sendStep = 7;
+        view.isSendMode = true;
+        view.sendFormTime = 0.5;
+
+        for (let i = 0; i < view.carousel.items.length; i += 1) {
+            if (view.carousel.items[i].chartMode) {
+                view.carousel.items[i].chartMode = false;
+                view.carousel.items[i].transitionTime = 0.5;
+            }
+        }
+
+        if (view.placeHolderAsset) {
+            view.placeHolderAsset.chartMode = false;
+            view.placeHolderAsset.transitionTime = 0.5;
+        }
     }
 
     function handleSignInError(error) {
@@ -3050,7 +3431,7 @@
                                 nativeAsset = view.placeHolderAsset;
                             }
                             let canAdd = namespace.Core.currentAccount
-                                .getMaxSend(nativeAsset.balance, true) >= namespace.Core.currentAccount.getTrustBaseFee()
+                                .getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee()
                                 ? true : false;
                             view.scroller.items.push({
                                 "data": new namespace.Core.Asset(currency.issuer, currency.code, 0),

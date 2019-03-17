@@ -97,7 +97,14 @@
         "toggleonImage": "toggleon.png",
         "toggleoffImage": "toggleoff.png",
         "lmtAccountImage": "lmtaccount.png",
-        "marketImage": "market.png"
+        "marketImage": "market.png",
+        "downImage": "down.png",
+        "upImage": "up.png",
+        "dropDownImage": "dropdown.png",
+        "histImage": "hist.png",
+        "stellarLightImage": "stellarlight.png",
+        "marketDarkImage": "marketdark.png",
+        "add2Image": "add2.png"
     };
 
 })(window.Litemint = window.Litemint || {});

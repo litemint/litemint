@@ -174,7 +174,20 @@
         "Marketplace",
         "Give Us Some Love",
         "Help us grow and rate us if you enjoy Litemint!",
-        "Not Supported Yet!" // 160
+        "Not Supported Yet!", // 160
+        "Buy",
+        "Sell",
+        "Trade",
+        "The order book is empty.",
+        "Price",
+        "Amount",
+        "Last Trades",
+        "Add Asset",
+        "Select Asset",
+        "Orders", // 170
+        "Offer",
+        "Cancel Offer",
+        "Cancelling..."
     ];
 
     /**
@@ -395,7 +408,7 @@
         "Non vérifié",
         "Envoyer",
         "Recevoir",
-        "Commerce",
+        "Echanger",
         "Activité",
         "Tokens",
         "Réserve:",
@@ -408,9 +421,9 @@
         "Solde disponible:",
         "Vous envoyez:",
         "Frais:",
-        "Il y a une minute",
-        "Il y a quelques minutes",
-        "Il y a quelques secondes",
+        "minute",
+        "minutes",
+        "quelques secondes",
         "Ajouter",
         "Token Ajouté",
         "Token supprimé",
@@ -733,7 +746,7 @@
         "확인되지 않음",
         "보내기",
         "받기",
-        "트레이드",
+        "거래",
         "활동 로그",
         "토큰",
         "Reserve:",

@@ -40,7 +40,10 @@
             "AddAsset": 5,
             "AccountSettings": 6,
             "Currencies": 7,
-            "Addresses": 8
+            "Addresses": 8,
+            "QuotesMenu": 9,
+            "LastTrades": 10,
+            "LiveOrders": 11
         },
 
         /**

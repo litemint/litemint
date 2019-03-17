@@ -42,6 +42,9 @@
         // List of assets for this account.
         this.assets = [];
 
+        // List of offers for this account.
+        this.offers = [];
+
         // List of addresses for this account.
         this.addresses = [];
 
@@ -181,9 +184,13 @@
     };
 
     // Get the account reserve.
-    namespace.Core.Account.prototype.getReserve = function (isNative) {
-        if (this.data && isNative) {
-            return (2 + this.data.subentry_count) * baseReserve;
+    namespace.Core.Account.prototype.getReserve = function (asset) {
+        if (this.data) {
+            let reserve = asset.issuer === "native" ? (2 + this.data.subentry_count) * baseReserve : 0;
+            this.offers.forEach(function (x) {
+                reserve += x.baseAsset.code === asset.code && (x.baseAsset.issuer === asset.issuer || asset.issuer === "native" && !x.baseAsset.issuer) ? Number(x.baseAmount) : 0;
+            });
+            return asset.issuer === "native" ? reserve + this.data.subentry_count * baseFee : reserve;
         }
         else {
             return 0;
@@ -191,9 +198,9 @@
     };
 
     // Get the maximum amount available.
-    namespace.Core.Account.prototype.getMaxSend = function (balance, isNative) {
-        if (this.data && isNative) {
-            return balance - (2 + this.data.subentry_count) * baseReserve;
+    namespace.Core.Account.prototype.getMaxSend = function (balance, asset) {
+        if (this.data) {
+            return asset.issuer === "native" ? Math.max(0, balance - this.getReserve(asset) - baseFee) : Math.max(0, balance - this.getReserve(asset));
         }
         else {
             return balance;

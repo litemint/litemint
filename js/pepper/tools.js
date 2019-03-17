@@ -77,7 +77,17 @@
      * @return {String} Formatted price.
      */
     namespace.Pepper.Tools.formatPrice = function (price, decimals) {
-        return Number(price).toFixed(decimals || 7);
+        const num = Number(!isNaN(price) ? price : "0");
+        let maxDecimals = decimals || 7;
+        maxDecimals =
+            num >= 1000000000 ? 1 :
+            num >= 100000000 ? Math.min(maxDecimals, 2) :
+            num >= 10000000 ? Math.min(maxDecimals, 3) :
+            num >= 1000000 ? Math.min(maxDecimals, 4) :
+            num >= 100000 ? Math.min(maxDecimals, 5) :
+            num >= 10000 ? Math.min(maxDecimals, 6) :
+            maxDecimals;
+        return num.toFixed(maxDecimals);
     };
 
     /**

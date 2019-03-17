@@ -75,7 +75,7 @@
                                         }
                                     })
                                     .catch(function (error) {
-                                        console.log(error);
+                                        console.error(error);
                                     });
                             }
                         };
@@ -159,7 +159,7 @@
                                     }
                                 })
                                 .catch(function (error) {
-                                    console.log(error);
+                                    console.error(error);
                                 });
                         };
 
@@ -184,6 +184,7 @@
         namespace.Core.currentAccount.data = null;
         namespace.Core.currentAccount.assets = [];
         namespace.Core.currentAccount.operations = [];
+        namespace.Core.currentAccount.offers = [];
         namespace.Core.currentAccount.addresses = [];
         namespace.Core.currentAccount.notifications = [];
         namespace.Core.currentAccount.friendlyAddress = null;
@@ -247,6 +248,34 @@
                             }
                         }
                     });
+
+                    // Retrieve the account offers.
+                    stellarServer.offers("accounts", namespace.Core.currentAccount.keys.publicKey())
+                        .limit(namespace.config.maxOrders)
+                        .call()
+                        .then((offerResult) => {
+                            namespace.Core.currentAccount.offers = [];
+                            for (let i = 0; i < offerResult.records.length; i += 1) {
+                                let record = offerResult.records[i];
+                                if (record.selling && record.buying) {
+                                    let offer = {
+                                        "id": record.id,
+                                        "baseAsset": record.selling.asset_type === "native" ? StellarSdk.Asset.native() : new StellarSdk.Asset(record.selling.asset_code, record.selling.asset_issuer),
+                                        "quoteAsset": record.buying.asset_type === "native" ? StellarSdk.Asset.native() : new StellarSdk.Asset(record.buying.asset_code, record.buying.asset_issuer),
+                                        "price": record.price,
+                                        "baseAmount": record.amount,
+                                        "quoteAmount": (Number(record.amount) * Number(record.price)).toFixed(7)
+                                    };
+                                    namespace.Core.currentAccount.offers.push(offer);
+                                }
+                            }
+                            if (namespace.Core.StellarNetwork.onOrdersUpdated) {
+                                namespace.Core.StellarNetwork.onOrdersUpdated();
+                            }
+                        })
+                        .catch((err) => {
+                            console.error(err);
+                        });
 
                     namespace.Core.currentAccount.data = account;
                     return resolve(account);
@@ -437,6 +466,97 @@
             });
     };
 
+    // Cancel offer.
+    namespace.Core.StellarNetwork.prototype.cancelOffer = function (offer, cb) {
+        var order = {
+            selling: offer.baseAsset,
+            buying: offer.quoteAsset,
+            amount: "0",
+            price: offer.price,
+            offerId: offer.id
+        };
+        stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
+            .then(function (receiver) {
+                const transaction = new StellarSdk.TransactionBuilder(receiver)
+                    .addOperation(StellarSdk.Operation.manageOffer(order))
+                    .setTimeout(60)
+                    .build();
+                transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
+                return stellarServer.submitTransaction(transaction);
+            })
+            .then(function (result) {
+                cb(true, result);
+            })
+            .catch(function (error) {
+                cb(false, error);
+            });
+    };
+
+    // Get order book for pair.
+    namespace.Core.StellarNetwork.prototype.getOrderBook = function (base, quote, history, cb) {
+        stellarServer.orderbook(base, quote)
+            .call()
+            .then((resp) => {
+                let orderBook = { "bids": [], "asks": [], "history": history };
+                if (resp.bids) {
+                    for (let i = 0; i < resp.bids.length; i += 1) {
+                        orderBook.bids.push(
+                            {
+                                "price": resp.bids[i].price,
+                                "baseAmount": (Number(resp.bids[i].amount) / Number(resp.bids[i].price)).toFixed(7),
+                                "quoteAmount": resp.bids[i].amount
+                            }
+                        );
+                    }
+                }
+
+                if (resp.asks) {
+                    for (let i = 0; i < resp.asks.length; i += 1) {
+                        orderBook.asks.push(
+                            {
+                                "price": resp.asks[i].price,
+                                "baseAmount": resp.asks[i].amount,
+                                "quoteAmount": (Number(resp.asks[i].amount) * Number(resp.asks[i].price)).toFixed(7)
+                            }
+                        );
+                    }
+                }
+
+                // Query trade history (without waiting for reply).
+                stellarServer.trades()
+                    .forAssetPair(base, quote)
+                    .limit(namespace.config.maxOrders)
+                    .order("desc")
+                    .call()
+                    .then((resp) => {
+                        orderBook.history = [];
+                        for (let i = 0; i < resp.records.length; i += 1) {
+                            const record = resp.records[i];
+                            orderBook.history.push(
+                                {
+                                    "baseAmount": record.base_amount,
+                                    "price": (Number(record.counter_amount) / Number(record.base_amount)).toFixed(7),
+                                    "quoteAmount": record.counter_amount,
+                                    "time": new Date(record.ledger_close_time),
+                                    "baseAccount": record.base_account,
+                                    "quoteAccount": record.counter_account,
+                                    "id": record.id,
+                                    "isBuy": record.base_is_seller
+                                });
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                    });
+
+                cb(false, orderBook);
+            })
+            .catch((err) => {
+                console.error(err);
+                cb(true, err);
+            });
+    };
+
     /**
      * Represents an asset with auto verification from stellar.toml hosted on home domain.
      * @class Asset
@@ -525,7 +645,7 @@
                             }
                         })
                         .catch(error => {
-                            console.log(JSON.stringify(error));
+                            console.error(JSON.stringify(error));
                             // Unverified home domain (no toml).
                             this.name = this.code;
                             this.loaded = true;
@@ -537,7 +657,7 @@
                     this.loaded = true;
                 }
             }).catch((error) => {
-                console.log(JSON.stringify(error));
+                console.error(JSON.stringify(error));
                 // Invalid account and unverified asset.
                 this.name = this.code;
                 this.errored = true;
