@@ -55,22 +55,24 @@
     });
 
     window.addEventListener("message", function (event) {
-        if (event.data === "litemint_ready") {
-            $("#loader").fadeOut();
-        }
-        else if (event.data.indexOf("litemint_toast:") === 0) {
-            if (snackTimerId) {
-                clearTimeout(snackTimerId);
-                snackTimerId = 0;
+        if (typeof event.data === "string") {
+            if (event.data === "litemint_ready") {
+                $("#loader").fadeOut();
             }
+            else if (event.data.indexOf("litemint_toast:") === 0) {
+                if (snackTimerId) {
+                    clearTimeout(snackTimerId);
+                    snackTimerId = 0;
+                }
 
-            let x = $("#snackbar")[0];
-            x.className = "show";
-            $("#snackbar").html(event.data.substr(15));
-            snackTimerId = setTimeout(function () { x.className = x.className.replace("show", ""); }, 2000);
-        }
-        else if (event.data.indexOf("litemint_copy:") === 0) {
-            copyTextToClipboard(event.data.substr(14));
+                let x = $("#snackbar")[0];
+                x.className = "show";
+                $("#snackbar").html(event.data.substr(15));
+                snackTimerId = setTimeout(function () { x.className = x.className.replace("show", ""); }, 2000);
+            }
+            else if (event.data.indexOf("litemint_copy:") === 0) {
+                copyTextToClipboard(event.data.substr(14));
+            }
         }
     });
 
