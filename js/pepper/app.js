@@ -74,7 +74,7 @@
         // Periodically refresh the current orderbook.
         namespace.Pepper.orderBooks = {"skipCount" : 0, "oldBook": "" };
         setInterval(() => {
-            if (view && view.isSendMode && view.sendStep === 6) {
+            if (view && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade) {
                 const base = view.getActiveCarouselItem().asset;
                 if (base) {
                     const quote = view.quoteAssets[base.code + base.issuer];
@@ -278,7 +278,7 @@
             domShowAboutPage(false);
             return "stay";
         }
-        else if (view.isSendMode) {
+        else if (view.isActivityMode) {
             view.closeSendPage(() => { domShowAddressForm(false); });
             return "stay";
         }
@@ -311,7 +311,7 @@
                 view.scroller.offset -= view.unit;
             }
         }
-        else if (view.isSendMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout && view.sendStep === 6) {
+        else if (view.isActivityMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout && view.activityType === namespace.Pepper.ActivityType.Trade) {
             if (down && view.book.offset < view.book.maxOffset) {
                 view.book.offset += view.unit;
             }
@@ -319,7 +319,7 @@
                 view.book.offset -= view.unit;
             }
         }
-        else if (!view.isSendMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout) {
+        else if (!view.isActivityMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout) {
             if (down && view.list.offset < view.list.maxOffset) {
                 view.list.offset += view.unit;
             }
@@ -808,7 +808,7 @@
     }
 
     function loadOrderBook(reset) {
-        if (view && view.sendStep === 6 && view.isSendMode && view.book) {
+        if (view && view.activityType === namespace.Pepper.ActivityType.Trade && view.isActivityMode && view.book) {
             const base = view.getActiveCarouselItem().asset;
             if (base) {
                 const quote = view.quoteAssets[base.code + base.issuer];
@@ -1146,46 +1146,46 @@
                 }
                 else {
                     let clicked;
-                    if (!clicked && !view.isSendMode && !namespace.Core.currentAccount.watchOnly) {
+                    if (!clicked && !view.isActivityMode && !namespace.Core.currentAccount.watchOnly) {
                         clicked = testElement(0, point, view.sendBtn, false);
                     }
-                    if (!clicked && !view.isSendMode) {
+                    if (!clicked && !view.isActivityMode) {
                         clicked = testElement(0, point, view.receiveBtn, false);
                     }
-                    if (!clicked && !view.isSendMode && !namespace.Core.currentAccount.watchOnly) {
+                    if (!clicked && !view.isActivityMode && !namespace.Core.currentAccount.watchOnly) {
                         clicked = testElement(0, point, view.tradeBtn, false);
                     }
                     if (!clicked) {
                         clicked = testElement(0, point, view.assetPicker, false);
                     }
-                    if (!clicked && !view.isSendMode) {
+                    if (!clicked && !view.isActivityMode) {
                         clicked = testElement(0, point, view.transactionsBtn, false);
                     }
-                    if (!clicked && !view.isSendMode) {
+                    if (!clicked && !view.isActivityMode) {
                         clicked = testElement(0, point, view.assetsBtn, false);
                     }
-                    if (!clicked && !view.isSendMode) {
+                    if (!clicked && !view.isActivityMode) {
                         clicked = testElement(0, point, view.moreBtn, false);
                     }
-                    if (!clicked && !view.isSendMode) {
+                    if (!clicked && !view.isActivityMode) {
                         clicked = testElement(0, point, view.chartBtn, false);
                     }
-                    if (!clicked && view.isSendMode && view.sendStep === 6 && view.getActiveCarouselItem() !== view.placeHolderAsset) {
+                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade && view.getActiveCarouselItem() !== view.placeHolderAsset) {
                         clicked = testElement(0, point, view.quoteBtn, false);
                     }
-                    if (!clicked && view.isSendMode && view.sendStep === 6) {
+                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade) {
                         clicked = testElement(0, point, view.buyBtn, false);
                     }
-                    if (!clicked && view.isSendMode && view.sendStep === 6) {
+                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade) {
                         clicked = testElement(0, point, view.sellBtn, false);
                     }
-                    if (!clicked && view.isSendMode && view.sendStep === 6 && namespace.Core.currentAccount.offers.length) {
+                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade && namespace.Core.currentAccount.offers.length) {
                         clicked = testElement(0, point, view.ordersBtn, false);
                     }
-                    if (!clicked && !view.isSendMode) {
+                    if (!clicked && !view.isActivityMode) {
                         clicked = testElement(0, point, view.filterBtn, false);
                     }
-                    if (!clicked && !view.isSendMode && !namespace.Core.currentAccount.watchOnly) {
+                    if (!clicked && !view.isActivityMode && !namespace.Core.currentAccount.watchOnly) {
                         clicked = testElement(0, point, view.addAssetBtn, false);
                     }
                     if (!clicked) {
@@ -1198,7 +1198,11 @@
                         clicked = testElement(0, point, view.marketBtn, false);
                     }
                     if (!clicked && view.carousel.offset === view.carousel.anchor) {
-                        if (!view.isSendMode || view.sendStep === 0 || view.sendStep === 5 || view.sendStep === 6 || view.sendStep === 7) {
+                        if (!view.isActivityMode
+                            || view.activityType === namespace.Pepper.ActivityType.SelectSendAmount
+                            || view.activityType === namespace.Pepper.ActivityType.Receive
+                            || view.activityType === namespace.Pepper.ActivityType.Trade
+                            || view.activityType === namespace.Pepper.ActivityType.Exchange) {
                             view.carousel.downDistance = 0;
                             view.carousel.isDown = true;
                             view.carousel.canClick = true;
@@ -1212,21 +1216,21 @@
                     }
 
                     if (!clicked) {
-                        if (view.isSendMode) {
+                        if (view.isActivityMode) {
                             testElement(0, point, view.numPadSendBtn, false);
                             testElement(0, point, view.numPadCloseBtn, false);
 
-                            if (view.sendStep === 0) {
+                            if (view.activityType === namespace.Pepper.ActivityType.SelectSendAmount) {
                                 for (let i = 0; i < view.numPad.length; i += 1) {
                                     testElement(0, point, view.numPad[i], false);
                                 }
                             }
-                            else if (view.sendStep === 1) {
+                            else if (view.activityType === namespace.Pepper.ActivityType.SelectSendRecipient) {
                                 testElement(0, point, view.bookBtn, false);
                                 testElement(0, point, view.pasteBtn, false);
                                 testElement(0, point, view.qrBtn, false);
                             }
-                            else if (view.sendStep === 6) {
+                            else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
                                 if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
                                     view.book.x, view.book.y, view.book.x + view.book.width, view.book.y + view.book.height)) {
                                     view.book.downDistance = 0;
@@ -1356,22 +1360,22 @@
                         testElement(1, point, view.marketBtn, isPointerDown);
                         testElement(1, point, view.assetPicker, isPointerDown);
 
-                        if (view.isSendMode) {
+                        if (view.isActivityMode) {
                             testElement(1, point, view.numPadSendBtn, isPointerDown);
                             testElement(1, point, view.numPadCloseBtn, isPointerDown);
                             testElement(1, point, view.quoteBtn, isPointerDown);
 
-                            if (view.sendStep === 0) {
+                            if (view.activityType === namespace.Pepper.ActivityType.SelectSendAmount) {
                                 for (let i = 0; i < view.numPad.length; i += 1) {
                                     testElement(1, point, view.numPad[i], isPointerDown);
                                 }
                             }
-                            else if (view.sendStep === 1) {
+                            else if (view.activityType === namespace.Pepper.ActivityType.SelectSendRecipient) {
                                 testElement(1, point, view.bookBtn, isPointerDown);
                                 testElement(1, point, view.pasteBtn, isPointerDown);
                                 testElement(1, point, view.qrBtn, isPointerDown);
                             }
-                            else if (view.sendStep === 6) {
+                            else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
                                 testElement(1, point, view.buyBtn, isPointerDown);
                                 testElement(1, point, view.sellBtn, isPointerDown);
                                 testElement(1, point, view.ordersBtn, isPointerDown);
@@ -2135,7 +2139,7 @@
                                     break;
                                 case 1:
                                     view.isDashboardMenu = false;
-                                    if (view.isSendMode) {
+                                    if (view.isActivityMode) {
                                         view.closeSendPage(() => {
                                             domShowAddressForm(false);
                                             showMarketplace();
@@ -2181,8 +2185,8 @@
                             testElement(2, point, view.sendBtn, isPointerDown, function () {
                                 if (!called) {
                                     called = true;
-                                    view.sendStep = 0;
-                                    view.isSendMode = true;
+                                    view.activityType = namespace.Pepper.ActivityType.SelectSendAmount;
+                                    view.isActivityMode = true;
                                     view.sendAmount = "";
                                     view.sendFormTime = 0.5;
                                     view.rotateSponsor();
@@ -2205,8 +2209,8 @@
                         testElement(2, point, view.receiveBtn, isPointerDown, function () {
                             if (!called) {
                                 called = true;
-                                view.sendStep = 5;
-                                view.isSendMode = true;
+                                view.activityType = namespace.Pepper.ActivityType.Receive;
+                                view.isActivityMode = true;
                                 view.sendFormTime = 0.5;
 
                                 domGenerateCode();
@@ -2229,8 +2233,8 @@
                             testElement(2, point, view.tradeBtn, isPointerDown, function () {
                                 if (!called) {
                                     called = true;
-                                    view.sendStep = 6;
-                                    view.isSendMode = true;
+                                    view.activityType = namespace.Pepper.ActivityType.Trade;
+                                    view.isActivityMode = true;
                                     view.sendFormTime = 0.5;
                                     loadOrderBook(true);
                                     domGenerateCode();
@@ -2277,7 +2281,7 @@
                             testElement(2, point, view.marketBtn, isPointerDown, function () {
                                 if (!called) {
                                     called = true;
-                                    if (view.isSendMode) {
+                                    if (view.isActivityMode) {
                                         view.closeSendPage(() => {
                                             domShowAddressForm(false);
                                             showMarketplace();
@@ -2350,7 +2354,7 @@
                         });
 
                         if (!called) {
-                            if (view.isSendMode) {
+                            if (view.isActivityMode) {
 
                                 testElement(2, point, view.quoteBtn, isPointerDown, function () {
                                     view.loadScroller(namespace.Pepper.ScrollerType.QuotesMenu);
@@ -2362,7 +2366,7 @@
                                     close = true;
                                 });
 
-                                if (view.sendStep === 2 && view.isSendMode && view.numPad.length) {
+                                if (view.activityType === namespace.Pepper.ActivityType.ConfirmSend && view.isActivityMode && view.numPad.length) {
                                     if (namespace.Pepper.Resources.currentSponsor) {
                                         const middleY = view.carousel.y + view.carousel.height + view.unit * 0.1 + (view.numPad[0].y - (view.carousel.y + view.carousel.height + view.unit * 0.1)) * 0.5 - view.unit * 0.7;
                                         const size = Math.min(view.numPadArea.width, view.numPadSendBtn.y - middleY - view.unit);
@@ -2396,14 +2400,14 @@
                                 testElement(2, point, view.numPadSendBtn, isPointerDown, function () {
                                     view.amountError = false;
                                     view.addressError = false;
-                                    switch (view.sendStep) {
-                                        case 0:
+                                    switch (view.activityType) {
+                                        case namespace.Pepper.ActivityType.SelectSendAmount:
                                             if (!Number.isNaN(Number(view.sendAmount)) && Number(view.sendAmount) > 0) {
                                                 if (Number(namespace.Core.currentAccount.getMaxSend(view.getActiveCarouselItem().asset.balance, view.getActiveCarouselItem().asset)) < view.sendAmount) {
                                                     view.amountErrorTime = 1;
                                                 }
                                                 else {
-                                                    view.sendStep += 1;
+                                                    view.activityType = namespace.Pepper.ActivityType.SelectSendRecipient;
                                                     view.sendTransition = 0.3;
                                                     domShowAddressForm(true);
                                                     view.getActiveCarouselItem().transitionTime = 0.5;
@@ -2414,9 +2418,9 @@
                                                 view.amountErrorTime = 1;
                                             }
                                             break;
-                                        case 1:
+                                        case namespace.Pepper.ActivityType.SelectSendRecipient:
                                             if ($("#address").val() !== "") {
-                                                view.sendStep += 1;
+                                                view.activityType = namespace.Pepper.ActivityType.ConfirmSend;
                                                 view.sendTransition = 0.3;
                                                 view.sendDestination = $("#address").val();
                                                 view.sendMemo = $("#memo").val() !== "" ? $("#memo").val() : null;
@@ -2439,17 +2443,17 @@
                                                     view.sendMemo,
                                                     (success, msg) => {
                                                         if (!success) {
-                                                            if (view.isSendMode) {
+                                                            if (view.isActivityMode) {
                                                                 view.sendTransition = 0.3;
-                                                                view.sendStep += 1;
+                                                                view.activityType = namespace.Pepper.ActivityType.DisplaySendSummary;
                                                                 view.sendErrorTxt = msg;
                                                                 console.error(JSON.stringify(msg));
                                                             }
                                                         }
                                                         else {
-                                                            if (view.isSendMode) {
+                                                            if (view.isActivityMode) {
                                                                 view.sendTransition = 0.3;
-                                                                view.sendStep += 1;
+                                                                view.activityType = namespace.Pepper.ActivityType.DisplaySendSummary;
                                                                 view.sendErrorTxt = "";
                                                             }
                                                         }
@@ -2461,17 +2465,17 @@
                                                 setTimeout(() => { $("#address").focus(); }, 10);
                                             }
                                             break;
-                                        case 2:
+                                        case namespace.Pepper.ActivityType.ConfirmSend:
                                             break;
-                                        case 3:
-                                            view.isSendMode = false;
+                                        case namespace.Pepper.ActivityType.DisplaySendSummary:
+                                            view.isActivityMode = false;
                                             view.sendFormEndTime = 0.5;
                                             view.list.startTime = 0.5;
                                             break;
                                     }
                                 });
 
-                                if (view.sendStep === 0) {
+                                if (view.activityType === namespace.Pepper.ActivityType.SelectSendAmount) {
                                     for (let i = 0; i < view.numPad.length; i += 1) {
                                         item = view.numPad[i];
                                         testElement(2, point, item, isPointerDown, function () {
@@ -2498,7 +2502,7 @@
                                         });
                                     }
                                 }
-                                else if (view.sendStep === 1) {
+                                else if (view.activityType === namespace.Pepper.ActivityType.SelectSendRecipient) {
                                     testElement(2, point, view.bookBtn, isPointerDown, function () {
                                         $("#address-form").hide();
                                         view.loadScroller(namespace.Pepper.ScrollerType.Addresses);
@@ -2533,7 +2537,7 @@
                                         }
                                     });
                                 }
-                                else if (!close && view.sendStep === 5 && view.getActiveCarouselItem()) {
+                                else if (!close && view.activityType === namespace.Pepper.ActivityType.Receive && view.getActiveCarouselItem()) {
                                     if (view.numPadCloseBtn.y + view.unit < point.y) {
                                         let key = view.getActiveCarouselItem().asset.deposit || namespace.Core.currentAccount.keys.publicKey();
                                         if (window.Android) {
@@ -2549,7 +2553,7 @@
                                         console.info(key);
                                     }
                                 }
-                                else if (view.sendStep === 6) {
+                                else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
                                     if (view.book.isDown && view.book.hasBar) {
                                         if (Math.abs(view.book.point.y - point.y) > view.book.rowHeight * 0.2) {
                                             view.book.offset += (view.book.point.y - point.y) * 0.6;
@@ -2992,8 +2996,8 @@
             parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
         }
 
-        view.sendStep = 7;
-        view.isSendMode = true;
+        view.activityType = namespace.Pepper.ActivityType.Exchange;
+        view.isActivityMode = true;
         view.sendFormTime = 0.5;
 
         for (let i = 0; i < view.carousel.items.length; i += 1) {
@@ -3078,7 +3082,7 @@
                 $("#import").css("fontSize", view.baseFontSize * 0.6 / pixelRatio + "px");
             }
 
-            if (view.isSendMode) {
+            if (view.isActivityMode) {
                 $("#address-form").css({ top: (view.viewport.y + view.unit * 5.5) / pixelRatio, left: (view.viewport.x + view.unit * 0.5) / pixelRatio });
                 $("#address-form").width((view.viewport.width - view.unit) / pixelRatio);
                 $("#address-form").height(view.unit * 2.5 / pixelRatio);
@@ -3326,7 +3330,7 @@
     }
 
     function domGenerateCode() {
-        if (view && view.isSendMode && view.sendStep === 5) {
+        if (view && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Receive) {
             let key = view.getActiveCarouselItem().asset.deposit || namespace.Core.currentAccount.keys.publicKey();
             $("#qrcode").qrcode({
                 "text": key,
@@ -3492,7 +3496,7 @@
                 && view.showModalPage) {
                 $("#import").val(code);
             }
-            else if (view.isSendMode && view.sendStep === 1) {
+            else if (view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.SelectSendRecipient) {
                 $("#address").val(code);
                 let inp = $("#address")[0];
                 if (inp.createTextRange) {

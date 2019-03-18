@@ -47,6 +47,21 @@
         },
 
         /**
+         * ActivityType
+         * @member ActivityType
+         * @memberof Litemint.Pepper
+        */
+        "ActivityType": {
+            "SelectSendAmount": 0,
+            "SelectSendRecipient": 1,
+            "ConfirmSend": 2,
+            "DisplaySendSummary": 3,
+            "Receive": 5,
+            "Trade": 6,
+            "Exchange": 7
+        },
+
+        /**
          * ListType
          * @member ListType
          * @memberof Litemint.Pepper

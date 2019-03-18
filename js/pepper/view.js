@@ -53,7 +53,7 @@
         this.modalPageTransitionTime = 0;
         this.modalStep = namespace.Pepper.WizardType.None;
         this.mnemonicSuccess = true;
-        this.sendStep = 0;
+        this.activityType = namespace.Pepper.ActivityType.SelectSendAmount;
         this.sendTransition = 0;
         this.sendFormOffset = 0;
         this.sendFormTime = 0;
@@ -605,7 +605,7 @@
             this.closeScrollerBtn.spawned = false;
         }
 
-        if (this.isSendMode) {
+        if (this.isActivityMode) {
             this.updateNumPad(elapsed);
         }
 
@@ -637,7 +637,7 @@
         this.marketBtn.width = this.unit * 1.2;
         this.marketBtn.height = this.unit * 1.2;
         this.marketBtn.tx = this.viewport.x + this.marketBtn.width;
-        this.marketBtn.ty = this.viewport.y - (this.isSendMode ? (this.unit * 1.3 + namespace.Pepper.barHeight ) : 0) - this.dashboardTime * this.marketBtn.height * 2;
+        this.marketBtn.ty = this.viewport.y - (this.isActivityMode ? (this.unit * 1.3 + namespace.Pepper.barHeight ) : 0) - this.dashboardTime * this.marketBtn.height * 2;
         if (this.marketBtn.spawned) {
             this.marketBtn.x = this.marketBtn.tx;
             this.marketBtn.y = this.marketBtn.ty;
@@ -758,7 +758,7 @@
         this.moreBtn.spawned = false;
 
         this.sendFormOffset = this.unit * 4 * this.sendFormTime;
-        if (this.isSendMode) {
+        if (this.isActivityMode) {
             const offset = this.unit * 2.5 - this.sendFormOffset;
             this.carousel.height = this.unit * 5 - offset;
         }
@@ -1260,7 +1260,7 @@
         this.numPadArea.width = this.viewport.width - this.unit;
         this.numPadArea.height = this.unit * 6;
 
-        if (this.isSendMode) {
+        if (this.isActivityMode) {
             const margin = (this.viewport.height - (this.carousel.height + this.numPadArea.height + this.unit * 1.5)) / 1.5;
             this.numPadArea.y = this.carousel.y + this.carousel.height +
                 Math.max(this.unit * 2.5, margin);
@@ -2518,21 +2518,21 @@
             context.drawImage(namespace.Pepper.Resources.warningImage, this.accountBtn.x + this.accountBtn.width * 0.5, this.accountBtn.y, this.accountBtn.width * 0.6, this.accountBtn.width * 0.6);
         }
 
-        if (this.isSendMode || this.sendFormEndTime) {
+        if (this.isActivityMode || this.sendFormEndTime) {
             this.drawNumPad(context);
         }
 
         context.save();
         context.translate(0, this.dashboardTime * this.unit * 3);
 
-        if (this.sendFormEndTime || this.sendFormTime || !this.isSendMode) {
+        if (this.sendFormEndTime || this.sendFormTime || !this.isActivityMode) {
             context.save();
 
-            if (this.sendFormTime && this.isSendMode) {
+            if (this.sendFormTime && this.isActivityMode) {
                 context.translate(0, (0.5 - this.sendFormTime) * this.unit * 3);
             }
 
-            if (this.sendFormEndTime && !this.isSendMode) {
+            if (this.sendFormEndTime && !this.isActivityMode) {
                 context.translate(0, this.sendFormEndTime * this.unit * 3);
             }
 
@@ -2592,7 +2592,7 @@
         context.restore();
 
         if (this.error === namespace.Pepper.ViewErrorType.AccountNotCreated
-            && !this.isSendMode
+            && !this.isActivityMode
             && this.tabId === 0
             && !namespace.Core.currentAccount.watchOnly) {
             context.save();
@@ -2702,7 +2702,7 @@
         context.save();
         context.fillStyle = namespace.Pepper.Resources.primaryColor;
         context.fillRect(this.carousel.x - this.unit * 5, this.carousel.y - this.carousel.headerHeight - namespace.Pepper.barHeight, this.carousel.width + this.unit * 5, this.carousel.height + this.unit * 0.5 + this.carousel.headerHeight + namespace.Pepper.barHeight);
-        if (!this.isSendMode) {
+        if (!this.isActivityMode) {
             let alpha = this.sendFormEndTime * 2 * context.globalAlpha;
             if (alpha) {
                 context.fillStyle = "rgba(0, 0, 0," + alpha * 0.15 + ")";
@@ -2806,7 +2806,11 @@
                 this.roundRect(context, item.x + this.unit * 0.1, item.y, item.width - this.unit * 0.2, item.height, this.unit * 0.2 + corner, namespace.Pepper.Resources.primaryColor, true, "rgba(0, 0, 0, 0.2)");
                 context.restore();
 
-                if (this.isSendMode && this.sendStep !== 0 && this.sendStep !== 5 && this.sendStep !== 6 && this.sendStep !== 7) {
+                if (this.isActivityMode
+                    && this.activityType !== namespace.Pepper.ActivityType.SelectSendAmount
+                    && this.activityType !== namespace.Pepper.ActivityType.Receive
+                    && this.activityType !== namespace.Pepper.ActivityType.Trade
+                    && this.activityType !== namespace.Pepper.ActivityType.Exchange) {
                     this.roundRect(context, item.x + this.unit * 0.1, item.y, item.width - this.unit * 0.2, item.height, this.unit * 0.2 + corner, "rgba(0, 0, 0, 0.2)");
                 }
                 else if (item.chartMode) {
@@ -2818,7 +2822,11 @@
                 this.roundRect(context, item.x + this.unit * 0.1, item.y, item.width - this.unit * 0.2, item.height, this.unit * 0.2, namespace.Pepper.Resources.primaryColor, true, "rgba(0, 0, 0, 0.2)");
                 context.restore();
 
-                if (this.isSendMode && this.sendStep !== 0 && this.sendStep !== 5 && this.sendStep !== 6 && this.sendStep !== 7) {
+                if (this.isActivityMode
+                    && this.activityType !== namespace.Pepper.ActivityType.SelectSendAmount
+                    && this.activityType !== namespace.Pepper.ActivityType.Receive
+                    && this.activityType !== namespace.Pepper.ActivityType.Trade
+                    && this.activityType !== namespace.Pepper.ActivityType.Exchange) {
                     this.roundRect(context, item.x + this.unit * 0.1, item.y, item.width - this.unit * 0.2, item.height, this.unit * 0.2 + corner, "rgba(0, 0, 0, 0.2)");
                 }
                 else if (item.chartMode) {
@@ -2834,11 +2842,11 @@
                     context.font = this.getFont("Roboto-Light");
                     context.textAlign = "right";
                     let extent = Math.max(this.unit * 1.5, context.measureText(item.asset.domain).width * 0.72) + this.unit * 1.2;
-                    if (!this.isSendMode || this.sendStep !== 6) {
+                    if (!this.isActivityMode || this.activityType !== namespace.Pepper.ActivityType.Trade) {
                         this.roundRect(context, item.x + item.width - extent - this.unit * 0.2, item.y + item.height - this.unit * 1.1, extent, this.unit * 1, this.unit * 0.18, "rgba(0,0,0, 0.15)");
                     }
 
-                    if (!this.isSendMode) {
+                    if (!this.isActivityMode) {
                         context.save();
 
                         context.globalAlpha = 1 - this.sendFormEndTime * 2 * context.globalAlpha;
@@ -2871,7 +2879,7 @@
                         context.restore();
 
                     }
-                    else if (this.sendStep === 6) {
+                    else if (this.activityType === namespace.Pepper.ActivityType.Trade) {
                         context.save();
                         context.font = this.getFont("Roboto-Regular");
 
@@ -2951,7 +2959,9 @@
 
                         context.restore();
                     }
-                    else if (this.sendStep === 0 || this.sendStep === 5 || this.sendStep === 7) {
+                    else if (this.activityType === namespace.Pepper.ActivityType.SelectSendAmount
+                        || this.activityType === namespace.Pepper.ActivityType.Receive
+                        || this.activityType === namespace.Pepper.ActivityType.Exchange) {
                         context.save();
                         let scale = 1 - this.sendFormOffset / (this.unit * 2) / 2;
                         context.globalAlpha = context.globalAlpha * scale;
@@ -2990,7 +3000,7 @@
                         context.restore();
                     }
 
-                    if (!this.isSendMode || this.sendStep !== 6) {
+                    if (!this.isActivityMode || this.activityType !== namespace.Pepper.ActivityType.Trade) {
                         context.font = this.getFont("Roboto-Light");
                         context.textAlign = "right";
                         this.drawText(context, item.x + item.width - this.unit * 1.2, item.y + item.height - this.unit * 0.81, item.asset.domain, "rgb(255, 255, 255)", 0.72);
@@ -3016,7 +3026,7 @@
                         }
                     }
 
-                    if (!this.isSendMode) {
+                    if (!this.isActivityMode) {
                         context.save();
                         if (this.carousel.active === index && (this.chartBtn.hover || this.chartBtn.selected)) {
                             context.globalAlpha = 0.7 * context.globalAlpha;
@@ -3025,7 +3035,7 @@
                         context.restore();
                     }
 
-                    if (!this.isSendMode) {
+                    if (!this.isActivityMode) {
                         context.save();
                         if (this.carousel.active === index && (this.moreBtn.hover || this.moreBtn.selected)) {
                             context.globalAlpha = 0.7 * context.globalAlpha;
@@ -3839,7 +3849,7 @@
 
     // Draw the numpad.
     namespace.Pepper.View.prototype.drawNumPad = function (context) {
-        const offset = this.sendFormEndTime ? this.unit * 4 - this.unit * 4 * this.sendFormEndTime * 2 : this.isSendMode ? this.sendFormOffset : 0;
+        const offset = this.sendFormEndTime ? this.unit * 4 - this.unit * 4 * this.sendFormEndTime * 2 : this.isActivityMode ? this.sendFormOffset : 0;
 
         context.save();
         context.translate(0, offset * 2);
@@ -3856,7 +3866,7 @@
         context.fillRect(this.list.x, this.carousel.y + this.numPadArea.y - this.unit * 1.7 - namespace.Pepper.barHeight, this.list.width, this.viewport.height);
         context.restore();
 
-        if (this.sendStep === 0) {
+        if (this.activityType === namespace.Pepper.ActivityType.SelectSendAmount) {
             context.save();
             const shift = Math.max(0, this.carouselItem.selectTime - 0.25);
             const middleY = this.carousel.y + this.carousel.height + this.unit * 0.4 + (this.numPad[0].y - (this.carousel.y + this.carousel.height + this.unit * 0.1)) * 0.5 - this.unit * 0.7;
@@ -3906,7 +3916,7 @@
             }
             context.restore();
         }
-        else if (this.sendStep === 5) {
+        else if (this.activityType === namespace.Pepper.ActivityType.Receive) {
             context.save();
             const shift = Math.max(0, this.carouselItem.selectTime - 0.25);
             const middleY = this.carousel.y + this.carousel.height + this.unit * 0.4 + (this.numPad[0].y - (this.carousel.y + this.carousel.height + this.unit * 0.1)) * 0.5 - this.unit * 0.7;
@@ -3957,7 +3967,7 @@
         }
 
         // Draw the numpad area.
-        if (this.sendStep === 0) {
+        if (this.activityType === namespace.Pepper.ActivityType.SelectSendAmount) {
             context.save();
             context.font = this.getFont("Roboto-Bold");
             for (let i = 0; i < this.numPad.length; i += 1) {
@@ -4007,26 +4017,29 @@
 
         context.restore();
 
-        if (this.sendStep !== 2 && this.sendStep !== 5 && this.sendStep !== 6 && this.sendStep !== 7) {
+        if (this.activityType !== namespace.Pepper.ActivityType.ConfirmSend
+            && this.activityType !== namespace.Pepper.ActivityType.Receive
+            && this.activityType !== namespace.Pepper.ActivityType.Trade
+            && this.activityType !== namespace.Pepper.ActivityType.Exchange) {
             context.save();
             this.roundRect(context, this.numPadSendBtn.x, this.numPadSendBtn.y, this.numPadSendBtn.width, this.numPadSendBtn.height, this.numPadSendBtn.height * 0.1, "rgb(42, 193, 188)");
             context.font = this.getFont("Roboto-Medium");
             if (this.numPadSendBtn.hover || this.numPadSendBtn.selected) {
                 context.globalAlpha = 0.7 * context.globalAlpha;
             }
-            if (this.sendStep === 1) {
+            if (this.activityType === namespace.Pepper.ActivityType.SelectSendRecipient) {
                 this.drawText(context, this.numPadSendBtn.x + this.numPadSendBtn.width * 0.5, this.numPadSendBtn.y + this.numPadSendBtn.height * 0.5, namespace.Pepper.Resources.localeText[44], "rgb(255, 255, 255)", 1);
             }
-            else if (this.sendStep === 0) {
+            else if (this.activityType === namespace.Pepper.ActivityType.SelectSendAmount) {
                 this.drawText(context, this.numPadSendBtn.x + this.numPadSendBtn.width * 0.5, this.numPadSendBtn.y + this.numPadSendBtn.height * 0.5, namespace.Pepper.Resources.localeText[4], "rgb(255, 255, 255)", 1);
             }
-            else if (this.sendStep === 3) {
+            else if (this.activityType === namespace.Pepper.ActivityType.DisplaySendSummary) {
                 this.drawText(context, this.numPadSendBtn.x + this.numPadSendBtn.width * 0.5, this.numPadSendBtn.y + this.numPadSendBtn.height * 0.5, namespace.Pepper.Resources.localeText[28], "rgb(255, 255, 255)", 1);
             }
 
             context.restore();
         }
-        else if (this.sendStep === 2) {
+        else if (this.activityType === namespace.Pepper.ActivityType.ConfirmSend) {
             let middleY = this.carousel.y + this.carousel.height + this.unit * 0.1 + (this.numPad[0].y - (this.carousel.y + this.carousel.height + this.unit * 0.1)) * 0.5 - this.unit * 0.7;
             let size = Math.min(this.numPadArea.width, this.numPadSendBtn.y - middleY - this.unit);
 
@@ -4045,7 +4058,7 @@
         if (this.numPadCloseBtn.hover || this.numPadCloseBtn.selected) {
             context.globalAlpha = 0.7 * context.globalAlpha;
         }
-        if (this.sendStep === 1 || this.sendStep === 2) {
+        if (this.activityType === namespace.Pepper.ActivityType.SelectSendRecipient || this.activityType === namespace.Pepper.ActivityType.ConfirmSend) {
             context.drawImage(namespace.Pepper.Resources.closeDarkImage, this.numPadCloseBtn.x, this.numPadCloseBtn.y, this.numPadCloseBtn.width, this.numPadCloseBtn.height);
         }
         else {
@@ -4053,7 +4066,7 @@
         }
         context.restore();
 
-        if (this.sendStep === 1) {
+        if (this.activityType === namespace.Pepper.ActivityType.SelectSendRecipient) {
             context.save();
             if (this.bookBtn.hover || this.bookBtn.selected) {
                 context.globalAlpha = 0.7 * context.globalAlpha;
@@ -4083,7 +4096,7 @@
                 context.translate(trx, 0);
             }
         }
-        else if (this.sendStep === 3) {
+        else if (this.activityType === namespace.Pepper.ActivityType.DisplaySendSummary) {
             if (this.sendErrorTxt === "") {
                 const margin = (this.viewport.y + this.viewport.height * 0.5 - this.unit * 5.6 - this.viewport.y) * 0.5;
                 const trx = this.sendTransition * this.unit * this.numPadSendBtn.heartBeats[0].time * 3;
@@ -4114,10 +4127,10 @@
                 this.drawText(context, this.viewport.x + this.viewport.width * 0.5, this.viewport.y + this.unit * 9.1 + margin, namespace.Pepper.Resources.localeText[68], "rgb(36, 41, 46)", 0.73);
             }
         }
-        else if (this.sendStep === 6) {
+        else if (this.activityType === namespace.Pepper.ActivityType.Trade) {
             this.drawBook(context);
         }
-        else if (this.sendStep === 7) {
+        else if (this.activityType === namespace.Pepper.ActivityType.Exchange) {
             if (namespace.Pepper.Resources.sponsors[2]) {
                 let middleY = this.carousel.y + this.carousel.height + this.unit * 0.1 + (this.numPad[0].y - (this.carousel.y + this.carousel.height + this.unit * 0.1)) * 0.5 - this.unit * 0.7;
                 let size = Math.min(this.numPadArea.width, this.numPadSendBtn.y - middleY - this.unit);
@@ -4528,12 +4541,12 @@
 
     // Close the send page.
     namespace.Pepper.View.prototype.closeSendPage = function (cb, force) {
-        if (this.isSendMode || force) {
+        if (this.isActivityMode || force) {
             this.sendFormEndTime = force ? 0 : 0.5;
             this.list.startTime = force ? 0 : 0.5;
             this.amountError = false;
             this.addressError = false;
-            this.isSendMode = false;
+            this.isActivityMode = false;
             cb();
         }
     };
