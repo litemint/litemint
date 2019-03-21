@@ -376,4 +376,11 @@
         });
     };
 
+    /**
+     * Max value for 32-bit integer.
+     * @member MaxInt32
+     * @memberof Litemint.Core.Utils
+     */
+    namespace.Core.Utils.MaxInt32 = ~(1 << 31);
+
 })(window.Litemint = window.Litemint || {});

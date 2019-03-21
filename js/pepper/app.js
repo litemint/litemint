@@ -81,7 +81,7 @@
                     if (quote && (quote.code !== base.code || quote.issuer !== base.issuer)) {
                         namespace.Pepper.orderBooks.skipCount += 1;
                         let propId = base.code + base.issuer + quote.code + quote.issuer;
-                        if (namespace.Pepper.orderBooks.skipCount > 7
+                        if (namespace.Pepper.orderBooks.skipCount > 2
                             || namespace.Pepper.orderBooks.oldBook !== propId) {
 
                             const stellarnetwork = new namespace.Core.StellarNetwork();
@@ -272,6 +272,16 @@
             domShowDomainForm(false);
             domShowRenameForm(false);
             view.scrollerEndTime = 0.3;
+
+            if (view.scroller.type === namespace.Pepper.ScrollerType.QuotesMenu
+                || view.scroller.type === namespace.Pepper.ScrollerType.Assets) {
+                if (view.isActivityMode) {
+                    if (view.activityType === namespace.Pepper.ActivityType.Trade) {
+                        domShowTradeForm(true);
+                    }
+                }
+            }
+
             return "stay";
         }
         else if (view.showAbout) {
@@ -279,7 +289,10 @@
             return "stay";
         }
         else if (view.isActivityMode) {
-            view.closeSendPage(() => { domShowAddressForm(false); });
+            view.closeSendPage(() => {
+                domShowAddressForm(false);
+                domShowTradeForm(false);
+            });
             return "stay";
         }
         else if (view.isDashboardMenu) {
@@ -365,6 +378,7 @@
                 loaded = true;
                 domUpdateLanguage();
                 domShowAboutPage(false);
+                updateTradeInputs();
                 view.onCarouselItemChanged = function () {
                     domGenerateCode();
                     loadOrderBook(true);
@@ -503,14 +517,22 @@
                     item.selected = false;
                     item.hover = false;
                     item.overAddBtn = false;
-                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, item.y - view.scroller.offset, item.x + item.width, item.y + item.height - view.scroller.offset)) {
-                        item.selected = true;
-                        selected = true;
+                    if (point.y < view.scroller.y + view.scroller.height) {
+                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, item.y - view.scroller.offset, item.x + item.width, item.y + item.height - view.scroller.offset)) {
+                            item.selected = true;
+                            selected = true;
 
-                        if (view.scroller.type === namespace.Pepper.ScrollerType.AddAsset && !namespace.Pepper.queryAsset) {
-                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 1.7, item.y + view.unit * 0.25 - view.scroller.offset, item.x + view.unit * 1.7 + view.unit * 2.4, item.y + view.unit * 0.25 - view.scroller.offset + view.unit * 0.7)) {
-                                item.overAddBtn = true;
+                            if (view.scroller.type === namespace.Pepper.ScrollerType.AddAsset && !namespace.Pepper.queryAsset) {
+                                if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 1.7, item.y + view.unit * 0.25 - view.scroller.offset, item.x + view.unit * 1.7 + view.unit * 2.4, item.y + view.unit * 0.25 - view.scroller.offset + view.unit * 0.7)) {
+                                    item.overAddBtn = true;
+                                }
                             }
+                        }
+
+                        if ((view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders
+                            || view.scroller.type === namespace.Pepper.ScrollerType.LastTrades)
+                            && point.x < view.scroller.x + view.scroller.width) {
+                            selected = true;
                         }
                     }
                     break;
@@ -815,6 +837,8 @@
                 if (quote) {
                     if (reset) {
                         view.resetBook();
+                        $(".trade-input").val("");
+                        updateTradeInputs();
                     }
                     view.book.items = [];
                     view.book.id = base.code + base.issuer + quote.code + quote.issuer;
@@ -825,12 +849,20 @@
                             view.book.items.push({ "data": book.asks[i] });
                         }
 
+                        let total = 0;
+                        for (let i = view.book.items.length - 1; i >= 0; i -= 1) {
+                            total += Number(view.book.items[i].data.baseAmount);
+                            view.book.items[i].baseTotal = total.toFixed(7);
+                        }
+
                         if (book.asks.length || book.bids.length) {
                             view.book.items.push({ "data": { "spot": true } });
                         }
 
+                        total = 0;
                         for (let i = 0; i < book.bids.length; i += 1) {
-                            view.book.items.push({ "data": book.bids[i] });
+                            total += Number(book.bids[i].baseAmount);
+                            view.book.items.push({ "data": book.bids[i], "baseTotal": total.toFixed(7) });
                         }
 
                         view.needRedraw = true;
@@ -1068,6 +1100,12 @@
                     domShowRenameForm(false);
                     view.scrollerEndTime = 0.3;
                     view.discardedPanel = true;
+
+                    if (view.isActivityMode) {
+                        if (view.activityType === namespace.Pepper.ActivityType.Trade) {
+                            domShowTradeForm(true);
+                        }
+                    }
                 }
                 else {
                     let clicked = testElement(0, point, view.closeScrollerBtn, false);
@@ -1095,6 +1133,12 @@
                     if (view.scroller.type !== namespace.Pepper.ScrollerType.AccountSettings) {
                         view.scrollerEndTime = 0.3;
                         view.discardedPanel = true;
+
+                        if (view.isActivityMode) {
+                            if (view.activityType === namespace.Pepper.ActivityType.Trade) {
+                                domShowTradeForm(true);
+                            }
+                        }
                     }
                     else {
                         domShowRenameForm(false);
@@ -1177,6 +1221,10 @@
                         clicked = testElement(0, point, view.buyBtn, false);
                     }
                     if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade) {
+                        clicked = testElement(0, point, view.cancelOrderBtn, false);
+                        clicked = testElement(0, point, view.confirmOrderBtn, false);
+                    }
+                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade) {
                         clicked = testElement(0, point, view.sellBtn, false);
                     }
                     if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade && namespace.Core.currentAccount.offers.length) {
@@ -1231,15 +1279,17 @@
                                 testElement(0, point, view.qrBtn, false);
                             }
                             else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
-                                if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
-                                    view.book.x, view.book.y, view.book.x + view.book.width, view.book.y + view.book.height)) {
-                                    view.book.downDistance = 0;
-                                    view.book.isDown = true;
-                                    view.book.canClick = true;
-                                    view.book.downTime = 0;
-                                    view.book.point = { "x": point.x, "y": point.y };
-                                    view.book.scrollTime = 1.5;
-                                    testBook(0, point, view.book, false);
+                                if (!namespace.Core.currentAccount.queuedOrder) {
+                                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
+                                        view.book.x, view.book.y, view.book.x + view.book.width, view.book.y + view.book.height)) {
+                                        view.book.downDistance = 0;
+                                        view.book.isDown = true;
+                                        view.book.canClick = true;
+                                        view.book.downTime = 0;
+                                        view.book.point = { "x": point.x, "y": point.y };
+                                        view.book.scrollTime = 1.5;
+                                        testBook(0, point, view.book, false);
+                                    }
                                 }
                             }
                         }
@@ -1376,30 +1426,36 @@
                                 testElement(1, point, view.qrBtn, isPointerDown);
                             }
                             else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
-                                testElement(1, point, view.buyBtn, isPointerDown);
-                                testElement(1, point, view.sellBtn, isPointerDown);
-                                testElement(1, point, view.ordersBtn, isPointerDown);
+                                
+                                testElement(1, point, view.cancelOrderBtn, isPointerDown);
+                                testElement(1, point, view.confirmOrderBtn, isPointerDown);
 
-                                testBook(1, point, view.book, isPointerDown);
-                                if (view.book.maxOffset > 0) {
-                                    if (view.book.isDown && view.book.hasBar) {
-                                        let multiplier = 1;
-                                        if (view.book.offset < view.book.minOffset) {
-                                            multiplier = 0.35;
-                                        }
-                                        else if (view.book.offset > view.book.maxOffset) {
-                                            multiplier = 0.35;
-                                        }
+                                if (!namespace.Core.currentAccount.queuedOrder) {
+                                    testElement(1, point, view.buyBtn, isPointerDown);
+                                    testElement(1, point, view.sellBtn, isPointerDown);
+                                    testElement(1, point, view.ordersBtn, isPointerDown);
 
-                                        if (Math.abs(view.book.point.y - point.y) > view.book.rowHeight * 0.05) {
-                                            view.book.offset += (view.book.point.y - point.y) * multiplier;
-                                            view.book.downDistance += view.book.point.y - point.y;
-                                            view.book.point = { "x": point.x, "y": point.y };
-                                            view.book.canClick = false;
+                                    testBook(1, point, view.book, isPointerDown);
+                                    if (view.book.maxOffset > 0) {
+                                        if (view.book.isDown && view.book.hasBar) {
+                                            let multiplier = 1;
+                                            if (view.book.offset < view.book.minOffset) {
+                                                multiplier = 0.35;
+                                            }
+                                            else if (view.book.offset > view.book.maxOffset) {
+                                                multiplier = 0.35;
+                                            }
+
+                                            if (Math.abs(view.book.point.y - point.y) > view.book.rowHeight * 0.05) {
+                                                view.book.offset += (view.book.point.y - point.y) * multiplier;
+                                                view.book.downDistance += view.book.point.y - point.y;
+                                                view.book.point = { "x": point.x, "y": point.y };
+                                                view.book.canClick = false;
+                                            }
                                         }
                                     }
+                                    view.book.scrollTime = 1.5;
                                 }
-                                view.book.scrollTime = 1.5;
                             }
                         }
                         else {
@@ -1646,8 +1702,10 @@
                     }
                 }
 
+                let noclick = true;
                 const data = namespace.Pepper.loadWalletData();
                 testScroller(2, point, view.scroller, isPointerDown, function (item, index) {
+                    noclick = false;
                     let stellarNet = new namespace.Core.StellarNetwork();
                     if (view.scroller.canClick) {
                         switch (view.scroller.type) {
@@ -1739,7 +1797,10 @@
                                     }
                                     else if (item.id === view.scroller.items.length - 2) {
                                         if (!namespace.Core.currentAccount.nobackup) {
-                                            view.closeSendPage(() => { domShowAddressForm(false); });
+                                            view.closeSendPage(() => {
+                                                domShowAddressForm(false);
+                                                domShowTradeForm(false);
+                                            });
                                             domShowModalPage(true, namespace.Pepper.WizardType.BackupStep1);
                                         }
                                     }
@@ -1749,7 +1810,10 @@
                                                 data.accounts.splice(data.lastaccount, 1);
                                                 data.lastaccount = -1;
                                                 namespace.Pepper.saveWalletData(data);
-                                                view.closeSendPage(() => { domShowAddressForm(false); }, true);
+                                                view.closeSendPage(() => {
+                                                    domShowAddressForm(false);
+                                                    domShowTradeForm(false);
+                                                }, true);
                                                 namespace.Core.currentAccount.unload(signOutCb);
                                                 view.scrollerEndTime = 0.1;
                                             }, 300);
@@ -1780,6 +1844,13 @@
                                     view.setActiveCarouselItem(item.id);
                                 }
                                 view.scrollerEndTime = 0.1;
+
+                                if (view.isActivityMode) {
+                                    if (view.activityType === namespace.Pepper.ActivityType.Trade) {
+                                        domShowTradeForm(true);
+                                    }
+                                }
+
                                 break;
                             case namespace.Pepper.ScrollerType.AddAsset:
                                 if (!item.data.balance && item.overAddBtn && !namespace.Pepper.queryAsset && item.hasAdd) {
@@ -1805,7 +1876,6 @@
                                 break;
                             case namespace.Pepper.ScrollerType.AssetsMenu:
                                 if (item.enabled) {
-                                    console.log("clicked menu item");
                                     view.scrollerEndTime = 0.1;
                                     let carouselitem = view.getActiveCarouselItem();
                                     switch (item.id) {
@@ -1875,8 +1945,6 @@
                                                     new StellarSdk.Asset(carouselitem.asset.code, carouselitem.asset.issuer),
                                                     (success, msg) => {
                                                         if (success) {
-                                                            console.log(carouselitem.asset.code + " asset removed");
-
                                                             // Clear quote asset if needed.
                                                             const propId = view.carousel.items[0].asset.code + view.carousel.items[0].asset.issuer;
                                                             const quote = view.quoteAssets[propId];
@@ -1896,6 +1964,11 @@
                                 }
                                 break;
                             case namespace.Pepper.ScrollerType.LastTrades:
+                                if (item.data) {
+                                    updateTradeInputs(
+                                        namespace.Pepper.Tools.formatPrice(
+                                            namespace.Pepper.Tools.rationalPriceToDecimal(item.data.price)));
+                                }
                                 break;
                             case namespace.Pepper.ScrollerType.LiveOrders:
                                 if (!view.cancellingOffer) {
@@ -1909,7 +1982,7 @@
                                     }
 
                                     let offer = view.scroller.items[item.id];
-                                    const isConfirmed = point.x > offer.x + offer.width - view.unit * 15 * 0.3;
+                                    const isConfirmed = point.x > offer.x + offer.width - view.unit * 13 * 0.3;
                                     if (offer.delete && isConfirmed) {
                                         view.cancellingOffer = offer.data.id;
                                         stellarNet.cancelOffer(offer.data, (success, message) => {
@@ -1937,17 +2010,18 @@
                                     let activeItem = view.getActiveCarouselItem();
                                     view.quoteAssets[activeItem.asset.code + activeItem.asset.issuer] = item.asset;
                                     loadOrderBook(true);
+                                    domShowTradeForm(true);
                                 }
                                 else {
                                     view.closeSendPage(() => {
                                         domShowAddressForm(false);
+                                        domShowTradeForm(false);
                                     });
                                     view.resetList(namespace.Pepper.ListType.Assets);
                                     reloadAssets();
                                 }
                                 break;
                             case namespace.Pepper.ScrollerType.FilterMenu:
-                                console.log("clicked filter item");
                                 view.account.filters[item.id] = !view.account.filters[item.id];
                                 item.time = 0.25;
 
@@ -1966,6 +2040,19 @@
                         }
                     }
                 });
+
+                if (noclick) {
+                    if (view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders) {
+                        if (!view.cancellingOffer) {
+                            for (let v = 0; v < view.scroller.items.length; v += 1) {
+                                if (view.scroller.items[v].delete) {
+                                    view.scroller.items[v].slideTime = 0.3;
+                                }
+                                view.scroller.items[v].delete = false;
+                            }
+                        }
+                    }
+                }
             }
         }
         else {
@@ -2142,6 +2229,7 @@
                                     if (view.isActivityMode) {
                                         view.closeSendPage(() => {
                                             domShowAddressForm(false);
+                                            domShowTradeForm(false);
                                             showMarketplace();
                                         });
                                     }
@@ -2156,7 +2244,10 @@
                                     domShowAboutPage(true);
                                     break;
                                 case 4:
-                                    view.closeSendPage(() => { domShowAddressForm(false); }, true);
+                                    view.closeSendPage(() => {
+                                        domShowAddressForm(false);
+                                        domShowTradeForm(false);
+                                    }, true);
                                     namespace.Core.currentAccount.unload(signOutCb);
                                     break;
                             }
@@ -2175,8 +2266,36 @@
                         }
 
                         testCarousel(2, point, view.carousel, isPointerDown, function (item, index) {
-                            if (!called && view.scroller.canClick) {
+                            if (!called && view.carousel.canClick) {
                                 called = true;
+                                if (item === view.getActiveCarouselItem()) {
+                                    if (view.isActivityMode) {
+                                        if (view.activityType === namespace.Pepper.ActivityType.SelectSendAmount) {
+                                            let amount = namespace.Core.currentAccount.getMaxSend(view.getActiveCarouselItem().asset.balance, view.getActiveCarouselItem().asset);
+                                            if (amount > 0) {
+                                                view.sendAmount = namespace.Pepper.Tools.formatPrice(amount);
+                                            }
+                                        }
+                                        else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
+                                            if (point.x < item.x + item.width * 0.5 - view.carousel.offset) {
+                                                let amount = namespace.Core.currentAccount.getMaxSend(view.getActiveCarouselItem().asset.balance, view.getActiveCarouselItem().asset);
+                                                if (amount > 0) {
+                                                    updateTradeInputs(null, namespace.Pepper.Tools.formatPrice(amount));
+                                                }
+                                            }
+                                            else {
+                                                let base = view.getActiveCarouselItem().asset;
+                                                let quote = view.quoteAssets[base.code + base.issuer];
+                                                if (quote) {
+                                                    let amount = namespace.Core.currentAccount.getMaxSend(quote.balance, quote);
+                                                    if (amount > 0) {
+                                                        updateTradeInputs(null, null, namespace.Pepper.Tools.formatPrice(amount));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         });
                     }
@@ -2238,6 +2357,7 @@
                                     view.sendFormTime = 0.5;
                                     loadOrderBook(true);
                                     domGenerateCode();
+                                    domShowTradeForm(true, true);
 
                                     for (let i = 0; i < view.carousel.items.length; i += 1) {
                                         if (view.carousel.items[i].chartMode) {
@@ -2258,6 +2378,7 @@
                             if (!called) {
                                 called = true;
                                 view.loadScroller(namespace.Pepper.ScrollerType.Assets);
+                                domShowTradeForm(false);
                             }
                         });
 
@@ -2265,14 +2386,20 @@
                             if (!called) {
                                 called = true;
                                 view.isDashboardMenu = true;
-                                view.closeSendPage(() => { domShowAddressForm(false); }, true);
+                                view.closeSendPage(() => {
+                                    domShowAddressForm(false);
+                                    domShowTradeForm(false);
+                                }, true);
                             }
                         });
 
                         testElement(2, point, view.accountBtn, isPointerDown, function () {
                             if (!called) {
                                 called = true;
-                                view.closeSendPage(() => { domShowAddressForm(false); });
+                                view.closeSendPage(() => {
+                                    domShowAddressForm(false);
+                                    domShowTradeForm(false);
+                                });
                                 view.loadScroller(namespace.Pepper.ScrollerType.AccountSettings);
                             }
                         });
@@ -2284,6 +2411,7 @@
                                     if (view.isActivityMode) {
                                         view.closeSendPage(() => {
                                             domShowAddressForm(false);
+                                            domShowTradeForm(false);
                                             showMarketplace();
                                         });
                                     }
@@ -2357,12 +2485,16 @@
                             if (view.isActivityMode) {
 
                                 testElement(2, point, view.quoteBtn, isPointerDown, function () {
+                                    domShowTradeForm(false);
                                     view.loadScroller(namespace.Pepper.ScrollerType.QuotesMenu);
                                 });
 
                                 let close = false;
                                 testElement(2, point, view.numPadCloseBtn, isPointerDown, function () {
-                                    view.closeSendPage(() => { domShowAddressForm(false); });
+                                    view.closeSendPage(() => {
+                                        domShowAddressForm(false);
+                                        domShowTradeForm(false);
+                                    });
                                     close = true;
                                 });
 
@@ -2403,7 +2535,7 @@
                                     switch (view.activityType) {
                                         case namespace.Pepper.ActivityType.SelectSendAmount:
                                             if (!Number.isNaN(Number(view.sendAmount)) && Number(view.sendAmount) > 0) {
-                                                if (Number(namespace.Core.currentAccount.getMaxSend(view.getActiveCarouselItem().asset.balance, view.getActiveCarouselItem().asset)) < view.sendAmount) {
+                                                if (Number(namespace.Pepper.Tools.formatPrice(namespace.Core.currentAccount.getMaxSend(view.getActiveCarouselItem().asset.balance, view.getActiveCarouselItem().asset))) < view.sendAmount) {
                                                     view.amountErrorTime = 1;
                                                 }
                                                 else {
@@ -2554,51 +2686,120 @@
                                     }
                                 }
                                 else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
-                                    if (view.book.isDown && view.book.hasBar) {
-                                        if (Math.abs(view.book.point.y - point.y) > view.book.rowHeight * 0.2) {
-                                            view.book.offset += (view.book.point.y - point.y) * 0.6;
-                                            view.book.downDistance += view.book.point.y - point.y;
-                                            view.book.point = { "x": point.x, "y": point.y };
-                                        }
-                                    }
-                                    view.book.isDown = false;
-                                    view.book.scrollTime = 1.5;
 
-                                    testBook(2, point, view.book, isPointerDown, function (item, index) {
-                                        if (view.book.canClick) {
-                                            if (item.overHistBtn) {
-                                                item.overHistBtn = false;
-                                                let base = view.getActiveCarouselItem().asset;
-                                                if (base) {
-                                                    let quote = view.quoteAssets[base.code + base.issuer];
-                                                    if (quote) {
-                                                        let propId = base.code + base.issuer + quote.code + quote.issuer;
-                                                        let book = namespace.Pepper.orderBooks[propId];
-                                                        if (book && book.history && book.history.length) {
-                                                            view.loadScroller(namespace.Pepper.ScrollerType.LastTrades);
+                                    testElement(2, point, view.confirmOrderBtn, isPointerDown, function () {
+                                        if (namespace.Core.currentAccount.processingOrder && namespace.Core.currentAccount.processingOrder.result) {
+                                            namespace.Core.currentAccount.processingOrder = null;
+                                        }
+                                        else if (namespace.Core.currentAccount.queuedOrder) {
+                                            var stellarNet = new namespace.Core.StellarNetwork();
+
+                                            // Promote to processing.
+                                            namespace.Core.currentAccount.processingOrder = {
+                                                "base": namespace.Core.currentAccount.queuedOrder.base,
+                                                "quote": namespace.Core.currentAccount.queuedOrder.quote,
+                                                "isBuy": namespace.Core.currentAccount.queuedOrder.isBuy,
+                                                "price": namespace.Core.currentAccount.queuedOrder.price,
+                                                "baseAmount": namespace.Core.currentAccount.queuedOrder.baseAmount,
+                                                "quoteAmount": namespace.Core.currentAccount.queuedOrder.quoteAmount
+                                            };
+                                            namespace.Core.currentAccount.queuedOrder = null;
+                                            view.orderTime = 0.3;
+
+                                            // Send the offer.
+                                            stellarNet.sendOffer((success, message) => {
+                                                if (success) {
+                                                    namespace.Core.currentAccount.processingOrder.result = { error: false };
+                                                }
+                                                else {
+                                                    console.log(JSON.stringify(message));
+                                                    namespace.Core.currentAccount.processingOrder.result = {
+                                                        error: true,
+                                                        status: message.response && message.response.data
+                                                            && message.response.data.extras
+                                                            && message.response.data.extras.result_codes
+                                                            && message.response.data.extras.result_codes.operations
+                                                            ? message.response.data.extras.result_codes.operations : message.response && message.response.data ? message.response.data.title : ""
+                                                    };
+                                                }
+                                            });
+                                        }
+                                    });
+
+                                    if (!namespace.Core.currentAccount.queuedOrder) {
+
+                                        if (view.book.isDown && view.book.hasBar) {
+                                            if (Math.abs(view.book.point.y - point.y) > view.book.rowHeight * 0.2) {
+                                                view.book.offset += (view.book.point.y - point.y) * 0.6;
+                                                view.book.downDistance += view.book.point.y - point.y;
+                                                view.book.point = { "x": point.x, "y": point.y };
+                                            }
+                                        }
+                                        view.book.isDown = false;
+                                        view.book.scrollTime = 1.5;
+
+                                        testBook(2, point, view.book, isPointerDown, function (item, index) {
+                                            if (view.book.canClick) {
+                                                if (item.data) {
+                                                    let base = view.getActiveCarouselItem().asset;
+                                                    if (base) {
+                                                        let quote = view.quoteAssets[base.code + base.issuer];
+                                                        if (quote) {
+                                                            let propId = base.code + base.issuer + quote.code + quote.issuer;
+                                                            let book = namespace.Pepper.orderBooks[propId];
+                                                            if (item.overHistBtn) {
+                                                                view.loadScroller(namespace.Pepper.ScrollerType.LastTrades);
+                                                            }
+                                                            else if (book && book.history && book.history.length && item.data.spot) {
+                                                                updateTradeInputs(namespace.Pepper.Tools.formatPrice(
+                                                                    namespace.Pepper.Tools.rationalPriceToDecimal(book.history[0].price)));
+                                                            }
+                                                            else if (!item.data.spot) {
+                                                                if (point.x < item.x + view.unit * 3.3) {
+                                                                    updateTradeInputs(namespace.Pepper.Tools.formatPrice(
+                                                                        namespace.Pepper.Tools.rationalPriceToDecimal(item.data.price)));
+                                                                }
+                                                                else {
+                                                                    updateTradeInputs(
+                                                                        namespace.Pepper.Tools.formatPrice(
+                                                                            namespace.Pepper.Tools.rationalPriceToDecimal(item.data.price)),
+                                                                        namespace.Pepper.Tools.formatPrice(item.baseTotal));
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
+
+                                                if (item.overHistBtn) {
+                                                    item.overHistBtn = false;
+                                                }
                                             }
-                                        }
-                                        else {
-                                            item.overHistBtn = false;
-                                        }
-                                    });
+                                            else {
+                                                item.overHistBtn = false;
+                                            }
+                                        });
 
-                                    testElement(2, point, view.sellBtn, isPointerDown, function () {
-                                        console.log("sell button clicked");
-                                    });
+                                        testElement(2, point, view.sellBtn, isPointerDown, function () {
+                                            if (view.sellBtn.enabled) {
+                                                prepareOrder(false);
+                                            }
+                                        });
 
-                                    testElement(2, point, view.buyBtn, isPointerDown, function () {
-                                        console.log("buy button clicked");
-                                    });
+                                        testElement(2, point, view.buyBtn, isPointerDown, function () {
+                                            if (view.buyBtn.enabled) {
+                                                prepareOrder(true);
+                                            }
+                                        });
 
-                                    testElement(2, point, view.ordersBtn, isPointerDown, function () {
-                                        if (namespace.Core.currentAccount.offers.length) {
-                                            view.loadScroller(namespace.Pepper.ScrollerType.LiveOrders);
-                                        }
-                                    });
+                                        testElement(2, point, view.ordersBtn, isPointerDown, function () {
+                                            if (namespace.Core.currentAccount.offers.length) {
+                                                view.loadScroller(namespace.Pepper.ScrollerType.LiveOrders);
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        namespace.Core.currentAccount.queuedOrder = null;
+                                    }
                                 }
                             }
                             else {
@@ -2639,7 +2840,6 @@
                                                         parent.postMessage("litemint_copy:" + item.data.memo, "*");
                                                         parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[123] + item.data.memo, "*");
                                                     }
-                                                    console.log(item.data.memo);
                                                 }
                                                 else if (item.overCopyBtn) {
                                                     item.overCopyBtn = false;
@@ -2701,7 +2901,6 @@
                                                 }
                                                 break;
                                             case namespace.Pepper.ListType.Assets:
-                                                console.log("clicked asset item" + index);
                                                 if (!item.data.balance && item.overAddBtn && !namespace.Pepper.queryAsset && item.hasAdd) {
                                                     item.overAddBtn = false;
                                                     namespace.Pepper.queryAsset = item.data;
@@ -2740,6 +2939,99 @@
         view.discardedPanel = false;
 
         isPointerDown = false;
+    }
+
+    function updateTradeInputs(inputPrice, inputBaseAmount, inputQuoteAmount) {
+        let updated = false;
+        if (view && view.getActiveCarouselItem()) {
+            const base = view.getActiveCarouselItem().asset;
+            const quote = view.quoteAssets[base.code + base.issuer];
+            if (base && quote && (base.code !== quote.code || base.issuer !== quote.issuer)) {
+                const book = namespace.Pepper.orderBooks[base.code + base.issuer + quote.code + quote.issuer];
+                if (book) {
+                    let updatedPrice, updatedBase, updatedQuote;
+                    if (inputPrice) {
+                        updatedPrice = true;
+                        $("#trade-price").val(inputPrice);
+                    }
+                    if (inputBaseAmount) {
+                        updatedBase = true;
+                        $("#base-amount").val(inputBaseAmount);
+                    }
+                    if (inputQuoteAmount) {
+                        updatedQuote = true;
+                        $("#quote-amount").val(inputQuoteAmount);
+                    }
+
+                    let price = Number($("#trade-price").val());
+                    let baseAmount = Number($("#base-amount").val());
+                    let quoteAmount = Number($("#quote-amount").val());
+
+                    if ((updatedPrice || updatedBase) && price > 0 && baseAmount > 0) {
+                        quoteAmount = price * baseAmount;
+                        $("#quote-amount").val(namespace.Pepper.Tools.formatPrice(quoteAmount));
+                    }
+                    else if ((updatedQuote || updatedBase) && !price && quoteAmount > 0 && baseAmount > 0) {
+                        price = quoteAmount / baseAmount;
+                        $("#trade-price").val(namespace.Pepper.Tools.formatPrice(price));
+                    }
+                    else if ((updatedPrice || updatedQuote) && quoteAmount > 0 && price > 0) {
+                        baseAmount = quoteAmount / price;
+                        $("#base-amount").val(namespace.Pepper.Tools.formatPrice(baseAmount));
+                    }
+
+                    if (price === 0 || baseAmount === 0 || quoteAmount === 0) {
+                        view.sellBtn.enabled = false;
+                        view.buyBtn.enabled = false;
+                    }
+                    else {
+                        if (Number(namespace.Pepper.Tools.formatPrice(baseAmount)) >
+                            Number(namespace.Pepper.Tools.formatPrice(namespace.Core.currentAccount.getMaxSend(base.balance, base)))) {
+                            view.sellBtn.enabled = false;
+                        }
+                        else {
+                            view.sellBtn.enabled = true;
+                        }
+
+                        if (Number(namespace.Pepper.Tools.formatPrice(quoteAmount)) >
+                            Number(namespace.Pepper.Tools.formatPrice(namespace.Core.currentAccount.getMaxSend(quote.balance, quote)))) {
+                            view.buyBtn.enabled = false;
+                        }
+                        else {
+                            view.buyBtn.enabled = true;
+                        }
+                    }
+                    updated = true;
+                }
+            }
+        }
+
+        if (!updated && view) {
+            view.buyBtn.enabled = false;
+            view.sellBtn.enabled = false;
+
+            $("#trade-price").val("");
+            $("#quote-amount").val("");
+            $("#base-amount").val("");
+        }
+
+        namespace.Core.currentAccount.queuedOrder = null;
+    }
+
+    function prepareOrder(isBuy) {
+        const base = view.getActiveCarouselItem().asset;
+        const quote = view.quoteAssets[base.code + base.issuer];
+        if (base && quote) {
+            namespace.Core.currentAccount.queuedOrder = {
+                "base": (base.issuer === "native") ? StellarSdk.Asset.native() : new StellarSdk.Asset(base.code, base.issuer),
+                "quote": (quote.issuer === "native") ? StellarSdk.Asset.native() : new StellarSdk.Asset(quote.code, quote.issuer),
+                "isBuy": isBuy,
+                "price": namespace.Pepper.Tools.formatPrice($("#trade-price").val()),
+                "baseAmount": namespace.Pepper.Tools.formatPrice($("#base-amount").val()),
+                "quoteAmount": namespace.Pepper.Tools.formatPrice($("#quote-amount").val())
+            };
+            view.orderTime = 0.3;
+        }
     }
 
     function reloadAccountOperations(indexes) {
@@ -2926,27 +3218,8 @@
 
         namespace.Pepper.orderBooks = { "skipCount": 0, "oldBook": "" };
 
-        namespace.Core.StellarNetwork.onOrdersUpdated = () => {
-            if (view.showScroller && view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders) {
-                view.cancellingOffer = 0;
-                view.scroller.items = [];
-                for (let i = 0; i < namespace.Core.currentAccount.offers.length; i += 1) {
-                    view.scroller.items.push({
-                        "id": i,
-                        "data": namespace.Core.currentAccount.offers[i],
-                        "delete": view.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? true : false,
-                        "slideTime": view.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? 0.3 : 0
-                    });
-                }
-
-                if (!namespace.Core.currentAccount.offers.length) {
-                    view.scrollerEndTime = 0.3;
-                }
-            }
-        };
-
         stellarNet.loadDefaultAssets();
-        stellarNet.attachAccount((full, indexes) => {
+        stellarNet.attachAccount((full, indexes, orders) => {
             stellarNet.updateAccount(full && !firstUpdate).then((account) => {
                 if (!full || firstUpdate) {
                     firstUpdate = false;
@@ -2965,10 +3238,33 @@
                 else if (view.tabId === 1) {
                     reloadAssets();
                 }
+
+                if (orders) {
+                    console.log(namespace.Core.currentAccount.offers);
+                    view.cancellingOffer = 0;
+                    if (view.showScroller && view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders) {
+                        view.scroller.items = [];
+                        for (let i = 0; i < namespace.Core.currentAccount.offers.length; i += 1) {
+                            view.scroller.items.push({
+                                "id": i,
+                                "data": namespace.Core.currentAccount.offers[i],
+                                "delete": view.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? true : false,
+                                "slideTime": view.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? 0.3 : 0
+                            });
+                        }
+
+                        if (!namespace.Core.currentAccount.offers.length) {
+                            view.scrollerEndTime = 0.3;
+                        }
+                    }
+                }
             });
         }).then(function () {
             view.error = namespace.Pepper.ViewErrorType.None;
-            view.closeSendPage(() => { domShowAddressForm(false); });
+            view.closeSendPage(() => {
+                domShowAddressForm(false);
+                domShowTradeForm(false);
+            });
             view.resetList(namespace.Pepper.ListType.Transactions);
             loadCarousel();
             if (cb) {
@@ -3083,9 +3379,31 @@
             }
 
             if (view.isActivityMode) {
-                $("#address-form").css({ top: (view.viewport.y + view.unit * 5.5) / pixelRatio, left: (view.viewport.x + view.unit * 0.5) / pixelRatio });
-                $("#address-form").width((view.viewport.width - view.unit) / pixelRatio);
-                $("#address-form").height(view.unit * 2.5 / pixelRatio);
+                switch (view.activityType) {
+                    case namespace.Pepper.ActivityType.SelectSendAmount:
+                    case namespace.Pepper.ActivityType.SelectSendRecipient:
+                    case namespace.Pepper.ActivityType.ConfirmSend:
+                    case namespace.Pepper.ActivityType.DisplaySendSummary:
+                        $("#address-form").css({ top: (view.viewport.y + view.unit * 5.5) / pixelRatio, left: (view.viewport.x + view.unit * 0.5) / pixelRatio });
+                        $("#address-form").width((view.viewport.width - view.unit) / pixelRatio);
+                        $("#address-form").height(view.unit * 2.5 / pixelRatio);
+                        break;
+                    case namespace.Pepper.ActivityType.Trade:
+                        $("#trade-price-form").css({ top: (view.book.y - view.book.headerHeight + view.unit * 1.14) / pixelRatio, left: (view.book.x + view.unit * 0.14) / pixelRatio });
+                        $("#base-amount-form").css({ top: (view.book.y - view.book.headerHeight + view.unit * 1.14) / pixelRatio, left: (view.book.x + view.unit * 3.4) / pixelRatio });
+                        $("#quote-amount-form").css({ top: (view.book.y - view.book.headerHeight + view.unit * 1.14) / pixelRatio, left: (view.book.x + view.unit * 6.65) / pixelRatio });
+
+                        $("#trade-price-form, #base-amount-form, #quote-amount-form").width((view.unit * 3.2) / pixelRatio);
+                        $("#trade-price-form, #base-amount-form, #quote-amount-form").height(view.unit * 1.2 / pixelRatio);
+
+                        $(".trade-input").not(".spear").css("fontSize", view.baseFontSize * 0.67 / pixelRatio + "px");
+                        $(".trade-input").not(".spear").css("padding", view.unit * 0.2 / pixelRatio + "px");
+                        $(".trade-input").not(".spear").css("border", view.unit * 0.02 / pixelRatio + "px solid rgb(42, 193, 188)");
+                        $(".trade-input").not(".spear").css("-webkit-border-radius", view.unit * 0.18 / pixelRatio + "px");
+                        $(".trade-input").not(".spear").css("-moz-border-radius", view.unit * 0.18 / pixelRatio + "px");
+                        $(".trade-input").not(".spear").css("border-radius", view.unit * 0.18 / pixelRatio + "px");
+                        break;
+                }
             }
 
             if (view.showScroller &&
@@ -3234,6 +3552,20 @@
         domUpdate();
     }
 
+    function domShowTradeForm(show, slow) {
+        setTimeout(() => {
+            view.needRedraw = true;
+            if (show) {
+                view.needDomUpdate = true;
+                $("#trade-price-form, #quote-amount-form, #base-amount-form").fadeIn();
+            }
+            else {
+                $("#trade-price-form, #quote-amount-form, #base-amount-form").hide();
+            }
+            domUpdate();
+        }, slow ? 100 : 1);
+    }
+
     function domShowAssetPage(show) {
         view.needRedraw = true;
         if (show) {
@@ -3357,6 +3689,16 @@
 
         // Initialize Litemint.
         namespace.initialize();
+
+        // Control decimal count on trade inputs.
+        let inputs = document.querySelectorAll(".trade-input");
+        inputs.forEach(function (elem) {
+            elem.addEventListener("input", function () {
+                let dec = elem.getAttribute("decimals");
+                let regex = new RegExp("(\\.\\d{" + dec + "})\\d+", "g");
+                elem.value = elem.value.replace(regex, "$1");
+            });
+        });
     });
 
     // Window is resized.
@@ -3481,6 +3823,46 @@
             $("#import").blur();
             e.preventDefault();
         }
+    });
+
+    // Handle trade price input.
+    $("#trade-price").keydown(function (e) {
+        if (e.keyCode === 13) {
+            $("#base-amount").focus();
+            e.preventDefault();
+        }
+    });
+
+    // Handle base amount input.
+    $("#base-amount").keydown(function (e) {
+        if (e.keyCode === 13) {
+            $("#quote-amount").focus();
+            e.preventDefault();
+        }
+    });
+
+    // Handle quote amount input.
+    $("#quote-amount").keydown(function (e) {
+        if (e.keyCode === 13) {
+            $("#quote-amount").blur();
+            e.preventDefault();
+        }
+    });
+
+    $("#trade-price").on("input", function () {
+        updateTradeInputs($("#trade-price").val());
+    });
+
+    $("#base-amount").on("input", function () {
+        updateTradeInputs(null, $("#base-amount").val());
+    });
+
+    $("#quote-amount").on("input", function () {
+        updateTradeInputs(null, null, $("#quote-amount").val());
+    });
+
+    $("#quote-amount, #base-amount, #trade-price").on("focus", function () {
+        namespace.Core.currentAccount.queuedOrder = null;
     });
 
     // Native callback: back button pressed.

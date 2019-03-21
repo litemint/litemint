@@ -15,9 +15,6 @@
     // Data stream Id.
     let streamId = 0;
 
-    // Event source.
-    let eventSrc;
-
     // Watch event source.
     let watchEventSrc;
 
@@ -62,24 +59,6 @@
 
                     // Start the stream.
                     if (streamCb) {
-                        let processRecord = (record) => {
-                            if (record.type === "payment" || record.type === "manage_offer" || record.type === "create_passive_offer") {
-                                stellarServer.transactions()
-                                    .transaction(record.transaction_hash)
-                                    .call()
-                                    .then(function (opResult) {
-                                        let op = namespace.Core.currentAccount.operations.find(item => item.transaction_hash === opResult.hash);
-                                        if (op) {
-                                            let txDetails = StellarSdk.xdr.TransactionEnvelope.fromXDR(opResult.envelope_xdr, "base64");
-                                            op.memo = txDetails.tx().memo().value();
-                                        }
-                                    })
-                                    .catch(function (error) {
-                                        console.error(error);
-                                    });
-                            }
-                        };
-
                         let queryTx = (count) => {
                             stellarServer.operations()
                                 .forAccount(namespace.Core.currentAccount.keys.publicKey())
@@ -87,7 +66,7 @@
                                 .limit(count)
                                 .call()
                                 .then(function (page) {
-                                    // Load the history.
+                                    // Load the operations history.
                                     let full = false, valid = false, indexes = [];
                                     for (let i = page.records.length - 1; i >= 0; i -= 1) {
                                         if (!namespace.Core.currentAccount.operations.find(item => item.id === page.records[i].id)) {
@@ -98,8 +77,7 @@
                                             if (record.type === "allow_trust" || record.type === "change_trust") {
                                                 full = true;
                                             }
-
-                                            if (record.type === "payment" || record.type === "create_account") {
+                                            else if (record.type === "payment" || record.type === "create_account") {
                                                 if (count < namespace.config.maxOperations &&
                                                     record.to === namespace.Core.currentAccount.keys.publicKey()) {
                                                     if (record.type === "payment") {
@@ -128,48 +106,88 @@
                                                 }
                                             }
 
-                                            processRecord(page.records[i]);
+                                            if (record.type === "payment" || record.type === "manage_offer" || record.type === "create_passive_offer") {
+                                                stellarServer.transactions()
+                                                    .transaction(record.transaction_hash)
+                                                    .call()
+                                                    .then(function (opResult) {
+                                                        let op = namespace.Core.currentAccount.operations.find(item => item.transaction_hash === opResult.hash);
+                                                        if (op) {
+                                                            let txDetails = StellarSdk.xdr.TransactionEnvelope.fromXDR(opResult.envelope_xdr, "base64");
+                                                            op.memo = txDetails.tx().memo().value();
+                                                        }
+                                                    })
+                                                    .catch(function (error) {
+                                                        console.error(error);
+                                                    });
+                                            }
                                         }
                                     }
                                     namespace.Core.currentAccount.operations = namespace.Core.currentAccount.operations.slice(0, namespace.config.maxOperations);
 
                                     if (valid) {
                                         streamCb(full, indexes);
-                                        if (!namespace.config.useNetworkPolling) {
-                                            // Start the operations event stream.
-                                            eventSrc = stellarServer.operations()
-                                                .forAccount(namespace.Core.currentAccount.keys.publicKey())
-                                                .cursor("now")
-                                                .stream({
-                                                    onmessage: function (record) {
-                                                        let full = false;
-                                                        namespace.Core.currentAccount.operations.unshift(record);
-                                                        if (record.type === "allow_trust" || record.type === "change_trust") {
-                                                            full = true;
-                                                        }
-                                                        console.log(record);
-                                                        processRecord(record);
-                                                        streamCb(full, []);
-                                                    }
-                                                });
-                                            if (eventSrc) {
-                                                console.info("Event source stream started for account:" + namespace.Core.currentAccount.keys.publicKey());
-                                            }
-                                        }
                                     }
+
+                                    stellarServer.offers("accounts", namespace.Core.currentAccount.keys.publicKey())
+                                        .limit(namespace.config.maxOrders)
+                                        .call()
+                                        .then((offerResult) => {
+                                            let updateOffers = false, offers = [];
+                                            for (let i = 0; i < offerResult.records.length; i += 1) {
+                                                let record = offerResult.records[i];
+                                                if (record.selling && record.buying) {
+                                                    if (!updateOffers) {
+                                                        if (!namespace.Core.currentAccount.offers.find((offer) => {
+                                                            return offer.id === record.id && offer.last_modified_ledger === record.last_modified_ledger })) {
+                                                            updateOffers = true;
+                                                            console.log(record);
+                                                        }
+                                                    }
+
+                                                    let offer = {
+                                                        "id": record.id,
+                                                        "baseAsset": record.selling.asset_type === "native" ? StellarSdk.Asset.native() : new StellarSdk.Asset(record.selling.asset_code, record.selling.asset_issuer),
+                                                        "quoteAsset": record.buying.asset_type === "native" ? StellarSdk.Asset.native() : new StellarSdk.Asset(record.buying.asset_code, record.buying.asset_issuer),
+                                                        "price": { n: record.price_r.n, d: record.price_r.d },
+                                                        "baseAmount": record.amount,
+                                                        "quoteAmount": (Number(record.amount) * (record.price_r.n / record.price_r.d)).toFixed(7),
+                                                        "last_modified_ledger": record.last_modified_ledger
+                                                    };
+                                                    offers.push(offer);
+                                                }
+                                            }
+
+                                            if (!updateOffers) {
+                                                for (let i = 0; i < namespace.Core.currentAccount.offers.length; i += 1) {
+                                                    let record = namespace.Core.currentAccount.offers[i];
+                                                    if (!offers.find((offer) => {
+                                                        return offer.id === record.id && offer.last_modified_ledger === record.last_modified_ledger
+                                                    })) {
+                                                        updateOffers = true;
+                                                    }
+                                                }
+                                            }
+
+                                            if (updateOffers) {
+                                                namespace.Core.currentAccount.offers = offers;
+                                                streamCb(false, [], true);
+                                            }
+                                        })
+                                        .catch((err) => {
+                                            console.error(err);
+                                        });
                                 })
                                 .catch(function (error) {
                                     console.error(error);
                                 });
                         };
 
-                        if (namespace.config.useNetworkPolling) {
-                            console.log("Polling stream started for account:" + namespace.Core.currentAccount.keys.publicKey());
-                            streamId = setInterval(() => {
-                                // Will do well up to 3 operations per seconds.
-                                queryTx(15);
-                            }, streamInterval);
-                        }
+                        console.log("Polling stream started for account:" + namespace.Core.currentAccount.keys.publicKey());
+                        streamId = setInterval(() => {
+                            // Will do well up to 3 operations per seconds.
+                            queryTx(15);
+                        }, streamInterval);
                         queryTx(namespace.config.maxOperations);
                     }
                     return resolve();
@@ -192,10 +210,6 @@
         if (streamId) {
             clearInterval(streamId);
             streamId = 0;
-        }
-
-        if (eventSrc) {
-            eventSrc();
         }
 
         if (watchEventSrc) {
@@ -248,34 +262,6 @@
                             }
                         }
                     });
-
-                    // Retrieve the account offers.
-                    stellarServer.offers("accounts", namespace.Core.currentAccount.keys.publicKey())
-                        .limit(namespace.config.maxOrders)
-                        .call()
-                        .then((offerResult) => {
-                            namespace.Core.currentAccount.offers = [];
-                            for (let i = 0; i < offerResult.records.length; i += 1) {
-                                let record = offerResult.records[i];
-                                if (record.selling && record.buying) {
-                                    let offer = {
-                                        "id": record.id,
-                                        "baseAsset": record.selling.asset_type === "native" ? StellarSdk.Asset.native() : new StellarSdk.Asset(record.selling.asset_code, record.selling.asset_issuer),
-                                        "quoteAsset": record.buying.asset_type === "native" ? StellarSdk.Asset.native() : new StellarSdk.Asset(record.buying.asset_code, record.buying.asset_issuer),
-                                        "price": record.price,
-                                        "baseAmount": record.amount,
-                                        "quoteAmount": (Number(record.amount) * Number(record.price)).toFixed(7)
-                                    };
-                                    namespace.Core.currentAccount.offers.push(offer);
-                                }
-                            }
-                            if (namespace.Core.StellarNetwork.onOrdersUpdated) {
-                                namespace.Core.StellarNetwork.onOrdersUpdated();
-                            }
-                        })
-                        .catch((err) => {
-                            console.error(err);
-                        });
 
                     namespace.Core.currentAccount.data = account;
                     return resolve(account);
@@ -466,19 +452,93 @@
             });
     };
 
-    // Cancel offer.
-    namespace.Core.StellarNetwork.prototype.cancelOffer = function (offer, cb) {
-        var order = {
-            selling: offer.baseAsset,
-            buying: offer.quoteAsset,
-            amount: "0",
-            price: offer.price,
-            offerId: offer.id
+    // Send offer.
+    namespace.Core.StellarNetwork.prototype.sendOffer = function (cb) {
+        const order = namespace.Core.currentAccount.processingOrder;
+
+        // In all cases, try to represent price as rational number
+        // for maximum precicion.
+        let price = order.price;
+        if (typeof price === "object" && price.n && price.d) {
+            price = {
+                "n": order.isBuy ? order.price.d : order.price.n,
+                "d": order.isBuy ? order.price.n : order.price.d
+            }
+        }
+        else if (!isNaN(price)) {
+            try {
+                // Note that with Stellar, numerator and denominator
+                // are limited to 32-bit integers!
+                const checkPriceBounds = (price) => {
+                    return price.d < namespace.Core.Utils.MaxInt32 && price.n < namespace.Core.Utils.MaxInt32;
+                }
+
+                let rational = new Fraction(price);
+                if (!checkPriceBounds(rational)) {
+                    rational = new Fraction(1 / price);
+                    if (!checkPriceBounds(rational)) {
+                        throw new Error("Fractional price out of bounds.");
+                    }
+                    price = {
+                        "n": order.isBuy ? rational.n : rational.d,
+                        "d": order.isBuy ? rational.d : rational.n
+                    }
+                }
+                else {
+                    price = {
+                        "n": !order.isBuy ? rational.n : rational.d,
+                        "d": !order.isBuy ? rational.d : rational.n
+                    }
+                }
+            }
+            catch (err) {
+                console.error(err);
+                // Fall back to using the actual number.
+                price = (order.isBuy ? 1 / Number(price) : Number(price)).toFixed(7);
+            }
+        }
+
+        // Convert buy/sell order to an offer.
+        const offer = {
+            selling: order.isBuy ? order.quote : order.base,
+            buying: order.isBuy ? order.base : order.quote,
+            amount: order.isBuy ? order.quoteAmount : order.baseAmount,
+            price: price,
+            offerId: "0"
         };
+
+        console.log(offer);
+
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
                 const transaction = new StellarSdk.TransactionBuilder(receiver)
-                    .addOperation(StellarSdk.Operation.manageOffer(order))
+                    .addOperation(StellarSdk.Operation.manageOffer(offer))
+                    .setTimeout(60)
+                    .build();
+                transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
+                return stellarServer.submitTransaction(transaction);
+            })
+            .then(function (result) {
+                cb(true, result);
+            })
+            .catch(function (error) {
+                cb(false, error);
+                console.error(error);
+            });
+    };
+
+    // Cancel offer.
+    namespace.Core.StellarNetwork.prototype.cancelOffer = function (offer, cb) {
+        stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
+            .then(function (receiver) {
+                const transaction = new StellarSdk.TransactionBuilder(receiver)
+                    .addOperation(StellarSdk.Operation.manageOffer({
+                        selling: offer.baseAsset,
+                        buying: offer.quoteAsset,
+                        amount: "0",
+                        price: offer.price,
+                        offerId: offer.id
+                    }))
                     .setTimeout(60)
                     .build();
                 transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
@@ -502,8 +562,8 @@
                     for (let i = 0; i < resp.bids.length; i += 1) {
                         orderBook.bids.push(
                             {
-                                "price": resp.bids[i].price,
-                                "baseAmount": (Number(resp.bids[i].amount) / Number(resp.bids[i].price)).toFixed(7),
+                                "price": { "n": resp.bids[i].price_r.n, "d": resp.bids[i].price_r.d },
+                                "baseAmount": (Number(resp.bids[i].amount) / (resp.bids[i].price_r.n / resp.bids[i].price_r.d)).toFixed(7),
                                 "quoteAmount": resp.bids[i].amount
                             }
                         );
@@ -514,9 +574,9 @@
                     for (let i = 0; i < resp.asks.length; i += 1) {
                         orderBook.asks.push(
                             {
-                                "price": resp.asks[i].price,
+                                "price": { "n": resp.asks[i].price_r.n, "d": resp.asks[i].price_r.d },
                                 "baseAmount": resp.asks[i].amount,
-                                "quoteAmount": (Number(resp.asks[i].amount) * Number(resp.asks[i].price)).toFixed(7)
+                                "quoteAmount": (Number(resp.asks[i].amount) * (resp.asks[i].price_r.n / resp.asks[i].price_r.d)).toFixed(7)
                             }
                         );
                     }
@@ -535,7 +595,7 @@
                             orderBook.history.push(
                                 {
                                     "baseAmount": record.base_amount,
-                                    "price": (Number(record.counter_amount) / Number(record.base_amount)).toFixed(7),
+                                    "price": { "n": record.price.n, "d": record.price.d },
                                     "quoteAmount": record.counter_amount,
                                     "time": new Date(record.ledger_close_time),
                                     "baseAccount": record.base_account,

@@ -187,7 +187,13 @@
         "Orders", // 170
         "Offer",
         "Cancel Offer",
-        "Cancelling..."
+        "Cancelling...",
+        "Confirm?",
+        "Place Order",
+        "Total:",
+        "Submitting your order, please wait...",
+        "The transaction failed.",
+        "Your order was submitted successfully."
     ];
 
     /**

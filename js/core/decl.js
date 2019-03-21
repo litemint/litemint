@@ -37,8 +37,7 @@
     namespace.config.federationServer = namespace.config.federationServer || "https://api.litemint.com/federation";
     namespace.config.opsEndPoint = namespace.config.opsEndPoint || "https://app.litemint.com/operations?opid=";
     namespace.config.maxOperations = namespace.config.maxOperations || 100;
-    namespace.config.maxOrders = namespace.config.maxOrders || 100;
-    namespace.config.useNetworkPolling = typeof namespace.config.useNetworkPolling === "undefined" ? false : namespace.config.useNetworkPolling;
+    namespace.config.maxOrders = namespace.config.maxOrders || 50;
     namespace.config.marketDataInterval = namespace.config.marketDataInterval ? namespace.config.marketDataInterval : 2;
     namespace.config.memoryStorageFallback = typeof namespace.config.memoryStorageFallback === "undefined" ? false : namespace.config.memoryStorageFallback;
     namespace.config.defaultAssets = namespace.config.defaultAssets || [{ "code": "MAG", "issuer": "GDXP3TDM2D3VRRMGVFI6OFZDJQRP63MJ6C4PNJJBZR7GKGZE7ZGQIRKF" }];

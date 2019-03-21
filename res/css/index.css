@@ -209,6 +209,17 @@ chart-container {
         background: #1fa39f;
     }
 
+.trade-input {
+    font-family: "Roboto-Medium";
+    text-align: center;
+    background-color: #e9f8f8;
+}
+
+    .trade-input::-webkit-outer-spin-button,
+    .trade-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 
 ::-webkit-input-placeholder {
     color: rgb(190, 190, 190);

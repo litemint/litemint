@@ -16,7 +16,6 @@
         "debug": false,
         "maxOperations": 100,
         "memoryStorageFallback": false,
-        "useNetworkPolling": true,
         "marketDataInterval": 2,
         "defaultAssets": [
             { "code": "MAG", "issuer": "GAACROE4I6LRXKDKAJ4PKGQHRAU43ZDKRBBSNCVYW5TXBP4RAWO62JAH" },

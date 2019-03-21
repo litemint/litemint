@@ -80,6 +80,7 @@ java -jar $COMPILER \
 --js js/thirdparty/crypto/scrypt-async.min.js \
 --js js/thirdparty/crypto/nacl-fast.min.js \
 --js js/thirdparty/crypto/nacl-util.min.js \
+--js js/thirdparty/crypto/fraction.min.js \
 --js js/thirdparty/stellar/stellar-sdk.min.js \
 --js js/core/decl.js \
 --js js/core/utils.js \

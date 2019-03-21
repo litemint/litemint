@@ -78,16 +78,18 @@
      */
     namespace.Pepper.Tools.formatPrice = function (price, decimals) {
         const num = Number(!isNaN(price) ? price : "0");
-        let maxDecimals = decimals || 7;
-        maxDecimals =
-            num >= 1000000000 ? 1 :
-            num >= 100000000 ? Math.min(maxDecimals, 2) :
-            num >= 10000000 ? Math.min(maxDecimals, 3) :
-            num >= 1000000 ? Math.min(maxDecimals, 4) :
-            num >= 100000 ? Math.min(maxDecimals, 5) :
-            num >= 10000 ? Math.min(maxDecimals, 6) :
-            maxDecimals;
-        return num.toFixed(maxDecimals);
+        return decimals ? num.toFixed(decimals) : num.toFixed(7);
+    };
+
+    /**
+     * Convert rational price number to decimal.
+     * @function rationalPriceToDecimal
+     * @memberof Litemint.Pepper.Tools
+     * @param {Object} price Price to convert.
+     * @return {Number} Decimal price.
+     */
+    namespace.Pepper.Tools.rationalPriceToDecimal = function (price) {
+        return price.n / price.d;
     };
 
     /**
