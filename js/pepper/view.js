@@ -3981,7 +3981,7 @@
 
         context.textAlign = "left";
 
-        context.fillStyle = item.data.spot ? "rgb(36, 41, 46)" : "rgb(255, 255, 255)";
+        context.fillStyle = item.data.spot ? "rgb(36, 41, 46)" : item.data.isMine ? "#eefaff" : "rgb(255, 255, 255)";
         context.fillRect(item.x, y, item.width, item.height);
         context.fillStyle = item.selected || item.hover ? "rgba(36, 41, 46, 0.07)" : "rgba(255, 255, 255, 0)";
         context.fillRect(item.x, y, item.width, item.height);
@@ -4028,12 +4028,12 @@
         else {
             if (quote) {
                 context.textAlign = "left";
-                context.font = this.getFont("Roboto-Medium");
+                context.font = item.data.isMine ? this.getFont("Roboto-Bold") : this.getFont("Roboto-Medium");
                 this.drawText(context, item.x + this.unit * 0.3, y + item.height * 0.5,
                    namespace.Pepper.Tools.formatPrice(namespace.Pepper.Tools.rationalPriceToDecimal(item.data.price)), isBid ? "rgb(23, 156, 75)" : "#db5365", 0.68);
 
                 context.textAlign = "right";
-                context.font = this.getFont("Roboto-Regular");
+                context.font = item.data.isMine ? this.getFont("Roboto-Bold") : this.getFont("Roboto-Regular");
                 this.drawText(context, item.x + this.unit * 6.2, y + item.height * 0.5, namespace.Pepper.Tools.formatPrice(item.data.baseAmount), "rgb(36, 41, 46)", 0.68);
                 this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Tools.formatPrice(item.data.quoteAmount), "rgb(36, 41, 46)", 0.68);
             }

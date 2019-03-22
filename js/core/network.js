@@ -557,6 +557,35 @@
         stellarServer.orderbook(base, quote)
             .call()
             .then((resp) => {
+
+                const isMyBid = (entry) => {
+                    if (namespace.Core.currentAccount.offers) {
+                        return namespace.Core.currentAccount.offers.some((offer) => {
+                            return offer.quoteAsset.code === base.code
+                                && offer.quoteAsset.issuer === base.issuer
+                                && offer.baseAsset.code === quote.code
+                                && offer.baseAsset.issuer === quote.issuer
+                                && offer.price.d === entry.price_r.n
+                                && offer.price.n === entry.price_r.d
+                        });
+                    }
+                    return false;
+                };
+
+                const isMyAsk = (entry) => {
+                    if (namespace.Core.currentAccount.offers) {
+                        return namespace.Core.currentAccount.offers.some((offer) => {
+                            return offer.baseAsset.code === base.code
+                                && offer.baseAsset.issuer === base.issuer
+                                && offer.quoteAsset.code === quote.code
+                                && offer.quoteAsset.issuer === quote.issuer
+                                && offer.price.n === entry.price_r.n
+                                && offer.price.d === entry.price_r.d
+                        });
+                    }
+                    return false;
+                };
+
                 let orderBook = { "bids": [], "asks": [], "history": history };
                 if (resp.bids) {
                     for (let i = 0; i < resp.bids.length; i += 1) {
@@ -564,7 +593,8 @@
                             {
                                 "price": { "n": resp.bids[i].price_r.n, "d": resp.bids[i].price_r.d },
                                 "baseAmount": (Number(resp.bids[i].amount) / (resp.bids[i].price_r.n / resp.bids[i].price_r.d)).toFixed(7),
-                                "quoteAmount": resp.bids[i].amount
+                                "quoteAmount": resp.bids[i].amount,
+                                "isMine": isMyBid(resp.bids[i])
                             }
                         );
                     }
@@ -576,7 +606,8 @@
                             {
                                 "price": { "n": resp.asks[i].price_r.n, "d": resp.asks[i].price_r.d },
                                 "baseAmount": resp.asks[i].amount,
-                                "quoteAmount": (Number(resp.asks[i].amount) * (resp.asks[i].price_r.n / resp.asks[i].price_r.d)).toFixed(7)
+                                "quoteAmount": (Number(resp.asks[i].amount) * (resp.asks[i].price_r.n / resp.asks[i].price_r.d)).toFixed(7),
+                                "isMine": isMyAsk(resp.asks[i])
                             }
                         );
                     }
