@@ -1245,7 +1245,7 @@
         "ru": { "name": "Русский", "text": russianLanguagePack, "scale": 0.95 },
         "kr": { "name": "한국어", "text": koreanLanguagePack },
         "cn": { "name": "中文(中国)", "text": chineseLanguagePack },
-	"gr": { "name": "Ελληνικά", "text": greekLanguagePack, "scale": 0.95 }
+	"el": { "name": "Ελληνικά", "text": greekLanguagePack, "scale": 0.95 }
     };
 
     /**
