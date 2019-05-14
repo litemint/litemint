@@ -6,15 +6,17 @@
 
 [https://litemint.com](https://litemint.com)
 
-Sending and receiving crypto or selling and buying digital goods should be as simple as using your email. Built on Stellar, Litemint is a friendly multi-currency wallet and decentralized marketplace to do just that.
+Sending, receiving and trading cryptocurrencies as well as selling and buying digital goods should be as simple as using your email. Built on Stellar, Litemint is a friendly multi-currency wallet and decentralized marketplace to allow just that.
 
 ## Discover Litemint:
 
+- Now over 15000 mobile and web users - and growing fast!
+
 - Litemint accounts are standard, secure and compatible with all mainstream stellar services and hardware wallets. They implement mnemonic with [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), universal private key derivation with [SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md) and [SEP-0005](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md) and can be recovered and imported independently.
 
-- The marketplace is an exclusive feature allowing users to buy, sell and create merchant listings for digital goods from music to games (IAP) to ebooks. Merchants can receive payments directly. It leverages the anchor feature of Stellar.
+- Leveraging the native anchor system of Stellar, the marketplace is an exclusive Litemint feature (coming soon). Users can list, buy and sell digital goods to all Litemint users. Merchants receive payments directly - no middle man.
 
-- Litemint allows seamless in-wallet deposits and withdrawals from partners by using federation and secure endpoints to bridge the Stellar network to external networks.
+- Litemint allows seamless in-wallet deposits and withdrawals from partners by using federation and secure endpoints to bridge the Stellar network to external networks. If you operate a native token and wishes to discuss a possible integration, please contact us.
 
 ## Building it Yourself
 
