@@ -2,7 +2,7 @@
 
 [![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/litemint/litemint/blob/master/LICENSE) [![Build Status](https://travis-ci.org/litemint/litemint.svg?branch=master)](https://travis-ci.org/litemint/litemint)
 
-> The crypto world is limitless, explore it.
+> Put your crypto into play.
 
 [https://litemint.com](https://litemint.com)
 
