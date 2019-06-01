@@ -6,7 +6,7 @@
 
 [https://litemint.com](https://litemint.com)
 
-Sending, receiving and trading cryptocurrencies as well as selling and buying digital goods should be as simple as using your email. Built on Stellar, Litemint is a friendly multi-currency wallet and decentralized marketplace to allow just that.
+Built on Stellar, Litemint offers a peer-to-peer and secure wallet to send, receive and trade any digital asset while providing access to a seamlessly connected platform for games and apps.
 
 ## Discover Litemint:
 
