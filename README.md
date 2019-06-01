@@ -16,7 +16,7 @@ Built on Stellar, Litemint offers a peer-to-peer and secure wallet to send, rece
 
 - Litemint accounts are standard, secure and compatible with all mainstream stellar services and hardware wallets. They implement mnemonic with [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), universal private key derivation with [SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md) and [SEP-0005](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md) and can be recovered and imported independently.
 
-- Leveraging the native anchor system of Stellar, the Litemint instant game platform is an exclusive Litemint feature (coming soon). Game creators can publish their games to reach out and sell in-app products to all Litemint users. All payments are peer-to-peer.
+- Leveraging the native anchor system of Stellar, Litemint instant game platform is an exclusive feature (coming soon). Game creators can publish their games to reach out and sell in-app products to all Litemint users. All payments are peer-to-peer.
 
 - Litemint allows seamless in-wallet deposits and withdrawals from partners by using federation and secure endpoints to bridge the Stellar network to external networks. If you operate a native token and wishes to discuss a possible integration, please contact us.
 
