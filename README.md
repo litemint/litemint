@@ -18,7 +18,7 @@ Built on Stellar, Litemint offers a peer-to-peer and secure wallet to send, rece
 
 - Litemint instant game platform and marketplace is our most anticipated upcoming feature. Play our games right in Litemint while using crypto for seamless, peer-to-peer and instant in-app purchases. Easily sell game collectibles on the marketplace.
 
-- We are breaking all barriers between currencies. Litemint is a global service to trade, send and receive any digital asset and crypto. Along with Stellar, we plan to support additional networks. Our next update will bring support for Binance DEX accounts and instant exchange. Keep posted!
+- We are breaking all barriers between currencies. Along with Stellar, we plan to support additional networks. Our next update will bring support for Binance DEX accounts and instant exchange. Keep posted!
 
 ## Building it Yourself
 
