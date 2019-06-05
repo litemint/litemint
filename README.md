@@ -14,11 +14,11 @@ Built on Stellar, Litemint offers a peer-to-peer and secure wallet to send, rece
 
 - Send, receive and trade any digital asset. Litemint is decentralized, secure and friendly.
 
-- Litemint accounts are standard, secure and compatible with all mainstream stellar services and hardware wallets. They implement mnemonic with [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), universal private key derivation with [SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md) and [SEP-0005](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md) and can be recovered and imported independently.
+- Your account keys always stay with you! Litemint accounts are standard, secure and compatible with all mainstream stellar services and hardware wallets. They implement mnemonic with [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), universal private key derivation with [SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md) and [SEP-0005](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md) and can be recovered and imported independently.
 
-- Leveraging the native anchor system of Stellar, Litemint instant game platform is an exclusive feature (coming soon). Game creators can publish their games to reach out and sell in-app products to all Litemint users. All payments are peer-to-peer.
+- Litemint instant game platform and marketplace is our most anticipated upcoming feature. Play our games right in Litemint while using crypto for seamless, peer-to-peer and instant in-app purchases. Easily sell game collectibles on the marketplace.
 
-- Litemint allows seamless in-wallet deposits and withdrawals from partners by using federation and secure endpoints to bridge the Stellar network to external networks. If you operate a native token and wishes to discuss a possible integration, please contact us.
+- We are breaking all barriers between currencies. Litemint is a global service to trade, send and receive any digital asset and crypto. Along with Stellar, we plan to support additional networks. Our next update will bring support for Binance DEX accounts and instant exchange. Keep posted!
 
 ## Building it Yourself
 
