@@ -340,7 +340,7 @@
                         if (this.hasTrustline(destAccount, asset)) {
                             stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
                                 .then(function (sourceAccount) {
-                                    let transaction = new StellarSdk.TransactionBuilder(sourceAccount)
+                                    let transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE })
                                         .addOperation(StellarSdk.Operation.payment({
                                             destination: destinationKey,
                                             asset: asset,
@@ -379,7 +379,7 @@
     namespace.Core.StellarNetwork.prototype.createAccount = function (destinationKey, amount, memo, cb) {
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then((sourceAccount) => {
-                const transaction = new StellarSdk.TransactionBuilder(sourceAccount)
+                const transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE })
                     .addOperation(StellarSdk.Operation.createAccount({
                         destination: destinationKey,
                         startingBalance: amount
@@ -413,7 +413,7 @@
     namespace.Core.StellarNetwork.prototype.setTrust = function (asset, cb) {
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
-                const transaction = new StellarSdk.TransactionBuilder(receiver)
+                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE })
                     .addOperation(StellarSdk.Operation.changeTrust({
                         asset: asset
                     }))
@@ -434,7 +434,7 @@
     namespace.Core.StellarNetwork.prototype.removeTrust = function (asset, cb) {
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
-                const transaction = new StellarSdk.TransactionBuilder(receiver)
+                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE })
                     .addOperation(StellarSdk.Operation.changeTrust({
                         asset: asset,
                         limit: "0" // Remove trustline.
@@ -511,8 +511,8 @@
 
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
-                const transaction = new StellarSdk.TransactionBuilder(receiver)
-                    .addOperation(StellarSdk.Operation.manageOffer(offer))
+                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE })
+                    .addOperation(StellarSdk.Operation.manageSellOffer(offer))
                     .setTimeout(60)
                     .build();
                 transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
@@ -529,10 +529,11 @@
 
     // Cancel offer.
     namespace.Core.StellarNetwork.prototype.cancelOffer = function (offer, cb) {
+
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
-                const transaction = new StellarSdk.TransactionBuilder(receiver)
-                    .addOperation(StellarSdk.Operation.manageOffer({
+                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE })
+                    .addOperation(StellarSdk.Operation.manageSellOffer({
                         selling: offer.baseAsset,
                         buying: offer.quoteAsset,
                         amount: "0",
