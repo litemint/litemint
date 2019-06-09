@@ -19,7 +19,7 @@
         "Confirm your PIN",
         "Sign In",
         "Next",
-        "The crypto world is limitless, explore it.",
+        "Put your crypto into play.",
         "Incorrect PIN. Please try again.",
         "Your PIN can be 4-12 digits.",
         "Make sure you choose one that's hard to guess.",
