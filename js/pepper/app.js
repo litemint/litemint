@@ -3760,7 +3760,10 @@
                 view.appMode = true;
             }
             if(!noloader){
-                $("#activity-loader").show();
+                // Temporary fix for iOS till new host is available on App Store.
+                if (!namespace.Pepper.isWebkitHost()) {
+                    $("#activity-loader").show();
+                }
             }
             if(!namespace.Pepper.isDesktop) {
                 $("#activity-view").css("top", namespace.Pepper.barHeight / pixelRatio + "px");
