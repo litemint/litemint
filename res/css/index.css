@@ -64,6 +64,11 @@ canvas {
     display: block;
 }
 
+iframe {
+    width: 100%;
+    height: 100%;
+}
+
 chart-container {
     position: absolute;
     display: block;
@@ -120,6 +125,23 @@ chart-container {
     display:none;
     width:720px;
     height:720px;
+}
+
+#activity-view {
+    position: absolute;
+    width:0;
+    height:0;
+    background-color: #fff;
+    overflow: hidden;
+    z-index: 9999;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+#activity-loader {
+    width: 100%;
+    height: 100%;
+    background:white;
+    background:url(../img/loader.gif) center center no-repeat;
 }
 
 .hidden {

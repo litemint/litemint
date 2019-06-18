@@ -43,7 +43,8 @@
             "Addresses": 8,
             "QuotesMenu": 9,
             "LastTrades": 10,
-            "LiveOrders": 11
+            "LiveOrders": 11,
+            "Leaderboard": 12
         },
 
         /**

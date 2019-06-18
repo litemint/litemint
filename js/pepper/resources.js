@@ -104,7 +104,15 @@
         "histImage": "hist.png",
         "stellarLightImage": "stellarlight.png",
         "marketDarkImage": "marketdark.png",
-        "add2Image": "add2.png"
+        "add2Image": "add2.png",
+        "gamepadImage": "gamepad.png",
+        "gamepadDarkImage": "gamepaddark.png",
+        "gamepadIconImage": "gamepadicon.png",
+        "playImage": "play.png",
+        "playDisabledImage": "playdisabled.png",
+        "scoreImage": "score.png",
+        "scoreDisabledImage": "scoredisabled.png",
+        "lmtAccountLightImage": "lmtaccountlight.png"
     };
 
 })(window.Litemint = window.Litemint || {});

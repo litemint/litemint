@@ -113,6 +113,51 @@
             }
         }, 1000 * namespace.config.marketDataInterval);
 
+        setInterval(() => {
+            retrieveLeaderboard();
+        }, 1000 * 5 * namespace.config.marketDataInterval);
+
+        // Download the store data.
+        namespace.Pepper.storeData = [];
+        const getStoreData = function () {
+            const loadStoreItem = function (item) {
+                const storeItem = {};
+                storeItem.image = new Image();
+                storeItem.image.onload = () => {
+                    storeItem.valid = true;
+                };
+                storeItem.image.onerror = () => {
+                    storeItem.valid = false;
+                };
+                storeItem.image.src = item.imageLink;            
+
+                if(item.headerLink){
+                    storeItem.headerImage = new Image();
+                    storeItem.headerImage.onload = () => {
+                        storeItem.validHeader = true;
+                    };
+                    storeItem.headerImage.onerror = () => {
+                        storeItem.validHeader = false;
+                    };
+                    storeItem.headerImage.src = item.headerLink;
+                }
+
+                storeItem.data = item;
+                namespace.Pepper.storeData.push(storeItem);
+            };
+
+            $.ajax(namespace.config.apiUrl + "/.store/all").then(
+                function success(response) {
+                    for (let i = 0; i < response.length; i += 1) {
+                        loadStoreItem(response[i]);
+                    }
+                },
+                function fail(data, status) {
+                }
+            );
+        };
+        getStoreData();
+
         // Download the network message.
         namespace.Pepper.networkMessage = namespace.config.version;
         const getmessage = function () {
@@ -259,9 +304,13 @@
         }
 
         view.needRedraw = true;
-
-        // Close the modal page if opened.
-        if (view.showModalPage) {
+        
+        if(view.appMode){
+            domShowApp(false);
+            return "stay";
+        }
+        else if (view.showModalPage) {
+            // Close the modal page if opened.
             domShowVerificationForm(false);
             domShowImportForm(false);
             domShowAssetPage(false);
@@ -330,6 +379,14 @@
             }
             else if (!down && view.book.offset > 0) {
                 view.book.offset -= view.unit;
+            }
+        }
+        else if (view.isActivityMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout && view.activityType === namespace.Pepper.ActivityType.Exchange) {
+            if (down && view.store.offset < view.store.maxOffset) {
+                view.store.offset += view.unit;
+            }
+            else if (!down && view.store.offset > 0) {
+                view.store.offset -= view.unit;
             }
         }
         else if (!view.isActivityMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout) {
@@ -530,7 +587,8 @@
                         }
 
                         if ((view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders
-                            || view.scroller.type === namespace.Pepper.ScrollerType.LastTrades)
+                            || view.scroller.type === namespace.Pepper.ScrollerType.LastTrades
+                            || view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard)
                             && point.x < view.scroller.x + view.scroller.width) {
                             selected = true;
                         }
@@ -729,6 +787,71 @@
         }
     }
 
+    function testStore(testType, point, list, isDown, callback) {
+        for (let i = 0; i < list.items.length; i += 1) {
+            const item = list.items[i];
+
+            let y = item.spot ? item.y - view.store.offset + view.unit * 0.2 < view.store.y ? view.store.y + view.store.offset - view.unit * 0.2 : item.y : item.y;
+            y = item.spot ? item.y + item.height - view.store.offset + view.unit * 0.2 > view.store.y + view.store.height ? view.store.y + view.store.height + view.store.offset - item.height : y : y;
+
+            switch (testType) {
+                case 0:
+                    item.selected = false;
+                    item.hover = false;
+                    item.hasClick = false;
+                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
+                        item.selected = true;
+                        item.hasClick = true;
+
+                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.2, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
+                            item.overPlayBtn = true;
+                        }
+
+                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.2, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)) {
+                            item.overScoreBtn = true;
+                        }
+                    }
+                    break;
+                case 1:
+                    item.hover = false;
+                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
+                        if (isDown) {
+                            if (item.hasClick) {
+                                item.selected = true;
+                                item.hover = true;
+
+                                if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.2, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
+                                    item.overPlayBtn = false;
+                                }
+
+                                if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.2, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)) {
+                                    item.overScoreBtn = false;
+                                }
+                            }
+                        }
+                        else {
+                            item.hover = true;
+                        }
+                    }
+                    else if (item.selected) {
+                        item.hasClick = false;
+                        item.selected = false;
+                    }
+                    break;
+                case 2:
+                    if (item.selected) {
+                        item.selected = false;
+                        item.hover = false;
+
+                        if (item.hasClick) {
+                            callback(item, i);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
     function testCarousel(testType, point, carousel, isDown, callback) {
         let clicked = false;
         for (let i = 0; i < carousel.items.length; i += 1) {
@@ -825,6 +948,22 @@
                 if (event.originalEvent.pointerId) {
                     console.log(err);
                 }
+            }
+        }
+    }
+
+    function loadStore () {
+        if (view) {        
+            view.resetStore();
+            view.store.items = [];
+            for (let i = 0; i < namespace.Pepper.storeData.length; i += 1) {
+                if (i === 0) { // Featured item takes 2 rows.
+                    view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
+                    view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
+                }
+                else{
+                    view.store.items.push({ "spot": (i == 1 ? true : false), "data": namespace.Pepper.storeData[i] });
+                }     
             }
         }
     }
@@ -1129,6 +1268,7 @@
                         || view.scroller.type === namespace.Pepper.ScrollerType.QuotesMenu
                         || view.scroller.type === namespace.Pepper.ScrollerType.LastTrades
                         || view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders
+                        || view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard
                         || view.scroller.type === namespace.Pepper.ScrollerType.AccountSettings)) {
                     if (view.scroller.type !== namespace.Pepper.ScrollerType.AccountSettings) {
                         view.scrollerEndTime = 0.3;
@@ -1199,7 +1339,7 @@
                     if (!clicked && !view.isActivityMode && !namespace.Core.currentAccount.watchOnly) {
                         clicked = testElement(0, point, view.tradeBtn, false);
                     }
-                    if (!clicked) {
+                    if (!clicked && !(view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange)) {
                         clicked = testElement(0, point, view.assetPicker, false);
                     }
                     if (!clicked && !view.isActivityMode) {
@@ -1230,6 +1370,9 @@
                     if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade && namespace.Core.currentAccount.offers.length) {
                         clicked = testElement(0, point, view.ordersBtn, false);
                     }
+                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange && !namespace.Core.currentAccount.friendlyAddress && !namespace.Core.currentAccount.nobackup) {
+                        clicked = testElement(0, point, view.gamerIdBtn, false);
+                    }
                     if (!clicked && !view.isActivityMode) {
                         clicked = testElement(0, point, view.filterBtn, false);
                     }
@@ -1249,8 +1392,7 @@
                         if (!view.isActivityMode
                             || view.activityType === namespace.Pepper.ActivityType.SelectSendAmount
                             || view.activityType === namespace.Pepper.ActivityType.Receive
-                            || view.activityType === namespace.Pepper.ActivityType.Trade
-                            || view.activityType === namespace.Pepper.ActivityType.Exchange) {
+                            || view.activityType === namespace.Pepper.ActivityType.Trade) {
                             view.carousel.downDistance = 0;
                             view.carousel.isDown = true;
                             view.carousel.canClick = true;
@@ -1290,6 +1432,19 @@
                                         view.book.scrollTime = 1.5;
                                         testBook(0, point, view.book, false);
                                     }
+                                }
+                            }
+                            else if (view.activityType === namespace.Pepper.ActivityType.Exchange) {
+                                testElement(0, point, view.promoBtn, false);
+                                if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
+                                    view.store.x, view.store.y, view.store.x + view.store.width, view.store.y + view.store.height)) {
+                                    view.store.downDistance = 0;
+                                    view.store.isDown = true;
+                                    view.store.canClick = true;
+                                    view.store.downTime = 0;
+                                    view.store.point = { "x": point.x, "y": point.y };
+                                    view.store.scrollTime = 1.5;
+                                    testStore(0, point, view.store, false);
                                 }
                             }
                         }
@@ -1456,6 +1611,30 @@
                                     }
                                     view.book.scrollTime = 1.5;
                                 }
+                            }
+                            else if (view.activityType === namespace.Pepper.ActivityType.Exchange) {
+                                testElement(1, point, view.promoBtn, isPointerDown);
+                                testStore(1, point, view.store, isPointerDown);
+                                testElement(1, point, view.gamerIdBtn, isPointerDown);
+                                if (view.store.maxOffset > 0) {
+                                    if (view.store.isDown && view.store.hasBar) {
+                                        let multiplier = 1;
+                                        if (view.store.offset < view.store.minOffset) {
+                                            multiplier = 0.35;
+                                        }
+                                        else if (view.store.offset > view.store.maxOffset) {
+                                            multiplier = 0.35;
+                                        }
+
+                                        if (Math.abs(view.store.point.y - point.y) > view.store.rowHeight * 0.05) {
+                                            view.store.offset += (view.store.point.y - point.y) * multiplier;
+                                            view.store.downDistance += view.store.point.y - point.y;
+                                            view.store.point = { "x": point.x, "y": point.y };
+                                            view.store.canClick = false;
+                                        }
+                                    }
+                                }
+                                view.store.scrollTime = 1.5;
                             }
                         }
                         else {
@@ -1970,6 +2149,9 @@
                                             namespace.Pepper.Tools.rationalPriceToDecimal(item.data.price)));
                                 }
                                 break;
+                            case namespace.Pepper.ScrollerType.Leaderboard:
+                                // TODO
+                                break;
                             case namespace.Pepper.ScrollerType.LiveOrders:
                                 if (!view.cancellingOffer) {
                                     for (let v = 0; v < view.scroller.items.length; v += 1) {
@@ -2396,6 +2578,14 @@
                         testElement(2, point, view.accountBtn, isPointerDown, function () {
                             if (!called) {
                                 called = true;
+
+                                if (!namespace.Core.currentAccount.friendlyAddress) {
+                                    namespace.Core.Account.ResolveAccount(namespace.Core.currentAccount.keys.publicKey(), "litemint.com", (addr) => {
+                                        namespace.Core.currentAccount.friendlyAddress = addr;
+                                        view.needRedraw = true;
+                                    });
+                                }
+
                                 view.closeSendPage(() => {
                                     domShowAddressForm(false);
                                     domShowTradeForm(false);
@@ -2801,6 +2991,82 @@
                                         namespace.Core.currentAccount.queuedOrder = null;
                                     }
                                 }
+                                else if (view.activityType === namespace.Pepper.ActivityType.Exchange) {
+                                    if (view.store.isDown && view.store.hasBar) {
+                                        if (Math.abs(view.store.point.y - point.y) > view.store.rowHeight * 0.2) {
+                                            view.store.offset += (view.store.point.y - point.y) * 0.6;
+                                            view.store.downDistance += view.store.point.y - point.y;
+                                            view.store.point = { "x": point.x, "y": point.y };
+                                        }
+                                    }
+                                    view.store.isDown = false;
+                                    view.store.scrollTime = 1.5;
+
+                                    testElement(2, point, view.promoBtn, isPointerDown, function () {
+                                        if (namespace.Pepper.storeData.length > 1 && namespace.Pepper.storeData[1].valid) {
+                                            loadGame(namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true);
+                                        }
+                                    });
+
+                                    
+                                    testElement(2, point, view.gamerIdBtn, isPointerDown, function () {
+                                        if (!namespace.Core.currentAccount.friendlyAddress &&
+                                            !namespace.Core.currentAccount.nobackup) {
+
+                                            view.closeSendPage(() => {
+                                                domShowAddressForm(false);
+                                                domShowTradeForm(false);
+                                            });
+
+                                            let nothingUpMySleeve = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+                                            let result = namespace.Core.currentAccount.keys.sign(nothingUpMySleeve);
+                                            let signedData = namespace.Core.Utils.bytesToHex(result);
+
+                                            if (namespace.Pepper.isDesktop) {
+                                                window.open("https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey(), "_blank");
+                                            }
+                                            else {
+                                                window.location = "https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey();
+                                            }
+                                        }
+                                    });
+
+                                    testStore(2, point, view.store, isPointerDown, function (item, index) {
+                                        if (view.store.canClick) {                             
+                                            if (!item.spot) {
+                                                if(index === 0 || index === 1){
+                                                    loadGame(item.data.data.link);
+                                                }
+                                                else if (item.overPlayBtn && item.data.data.gameid) {
+                                                    loadGame(item.data.data.link);
+                                                }
+                                                else if (item.overScoreBtn && item.data.data.gameid) {
+                                                    view.selectedGame = item.data;
+                                                    view.loadScroller(namespace.Pepper.ScrollerType.Leaderboard); 
+                                                    if(namespace.leaderBoardRequestId){
+                                                        clearTimeout(namespace.leaderBoardRequestId);
+                                                    }
+                                                    namespace.leaderBoardRequestId = setTimeout(() => { 
+                                                        namespace.leaderBoardRequestId = null;
+                                                        retrieveLeaderboard();                                                       
+                                                    }, 1000);
+                                                    
+                                                }
+                                            }
+
+                                            if (item.overPlayBtn) {
+                                                item.overPlayBtn = false;
+                                            }
+                                            if (item.overScoreBtn) {
+                                                item.overScoreBtn = false;
+                                            }
+                                        }
+                                        else {
+                                            item.overPlayBtn = false;
+                                            item.overScoreBtn = false;
+                                        }
+                                    });
+                                }
                             }
                             else {
 
@@ -3018,6 +3284,48 @@
         namespace.Core.currentAccount.queuedOrder = null;
     }
 
+    function loadGame(url, noloader){
+        if(namespace.Core.currentAccount.friendlyAddress){
+            if(url[url.length - 1] !== "/"){
+                url += "/";
+            }
+            url += "?name=" + namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "");
+        }
+        domShowApp(true, url, noloader);
+    }
+
+    function retrieveLeaderboard() {
+        if(view && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange 
+            && view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard
+            && view.selectedGame && view.selectedGame.data) {
+            let playerName = "";
+            if(namespace.Core.currentAccount.friendlyAddress){
+                playerName = namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "");
+            }
+            $.post(namespace.config.apiUrl + "/.game/leader",
+            {
+                "gameid": view.selectedGame.data.gameid,
+                "playername": playerName
+            })
+            .done(function (response) {
+                if (response) {
+                    console.log(response);
+                    view.scroller.items = [];
+                    for(let i= 0; i <response.top.length; i += 1){
+                        view.scroller.items.push({
+                            "id": i,
+                            "data": response.top[i],
+                            "count": response.count
+                        });
+                    }
+                    view.needRedraw = true;
+                }
+            })
+            .fail(function (xhr, status, error) {
+            });
+        }
+    }
+
     function prepareOrder(isBuy) {
         const base = view.getActiveCarouselItem().asset;
         const quote = view.quoteAssets[base.code + base.issuer];
@@ -3216,6 +3524,8 @@
 
         view.resetBook();
 
+        loadStore();
+
         namespace.Pepper.orderBooks = { "skipCount": 0, "oldBook": "" };
 
         stellarNet.loadDefaultAssets();
@@ -3279,17 +3589,11 @@
 
     function showMarketplace() {
 
-        if (window.Android) {
-            window.Android.showToast(namespace.Pepper.Resources.localeText[160]);
-        }
-        else if (namespace.Pepper.isWebkitHost()) {
-            webkit.messageHandlers.callbackHandler.postMessage({
-                "name": "showToast",
-                "message": namespace.Pepper.Resources.localeText[160]
+        if (!namespace.Core.currentAccount.friendlyAddress) {
+            namespace.Core.Account.ResolveAccount(namespace.Core.currentAccount.keys.publicKey(), "litemint.com", (addr) => {
+                namespace.Core.currentAccount.friendlyAddress = addr;
+                view.needRedraw = true;
             });
-        }
-        else if (parent) {
-            parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[160], "*");
         }
 
         view.activityType = namespace.Pepper.ActivityType.Exchange;
@@ -3352,6 +3656,8 @@
             view.resetPinPage(signUp);
         }
         new namespace.Core.StellarNetwork().detachAccount();
+
+        domShowApp(false);
     }
 
     function domUpdate() {
@@ -3445,6 +3751,44 @@
                 }
             }
             view.needRedraw = true;
+        }
+    }
+
+    function domShowApp(show, url, noloader) {
+        if(show) {
+            if (view) {
+                view.appMode = true;
+            }
+            if(!noloader){
+                $("#activity-loader").show();
+            }
+            if(!namespace.Pepper.isDesktop) {
+                $("#activity-view").css("top", namespace.Pepper.barHeight / pixelRatio + "px");
+                $("#activity-view").css("height", ($(document).height() - namespace.Pepper.barHeight / pixelRatio)  + "px");
+                $("#activity-view").animate({
+                    width: "100%"
+                }, 350, "swing", function () {
+                    $("#activity-frame").attr("src",url);
+                });
+            }
+            else {
+                $("#activity-frame").attr("src",url);
+            }
+        }
+        else {
+            if (view) {
+                view.appMode = false;
+            }
+            if(!namespace.Pepper.isDesktop) {
+                $("#activity-frame").attr("src","");
+                $("#activity-view").animate({
+                    width: "0%"
+                }, 350, "swing", function () {
+                });  
+            }
+            else {
+                $("#activity-frame").attr("src","https://dashboard.litemint.com");
+            }
         }
     }
 
@@ -3918,5 +4262,34 @@
             parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
         }
     };
+
+    window.addEventListener("message", function (event) {
+        if (typeof event.data === "string") {
+            if (event.data === "litemint_app_session_start") {
+                if (window.Android) {
+                    if(window.Android.showAd){
+                        window.Android.showAd();
+                    }
+                }
+                else if(namespace.Pepper.isDesktop) {
+                    this.setTimeout(() => {requestOutstreamAds(true);}, 100);       
+                }
+            }
+            else if (event.data === "litemint_app_session_end") {
+                domShowApp(false);
+                if (window.Android) {
+                    if(window.Android.showAd){
+                        window.Android.showAd();
+                    }
+                }
+                else if(namespace.Pepper.isDesktop) {
+                    this.setTimeout(() => {requestOutstreamAds(true);}, 100); 
+                }
+            }
+            else if (event.data === "litemint_app_ready") {
+                $('#activity-loader').fadeOut();
+            }
+        }
+    });
 
 })(window.Litemint = window.Litemint || {});

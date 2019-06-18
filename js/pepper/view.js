@@ -133,11 +133,14 @@
         this.modalQrBtn = new namespace.Pepper.HudElement();
         this.modalPasswordBtn = new namespace.Pepper.HudElement();
         this.activityLabel = new namespace.Pepper.HudElement();
+        this.promoBtn = new namespace.Pepper.HudElement();
+        this.gamerIdBtn = new namespace.Pepper.HudElement();
         this.scroller = namespace.Pepper.createScrollElement();
         this.carousel = namespace.Pepper.createScrollElement();
         this.carousel.oldActive = 0;
         this.list = namespace.Pepper.createScrollElement();
         this.book = namespace.Pepper.createScrollElement();
+        this.store = namespace.Pepper.createScrollElement();
         this.resize(width, height);
         this.setupLanguage(languageId, cb);
     };
@@ -340,6 +343,15 @@
             case namespace.Pepper.ScrollerType.LiveOrders:
                 this.scroller.rowHeight = this.unit * 1.3;
                 this.scroller.headerHeight = this.unit * 6.17;
+                this.scroller.x = this.viewport.x;
+                this.scroller.y = this.viewport.y + this.scroller.headerHeight;
+                this.scroller.width = this.viewport.width - this.unit * 0.3;
+                this.scroller.height = this.viewport.height - this.scroller.headerHeight - this.unit * 0.3;
+                this.scroller.translatePoint = { "x": this.quoteBtn.x + this.quoteBtn.width, "y": this.quoteBtn.y + this.unit * 0.7 };
+                break;
+            case namespace.Pepper.ScrollerType.Leaderboard:
+                this.scroller.rowHeight = this.unit * 1.3;
+                this.scroller.headerHeight = this.unit * 3.17;
                 this.scroller.x = this.viewport.x;
                 this.scroller.y = this.viewport.y + this.scroller.headerHeight;
                 this.scroller.width = this.viewport.width - this.unit * 0.3;
@@ -592,6 +604,7 @@
         this.updateTabs(elapsed);
         this.updateList(elapsed);
         this.updateBook(elapsed);
+        this.updateStore(elapsed);
 
         this.needRedraw |= this.menuBtn.update(elapsed);
         this.needRedraw |= this.accountBtn.update(elapsed);
@@ -1311,6 +1324,139 @@
         }
     };
 
+    // Update the store.
+    namespace.Pepper.View.prototype.updateStore = function (elapsed) {
+        this.store.startTime = updateTimer(elapsed, this.store.startTime);
+
+        this.needRedraw |=this.promoBtn.update(elapsed);
+        this.needRedraw |= this.gamerIdBtn.update(elapsed);
+
+        this.store.headerHeight = this.unit * 2.39;
+        this.store.rowHeight = this.unit * 1.5;
+        this.store.x = this.viewport.x;
+        this.store.y = this.viewport.y + this.unit * 4 + this.store.headerHeight;
+        this.store.width = this.viewport.width;
+        this.store.height = this.viewport.height - (this.store.headerHeight + this.unit * 5.2);
+
+        if (!this.store.isDown) {
+            this.store.scrollTime = updateTimer(elapsed, this.store.scrollTime, 2);
+        }
+
+        this.store.spotOffset = 0;
+        this.store.minOffset = 0;
+        this.store.maxOffset = 0;
+        let x = this.store.x;
+        let y = this.store.y;
+        this.store.maxOffset = this.store.y - (this.unit * 4 + this.store.headerHeight + namespace.Pepper.barHeight);
+
+        for (let i = 0; i < this.store.items.length; i += 1) {
+            let item = this.store.items[i];
+            item.x = x;
+            item.y = y;
+            item.width = this.store.width;
+            item.height = this.store.rowHeight;
+            this.store.maxOffset += item.height;
+            y += item.height;
+
+            if (item.spot && !this.store.isDown) {
+                this.store.spotOffset = Math.max(0, this.store.maxOffset - item.height * 0.5 - this.store.height * 0.5);
+            }
+        }
+
+        if (this.store.adjustOffset) {
+            this.store.adjustOffset = false;
+            this.store.offset = this.store.spotOffset;
+        }
+
+        this.store.hasBar = false;
+        if (this.store.maxOffset > this.store.height) {
+            this.store.hasBar = true;
+            this.store.barSize = this.store.height * this.store.height / this.store.maxOffset;
+        }
+        else {
+            this.store.offset = 0;
+        }
+
+        this.store.maxOffset -= this.store.height;
+
+        if (this.store.maxOffset > 0) {
+            if (!this.store.isDown) {
+                if (this.store.wasDown) {
+                    this.store.wasDown = false;
+                }
+                if (this.store.downDistance !== 0) {
+                    const threshold = 0.3;
+                    const velocity = Math.max(0, threshold - this.store.downTime) * 1.5;
+                    if (velocity) {
+                        this.store.offset += this.store.downDistance * velocity;
+                        this.store.downTime += elapsed * 0.15;
+
+                        if (this.store.offset < this.store.minOffset - this.store.rowHeight * 1.3) {
+                            this.store.offset = this.store.minOffset - this.store.rowHeight * 1.3;
+                            this.store.downTime = threshold;
+                        }
+                        else if (this.store.offset > this.store.maxOffset + this.store.rowHeight * 1.3) {
+                            this.store.offset = this.store.maxOffset + this.store.rowHeight * 1.3;
+                            this.store.downTime = threshold;
+                        }
+                        this.needRedraw = true;
+                    }
+
+                    if (this.store.downTime >= threshold) {
+                        this.store.downDistance = 0;
+                    }
+                }
+            }
+
+            if (!this.store.isDown) {
+                if (this.store.offset < this.store.minOffset) {
+                    this.store.offset += this.store.rowHeight * elapsed * 13;
+                    if (this.store.offset > this.store.minOffset) {
+                        this.store.offset = this.store.minOffset;
+                    }
+                    this.needRedraw = true;
+                }
+                else if (this.store.offset > this.store.maxOffset) {
+                    this.store.offset -= this.store.rowHeight * elapsed * 13;
+                    if (this.store.offset < this.store.maxOffset) {
+                        this.store.offset = this.store.maxOffset;
+                    }
+                    this.needRedraw = true;
+                }
+            }
+            else {
+                this.store.wasDown = true;
+                this.store.downTime += elapsed;
+
+                if (this.store.offset < this.store.minOffset - this.store.rowHeight * 1.3) {
+                    this.store.offset = this.store.minOffset - this.store.rowHeight * 1.3;
+                }
+                else if (this.store.offset > this.store.maxOffset + this.store.rowHeight * 1.3) {
+                    this.store.offset = this.store.maxOffset + this.store.rowHeight * 1.3;
+                }
+            }
+        }
+
+        this.promoBtn.width = this.viewport.width;
+        this.promoBtn.height = this.store.headerHeight - this.unit * 0.52;
+        this.promoBtn.x = this.viewport.x;
+        this.promoBtn.y = this.store.y - this.store.headerHeight + this.unit * 0.3;
+        this.promoBtn.tx = this.promoBtn.x;
+        this.promoBtn.ty = this.promoBtn.y;
+        this.promoBtn.spawned = false;
+
+        this.gamerIdBtn.width = this.store.width - this.unit * 0.2;
+        this.gamerIdBtn.height = this.unit * 1;
+        this.gamerIdBtn.tx = this.store.x + this.unit * 0.1;
+        this.gamerIdBtn.ty = this.store.y + this.store.height + this.unit * 0.1;
+        if (this.gamerIdBtn.spawned) {
+            this.gamerIdBtn.x = this.gamerIdBtn.tx;
+            this.gamerIdBtn.y = this.gamerIdBtn.ty;
+            this.gamerIdBtn.spawned = false;
+            this.gamerIdBtn.speed = 7;
+        }
+    };
+
     // Update the numpad.
     namespace.Pepper.View.prototype.updateNumPad = function (elapsed) {
         this.needRedraw |=this.numPadCloseBtn.update(elapsed);
@@ -1785,6 +1931,7 @@
         context.save();
 
         switch (this.scroller.type) {
+            case namespace.Pepper.ScrollerType.Leaderboard:
             case namespace.Pepper.ScrollerType.LiveOrders:
             case namespace.Pepper.ScrollerType.LastTrades:
                 context.translate(-this.scrollerTime * this.viewport.width * 6, 0);
@@ -1809,6 +1956,7 @@
         context.globalAlpha = (0.25 - this.scrollerTime) * 4 * context.globalAlpha;
         if (this.scrollerEndTime > 0) {
             switch (this.scroller.type) {
+                case namespace.Pepper.ScrollerType.Leaderboard:
                 case namespace.Pepper.ScrollerType.LiveOrders:
                 case namespace.Pepper.ScrollerType.LastTrades:
                     context.translate(-(0.3 - this.scrollerEndTime) * this.width * 5, 0);
@@ -1845,6 +1993,28 @@
                 context.shadowBlur = this.unit * 0.3;
                 this.roundRect(context, this.scroller.x, this.scroller.y, this.scroller.width, this.scroller.height, this.unit * 0.2, "rgb(255, 255, 255)");
                 context.restore();
+                break;
+            case namespace.Pepper.ScrollerType.Leaderboard:
+                if(this.selectedGame){
+                    this.roundRect(context, this.scroller.x, this.scroller.y - this.unit * 1.5, this.scroller.width, this.unit * 2, this.unit * 0.2, namespace.Pepper.Resources.primaryColor);
+                    this.roundRect(context, this.scroller.x, this.scroller.y - this.unit * 1.5, this.scroller.width, this.unit * 2, this.unit * 0.2, "rgba(36, 41, 46, 0.2)");
+                    context.drawImage(this.selectedGame.image, this.scroller.x + this.unit * 0.3, this.scroller.y - this.unit * 1.4, this.unit * 1.3, this.unit * 1.3);
+
+                    context.textAlign = "left";
+                    context.font = this.getFont("Roboto-Bold");
+                    this.drawText(context, this.scroller.x + this.unit * 1.8, this.scroller.y - this.unit * 0.92, this.selectedGame.data.name, "rgb(255, 255, 255)", 0.9);
+                    let count = "0";
+                    if(view.scroller.items.length){
+                        count = view.scroller.items[0].count;
+                    }
+                    context.textAlign = "left";
+                    context.font = this.getFont("Roboto-Regular");
+                    this.drawText(context, this.scroller.x + this.unit * 1.8, this.scroller.y - this.unit * 0.4, namespace.Pepper.Resources.localeText[187] + " " + count, "rgba(255, 255, 255, 0.7)", 0.7);
+
+                    context.textAlign = "right";
+                    context.font = this.getFont("Roboto-Regular");
+                    this.drawText(context, this.scroller.x + this.scroller.width - this.unit * 0.3, this.scroller.y - this.unit * 0.6, namespace.Pepper.Resources.localeText[185], "rgba(255, 255, 255, 0.6)", 0.8);
+                }
                 break;
             case namespace.Pepper.ScrollerType.LiveOrders:
                 context.save();
@@ -1887,6 +2057,7 @@
         context.save();
         context.beginPath();
         switch (this.scroller.type) {
+            case namespace.Pepper.ScrollerType.Leaderboard:
             case namespace.Pepper.ScrollerType.LiveOrders:
             case namespace.Pepper.ScrollerType.LastTrades:
                 this.roundRect(context, this.scroller.x - this.unit * 0.2, this.scroller.y, this.scroller.width + this.unit * 0.2, this.scroller.height, this.unit * 0.2, "rgb(255, 255, 255)");
@@ -1914,6 +2085,11 @@
             case namespace.Pepper.ScrollerType.Assets:
             case namespace.Pepper.ScrollerType.Currencies:
                 context.textAlign = "center";
+                break;
+            case namespace.Pepper.ScrollerType.Leaderboard:
+                if(!this.scroller.items.length){
+                    this.drawLoader(context, this.scroller.x + this.scroller.width * 0.5, this.scroller.y + this.scroller.height * 0.5, this.unit * 1.2, true);
+                }
                 break;
             default:
                 break;
@@ -2068,6 +2244,22 @@
                         context.restore();
                     }
                 }
+                else if (this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard) {
+                    if (item.data) {
+                        let isMe = (namespace.Core.currentAccount.friendlyAddress && item.data.name === namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "")) ? true : false;
+                        if(isMe){
+                            context.fillStyle = "rgb(36, 41, 46)";
+                            context.fillRect(item.x, item.y, item.width, item.height);
+                        }
+                        context.font =  isMe ? this.getFont("Roboto-Bold") : this.getFont("Roboto-Medium");
+                        context.textAlign = "left";
+                        context.drawImage(isMe ? namespace.Pepper.Resources.lmtAccountLightImage : namespace.Pepper.Resources.lmtAccountImage, item.x + this.unit * 0.3, item.y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        this.drawText(context, item.x + item.height * 1.2, item.y + item.height * 0.5, item.data.name, isMe ? "rgb(255, 255, 255)" : "rgb(36, 41, 46)", 0.7);
+                        context.textAlign = "right";
+                        context.font = this.getFont("Roboto-Bold");
+                        this.drawText(context, item.x + item.width - item.height * 0.5, item.y + item.height * 0.5, item.data.score, isMe ? "rgb(23, 156, 75)" : "rgb(36, 41, 46)", 0.9);
+                    }         
+                }
                 else if (this.scroller.type === namespace.Pepper.ScrollerType.LastTrades) {
                     if (item.data) {
 
@@ -2205,6 +2397,7 @@
             && this.scroller.type !== namespace.Pepper.ScrollerType.AssetsMenu
             && this.scroller.type !== namespace.Pepper.ScrollerType.QuotesMenu
             && this.scroller.type !== namespace.Pepper.ScrollerType.LastTrades
+            && this.scroller.type !== namespace.Pepper.ScrollerType.Leaderboard
             && this.scroller.type !== namespace.Pepper.ScrollerType.LiveOrders
             && this.scroller.type !== namespace.Pepper.ScrollerType.FilterMenu) {
             context.save();
@@ -2237,6 +2430,7 @@
                 case namespace.Pepper.ScrollerType.QuotesMenu:
                 case namespace.Pepper.ScrollerType.LastTrades:
                 case namespace.Pepper.ScrollerType.LiveOrders:
+                case namespace.Pepper.ScrollerType.Leaderboard:
                     break;
             }
 
@@ -2601,7 +2795,7 @@
             if (this.marketBtn.hover || this.marketBtn.selected) {
                 context.globalAlpha = 0.7 * context.globalAlpha;
             }
-            context.drawImage(namespace.Pepper.Resources.marketImage, this.marketBtn.x, this.marketBtn.y, this.marketBtn.width, this.marketBtn.width);
+            context.drawImage(namespace.Pepper.Resources.gamepadImage, this.marketBtn.x, this.marketBtn.y, this.marketBtn.width, this.marketBtn.width);
             context.restore();
         }
 
@@ -2616,7 +2810,7 @@
                 labelText = namespace.Pepper.Resources.localeText[46];
                 break;
             case namespace.Pepper.ActivityType.Exchange:
-                labelText = namespace.Pepper.Resources.localeText[157];
+                labelText = namespace.Pepper.Resources.localeText[180];
                 break;
         }
         context.font = this.getFont("Roboto-Medium");
@@ -2625,7 +2819,7 @@
         context.restore();
 
         if (!this.account.backup && !namespace.Core.currentAccount.nobackup) {
-            context.drawImage(namespace.Pepper.Resources.warningImage, this.accountBtn.x + this.accountBtn.width * 0.5, this.accountBtn.y, this.accountBtn.width * 0.6, this.accountBtn.width * 0.6);
+            context.drawImage(namespace.Pepper.Resources.warningImage, this.accountBtn.x + this.accountBtn.width * 0.45, this.accountBtn.y, this.accountBtn.width * 0.5, this.accountBtn.width * 0.5);
         }
 
         if (this.isActivityMode || this.sendFormEndTime) {
@@ -2775,8 +2969,8 @@
                         this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[91], "rgb(36, 41, 46)", 0.8);
                         break;
                     case 1:
-                        context.drawImage(namespace.Pepper.Resources.marketDarkImage, element.x + element.height * 0.6, element.y + element.height * 0.26, element.height * 0.43, element.height * 0.43);
-                        this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[157], "rgb(36, 41, 46)", 0.8);
+                        context.drawImage(namespace.Pepper.Resources.gamepadDarkImage, element.x + element.height * 0.6, element.y + element.height * 0.26, element.height * 0.45, element.height * 0.45);
+                        this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[180], "rgb(36, 41, 46)", 0.8);
                         break;
                     case 2:
                         context.fillStyle = "rgba(36, 41, 46, 0.16)";
@@ -2875,6 +3069,18 @@
         context.restore();
 
         context.restore();
+
+
+        
+        if (this.isActivityMode && this.activityType === namespace.Pepper.ActivityType.Exchange) {
+            context.save();
+            context.fillStyle = namespace.Pepper.Resources.primaryColor;
+            context.fillRect(this.carousel.x - this.unit * 5, this.carousel.y - this.carousel.headerHeight - namespace.Pepper.barHeight, this.carousel.width + this.unit * 5, this.carousel.height + this.unit * 0.5 + this.carousel.headerHeight + namespace.Pepper.barHeight);
+            if (namespace.Pepper.storeData.length && namespace.Pepper.storeData[0].validHeader) {
+                context.drawImage(namespace.Pepper.storeData[0].headerImage, this.store.x, namespace.Pepper.barHeight, this.store.width, this.carousel.height + this.unit * 0.5 + this.carousel.headerHeight);
+            }
+            context.restore();
+        }
     };
 
     // Draw carousel item.
@@ -3507,7 +3713,7 @@
         this.drawText(context, this.ordersBtn.x + this.ordersBtn.width * 0.5, this.ordersBtn.y + this.ordersBtn.height * 0.5, namespace.Pepper.Resources.localeText[170], namespace.Core.currentAccount.offers.length ? "rgba(255, 255, 255)" : "rgba(36, 41, 46, 0.16)", 0.65);
         context.restore();
 
-        if (this.showScroller && (this.scroller.type === namespace.Pepper.ScrollerType.LastTrades || this.scroller.type === namespace.Pepper.ScrollerType.LiveOrders)) {
+        if (this.showScroller && (this.scroller.type === namespace.Pepper.ScrollerType.LastTrades || this.scroller.type === namespace.Pepper.ScrollerType.LiveOrders || this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard)) {
             context.save();
             let alpha = (0.25 - this.scrollerTime) * 4 * context.globalAlpha;
             if (this.scrollerEndTime) {
@@ -3519,6 +3725,106 @@
             }
             context.restore();
         }
+
+        context.restore();
+    };
+
+    // Draw the store.
+    namespace.Pepper.View.prototype.drawStore = function (context) {
+        context.save();
+
+        if (this.store.startTime > 0.25) {
+            const startTime = this.store.startTime - 0.25;
+            context.translate(0, -startTime * this.unit * 10);
+        }
+        context.globalAlpha = 1 - this.store.startTime * 2;
+
+        context.textAlign = "left";
+        context.font = this.getFont("Roboto-Regular");
+
+        context.save();
+        context.beginPath();
+        context.rect(this.store.x, this.store.y - this.unit * 0.2, this.store.width, this.store.height + this.unit * 0.2);
+        context.clip();
+
+        context.save();
+        context.translate(0, -this.store.offset);
+        let spotItem;
+        for (let i = 0; i < this.store.items.length; i += 1) {
+            let item = this.store.items[i];
+            if (item.y - this.store.offset + item.height > this.store.y
+                && item.y - this.store.offset - item.height < this.store.y + this.store.height || item.spot || i === 0) {
+                if (!item.spot) {
+                    this.drawStoreItem(context, item, i);
+                }
+                else {
+                    spotItem = item;
+                }
+            }
+        }
+
+        if (spotItem) {
+            this.drawStoreItem(context, spotItem, this.store.items.length);
+        }
+
+        context.restore();
+
+        context.fillStyle = "rgba(36, 41, 46, 0.12)";
+        //context.fillRect(this.store.x, this.store.y - this.unit * 0.2, this.store.width, this.unit * 0.03);
+
+        if (this.store.hasBar && (this.store.isDown || this.store.scrollTime)) {
+            const barwidth = this.unit * 0.1;
+            const alpha = context.globalAlpha;
+            const limitedOffset = Math.max(0, Math.min(this.store.maxOffset, this.store.offset));
+            const offset = limitedOffset * this.store.height / (this.store.maxOffset + this.store.height);
+            context.globalAlpha = Math.min(1, this.store.scrollTime) * alpha;
+            this.roundRect(context, this.store.x - barwidth + this.store.width, this.store.y, barwidth, this.store.height, barwidth * 0.5, "rgba(0, 0, 0, 0.1)");
+            this.roundRect(context, this.store.x - barwidth + this.store.width, this.store.y + offset, barwidth, this.store.barSize, barwidth * 0.5, "rgba(0, 0, 0, 0.3)");
+            context.globalAlpha = alpha;
+        }
+
+        context.restore();
+
+        
+        context.save();
+        if (this.promoBtn.hover || this.promoBtn.selected) {
+            context.globalAlpha = 0.7 * context.globalAlpha;
+        }
+        if (namespace.Pepper.storeData.length > 1 && namespace.Pepper.storeData[1].valid) {
+            context.drawImage(namespace.Pepper.storeData[1].image, this.promoBtn.x, this.promoBtn.y, this.promoBtn.width, this.promoBtn.height);
+        }
+        context.restore();
+        
+
+        // Loading.
+        if (!this.store.items.length) {
+            context.font = this.getFont("Roboto-Regular");
+            context.textAlign = "center";
+            this.drawText(context, this.store.x + this.store.width * 0.5, this.store.y + this.store.height * 0.31, namespace.Pepper.Resources.localeText[41], "rgba(36, 41, 46, 1)", 0.8);
+            this.drawLoader(context, this.store.x + this.store.width * 0.5, this.store.y + this.store.height * 0.4, this.unit, true);
+        }
+
+        context.save();
+        context.fillStyle = "rgb(255, 255, 255)";
+        context.fillRect(this.store.x, this.store.y + this.store.height, this.store.width, this.unit * 2);
+        context.fillStyle = "rgb(36, 41, 46, 0.18)";
+        context.fillRect(this.store.x, this.store.y + this.store.height, this.store.width, this.unit * 0.02);
+        context.restore();
+
+
+        this.roundRect(context, this.gamerIdBtn.x, this.gamerIdBtn.y, this.gamerIdBtn.width, this.gamerIdBtn.height, this.unit * 0.18, namespace.Core.currentAccount.friendlyAddress ? "rgb(255, 255, 255)" : "#db5365");
+        context.save();
+        context.font = this.getFont(namespace.Core.currentAccount.friendlyAddress ? "Roboto-Bold" : "Roboto-Regular");
+        if (this.gamerIdBtn.hover || this.gamerIdBtn.selected) {
+            context.globalAlpha *= 0.6;
+        }
+        context.drawImage(namespace.Core.currentAccount.friendlyAddress ? 
+            namespace.Pepper.Resources.lmtAccountImage : 
+            namespace.Pepper.Resources.lmtAccountLightImage, this.gamerIdBtn.x + this.unit * 0.2, this.gamerIdBtn.y + this.unit * 0.05, this.unit * 0.9, this.unit * 0.9);
+        this.drawText(context, this.gamerIdBtn.x + this.unit * 1.2, this.gamerIdBtn.y + this.gamerIdBtn.height * 0.5, 
+            namespace.Core.currentAccount.friendlyAddress ? namespace.Core.currentAccount.friendlyAddress : namespace.Pepper.Resources.localeText[186], 
+            namespace.Core.currentAccount.friendlyAddress ? "rgb(36, 41, 46)" : "rgb(255, 255, 255)", 0.65);
+        context.restore();
 
         context.restore();
     };
@@ -4045,6 +4351,89 @@
         context.restore();
     };
 
+    // Draw a store item.
+    namespace.Pepper.View.prototype.drawStoreItem = function (context, item, index) {
+        if(index === 1){
+            return;
+        }
+        context.save();
+
+        let y = item.spot ? item.y - this.store.offset + this.unit * 0.2 < this.store.y ? this.store.y + this.store.offset - this.unit * 0.2 : item.y : item.y;
+        y = item.spot ? item.y + item.height - this.store.offset + this.unit * 0.2 > this.store.y + this.store.height ? this.store.y + this.store.height + this.store.offset - item.height : y : y;
+
+        context.textAlign = "left";
+
+        context.fillStyle = item.spot ? "rgb(36, 41, 46)" : "rgb(255, 255, 255)";
+        context.fillRect(item.x, y, item.width, item.height);
+        context.fillStyle = item.selected || item.hover ? "rgba(36, 41, 46, 0.07)" : "rgba(255, 255, 255, 0)";
+        context.fillRect(item.x, y, item.width, item.height);
+
+        context.font = this.getFont("Roboto-Regular");
+
+        const base = this.getActiveCarouselItem().asset;
+        const quote = this.quoteAssets[base.code + base.issuer] || base;
+
+        if (item.spot) {
+            context.textAlign = "left";
+            context.font = this.getFont("Roboto-Medium");
+            this.drawText(context, item.x + this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Resources.localeText[181], "rgb(255, 255, 255)", 0.7);
+            context.textAlign = "center";
+            this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.5, namespace.Pepper.Resources.localeText[182], "rgba(255, 255, 255, 0.3)", 0.7);
+            context.font = this.getFont("Roboto-Light");
+            this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
+            context.font = this.getFont("Roboto-Medium");
+            context.textAlign = "right";
+            this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Resources.localeText[183], "rgba(255, 255, 255, 0.3)", 0.7);
+            context.font = this.getFont("Roboto-Light");
+            this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
+        }
+        else {
+            if(index === 0) {
+                if (item.data.valid) {
+                    if (item.selected || item.hover || this.store.items[index + 1].selected || this.store.items[index + 1].hover) {
+                        context.globalAlpha = 0.7 * context.globalAlpha;
+                    }
+                    context.drawImage(item.data.image, item.x, y - this.unit * 0.2, item.width, item.height * 2 + this.unit * 0.2);
+                }
+            }
+            else{
+                if (item.data.valid) {
+                    context.drawImage(item.data.image, item.x + this.unit * 0.3, y + this.unit * 0.1, item.height - this.unit * 0.2, item.height - this.unit * 0.2);
+                }
+                else{
+                    context.save();
+                    context.globalAlpha = 0.5;
+                    context.drawImage(namespace.Pepper.Resources.gamepadIconImage, item.x + this.unit * 0.3, y + this.unit * 0.1, item.height - this.unit * 0.2, item.height - this.unit * 0.2);
+                    context.restore();
+                }
+
+                context.textAlign = "left";
+                context.font = this.getFont("Roboto-Medium");
+                if(item.data.data.name) {
+                    this.drawText(context, item.x + this.unit * 2, y + item.height * 0.5, item.data.data.name + (item.data.data.gameid ? "" : " (" + namespace.Pepper.Resources.localeText[184] + ")"), item.data.data.gameid ? "rgb(36, 41, 46)" : "rgba(36, 41, 46, 0.3)", 0.7);
+                
+                    context.save();
+                    if (item.overPlayBtn || !item.data.data.gameid) {
+                        context.globalAlpha = 0.5;
+                    }
+                    context.font = this.getFont("Roboto-Regular");
+                    context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.playImage : namespace.Pepper.Resources.playDisabledImage, item.x + item.width - item.height * 1.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                    context.restore();   
+                    
+                    context.save();
+                    if (item.overScoreBtn || !item.data.data.gameid) {
+                        context.globalAlpha = 0.5;
+                    }
+                    context.font = this.getFont("Roboto-Regular");
+                    context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.scoreImage : namespace.Pepper.Resources.scoreDisabledImage, item.x + item.width - item.height * 2.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                    context.restore();  
+                }
+            }
+        }
+
+        context.restore();
+    };
+
     // Draw the numpad.
     namespace.Pepper.View.prototype.drawNumPad = function (context) {
         const offset = this.sendFormEndTime ? this.unit * 4 - this.unit * 4 * this.sendFormEndTime * 2 : this.isActivityMode ? this.sendFormOffset : 0;
@@ -4327,10 +4716,13 @@
             this.drawBook(context);
         }
         else if (this.activityType === namespace.Pepper.ActivityType.Exchange) {
+
+            this.drawStore(context);
+
             if (namespace.Pepper.Resources.sponsors[2]) {
                 let middleY = this.carousel.y + this.carousel.height + this.unit * 0.1 + (this.numPad[0].y - (this.carousel.y + this.carousel.height + this.unit * 0.1)) * 0.5 - this.unit * 0.7;
                 let size = Math.min(this.numPadArea.width, this.numPadSendBtn.y - middleY - this.unit);
-                context.drawImage(namespace.Pepper.Resources.sponsors[2].image, this.numPadSendBtn.x + this.numPadSendBtn.width * 0.5 - size * 0.5, middleY, size, size);
+               // context.drawImage(namespace.Pepper.Resources.sponsors[2].image, this.numPadSendBtn.x + this.numPadSendBtn.width * 0.5 - size * 0.5, middleY, size, size);
             }
         }
 
@@ -4596,6 +4988,10 @@
                 this.showScroller = true;
                 this.scrollerTime = 0.25;
                 break;
+            case namespace.Pepper.ScrollerType.Leaderboard:
+                this.showScroller = true;
+                this.scrollerTime = 0.25;
+                break;
             case namespace.Pepper.ScrollerType.LiveOrders:
                 for (let i = 0; i < namespace.Core.currentAccount.offers.length; i += 1) {
                     this.scroller.items.push({
@@ -4698,6 +5094,20 @@
         this.book.spotOffset = 0;
         this.book.adjustOffset = true;
         this.book.items = [];
+    };
+
+    // Reset the store.
+    namespace.Pepper.View.prototype.resetStore = function (type) {
+        this.store.type = type;
+        this.store.offset = 0;
+        this.store.maxOffset = 0;
+        this.store.minOffset = 0;
+        this.store.isDown = false;
+        this.store.downTime = 0;
+        this.store.downDistance = 0;
+        this.store.spotOffset = 0;
+        this.store.adjustOffset = false;
+        this.store.items = [];
     };
 
     // Reset the carousel.

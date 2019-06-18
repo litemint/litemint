@@ -170,7 +170,7 @@
         "Payment Received: ",
         "Notifications",
         "Toasts",
-        "Get Your Friendly Address",
+        "Get Your Friendly Name",
         "Marketplace",
         "Give Us Some Love",
         "Help us grow and rate us if you enjoy Litemint!",
@@ -193,7 +193,15 @@
         "Total:",
         "Submitting your order, please wait...",
         "The transaction failed.",
-        "Your order was submitted successfully."
+        "Your order was submitted successfully.",
+        "Games", // 180
+        "GAMES",
+        "COLLECTIBLES",
+        "SHOP",
+        "Coming Soon",
+        "Leaderboard",
+        "Playing as 'Guest'. Get your Gamer ID!",
+        "Players Today:"
     ];
 
     /**

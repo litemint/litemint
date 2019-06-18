@@ -26,10 +26,10 @@
 
     const onResize = function () {
         if (Litemint.Pepper.showWallet) {
-            $("#marketview").width($(window).width() - $(window).height() * 0.5);
+            $("#activity-view").width($(window).width() - $(window).height() * 0.5);
         }
         else {
-            $("#marketview").width($(window).width());
+            $("#activity-view").width($(window).width());
         }
     };
 
@@ -44,14 +44,20 @@
         onResize();
 
         if (isMobile()) {
-            $("#marketview").hide();
+            $("#activity-view").hide();
             $("#mainview").hide();
             $("#mobile").removeClass("is-hidden");
         }
+        else{
+            $("#activity-loader").hide();
+        }
+
+        initOutstream();
     });
 
     $(window).resize(function () {
         onResize();
+        resizeOutstream($(window).width(), $(window).height());
     });
 
     window.addEventListener("message", function (event) {
@@ -79,7 +85,7 @@
     $(".toggle-wallet-wrapper").click(function () {
         if (Litemint.Pepper.showWallet) {
             Litemint.Pepper.showWallet = false;
-            $("#marketview").animate({
+            $("#activity-view").animate({
                 width: "100%"
             }, 350, "swing", function () {
                 $("#close-wallet-button").hide();
@@ -88,7 +94,7 @@
         }
         else {
             Litemint.Pepper.showWallet = true;
-            $("#marketview").animate({
+            $("#activity-view").animate({
                 width: $(window).width() - $(window).height() * 0.5 + "px"
             }, 350, "swing", function () {
                 $("#open-wallet-button").hide();

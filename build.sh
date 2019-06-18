@@ -117,6 +117,7 @@ echo "Compiling litemint spear flavor..."
 java -jar $COMPILER \
 --compilation_level SIMPLE_OPTIMIZATIONS \
 --js js/license.js \
+--js js/thirdparty/ui/outstream.js \
 --js js/spear/index.js \
 --js_output_file=${OUT}spear.min.js
 

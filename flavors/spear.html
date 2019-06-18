@@ -16,7 +16,7 @@
     <meta charset="utf-8" />
     <meta name="author" content="Frederic Rezeau">
     <meta name="application-name" content="Litemint">
-    <meta name="description" content="Secure, peer-to-peer, digital currency trading and wallet service.">
+    <meta name="description" content="Litemint is a secure, peer-to-peer, multi-currency crypto wallet, instant game platform and marketplace.">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
@@ -28,18 +28,20 @@
     <link rel="stylesheet" type="text/css" href="res/css/spear.css" />
     <link rel="icon" type="image/x-icon" href="res/img/favicon.ico" />
 
-    <title>Litemint - Explore the crypto world.</title>
+    <title>Litemint - Put your crypto into play.</title>
     <base target="_blank">
 </head>
 <body>
-    <div id="marketview">
-        <iframe id="dashboard" src="https://dashboard.litemint.com"></iframe>
+    <div id="activity-view">
+        <div id="activity-loader"></div>
+        <iframe id="activity-frame" src="https://dashboard.litemint.com" frameBorder="0"></iframe>
         <div class="toggle-wallet-wrapper">
             <img id="open-wallet-button" src="res/img/openwallet.png" style="display:none;" />
             <img id="close-wallet-button" src="res/img/closewallet.png" />
         </div>
     </div>
     <canvas id="mainview"></canvas>
+    <div id="outstreamContainer"></div>
 
     <section id="loader" class="hero is-fullheight is-white">
         <div class="hero-body">
@@ -64,6 +66,7 @@
                     <p>or download Litemint on your mobile.</p>
                     <br />
                     <p><a href="https://play.google.com/store/apps/details?id=com.litemint.app"><img src="https://litemint.com/img/badge_playstore.png" /></a></p>
+                    <p><a href="https://itunes.apple.com/app/litemint/id1454801150"><img src="https://litemint.com/img/badge_appstore.png" /></a></p>
                 </div>
             </div>
         </div>
@@ -186,6 +189,10 @@
     </div>
 
     <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+
+    <!-- Outstream SDK -->
+    <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/outstream.js"></script>   
+
     <script src="config.js"></script>
     <script src="core.min.js"></script>
     <script src="pepper.min.js"></script>
