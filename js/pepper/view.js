@@ -2290,7 +2290,7 @@
                 else if (this.scroller.type === namespace.Pepper.ScrollerType.AccountSettings) {
                     if (item.id === this.scroller.items.length - 2 || item.id === 4) {
                         context.save();
-                        if (namespace.Core.currentAccount.nobackup) {
+                        if ((namespace.Core.currentAccount.nobackup && item.id === this.scroller.items.length - 2) || (namespace.Core.currentAccount.watchOnly && !namespace.Core.currentAccount.friendlyAddress)) {
                             context.globalAlpha = context.globalAlpha * 0.3;
                         }
                         else {

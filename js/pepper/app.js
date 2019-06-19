@@ -1370,7 +1370,7 @@
                     if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade && namespace.Core.currentAccount.offers.length) {
                         clicked = testElement(0, point, view.ordersBtn, false);
                     }
-                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange && !namespace.Core.currentAccount.friendlyAddress && !namespace.Core.currentAccount.nobackup) {
+                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange) {
                         clicked = testElement(0, point, view.gamerIdBtn, false);
                     }
                     if (!clicked && !view.isActivityMode) {
@@ -1949,7 +1949,7 @@
                                     }
                                     else if (item.id === 4) {
                                         if (!namespace.Core.currentAccount.friendlyAddress &&
-                                            !namespace.Core.currentAccount.nobackup) {
+                                            !namespace.Core.currentAccount.watchOnly) {
                                             let nothingUpMySleeve = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
                                             let result = namespace.Core.currentAccount.keys.sign(nothingUpMySleeve);
                                             let signedData = namespace.Core.Utils.bytesToHex(result);
@@ -1961,14 +1961,14 @@
                                                 window.location = "https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey();
                                             }
                                         }
-                                        else {
-                                            if (!namespace.Core.currentAccount.nobackup && window.Android) {
+                                        else if(namespace.Core.currentAccount.friendlyAddress) {
+                                            if (window.Android) {
                                                 window.Android.copyToClipboard("address", namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
                                             }
-                                            else if (!namespace.Core.currentAccount.nobackup && namespace.Pepper.isWebkitHost()) {
+                                            else if (namespace.Pepper.isWebkitHost()) {
                                                 webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": namespace.Core.currentAccount.friendlyAddress, "message": namespace.Pepper.Resources.localeText[122] });
                                             }
-                                            else if (!namespace.Core.currentAccount.nobackup && parent) {
+                                            else if (parent) {
                                                 parent.postMessage("litemint_copy:" + namespace.Core.currentAccount.friendlyAddress, "*");
                                                 parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
                                             }
@@ -3011,7 +3011,7 @@
                                     
                                     testElement(2, point, view.gamerIdBtn, isPointerDown, function () {
                                         if (!namespace.Core.currentAccount.friendlyAddress &&
-                                            !namespace.Core.currentAccount.nobackup) {
+                                            !namespace.Core.currentAccount.watchOnly) {
 
                                             view.closeSendPage(() => {
                                                 domShowAddressForm(false);
@@ -3027,6 +3027,18 @@
                                             }
                                             else {
                                                 window.location = "https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey();
+                                            }
+                                        }
+                                        else if(namespace.Core.currentAccount.friendlyAddress) {
+                                            if (window.Android) {
+                                                window.Android.copyToClipboard("address", namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
+                                            }
+                                            else if (namespace.Pepper.isWebkitHost()) {
+                                                webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": namespace.Core.currentAccount.friendlyAddress, "message": namespace.Pepper.Resources.localeText[122] });
+                                            }
+                                            else if (parent) {
+                                                parent.postMessage("litemint_copy:" + namespace.Core.currentAccount.friendlyAddress, "*");
+                                                parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
                                             }
                                         }
                                     });
