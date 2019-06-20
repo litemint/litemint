@@ -307,6 +307,12 @@
         
         if(view.appMode){
             domShowApp(false);
+            // Request and ad from native layer.
+            if (window.Android) {
+                if(window.Android.showAd){
+                    window.Android.showAd();
+                }
+            }
             return "stay";
         }
         else if (view.showModalPage) {
