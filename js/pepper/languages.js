@@ -288,7 +288,7 @@
         "Berühren, um Adresse zu kopieren",
         "Währung wählen",
         "Details",
-        "Kursdiagramm",
+        "Preisdiagramm",
         "Teilen",
         "Webseite", // 80
         "Währung entfernen",
@@ -326,7 +326,7 @@
         "Sequenz angestoßen",
         "Konten zusammengeführt",
         "Verkaufsauftrag",
-        "Verkauf abbrechen",
+        "Verkauf abgebrochen",
         "Pfadzahlung",
         "Beobachtungskonto",
         "Keine Daten verfügbar",
@@ -367,7 +367,37 @@
         "Benachrichtigungen",
         "Toasts",
         "Ihre einfache Adresse bekommen",
-        "Marktplatz"
+        "Marktplatz",
+        "Gib uns etwas Liebe",
+        "Hilf uns zu wachsen, bewerte Litemint!",
+        "Noch nicht unterstützt!", // 160
+        "Kaufen",
+        "Verkaufen",
+        "Tauschen",
+        "Auftragsbuch ist leer.",
+        "Preis",
+        "Menge",
+        "Letzte Trades",
+        "Währung hinzufügen",
+        "Wähle Währung",
+        "Aufträge", // 170
+        "Angebot",
+        "Angebot stornieren",
+        "Stornieren...",
+        "Bestätigen?",
+        "Angebot platzieren",
+        "Total:",
+        "Auftrag wird gesendet, bitte warten...",
+        "Transaktion ist fehlgeschlagen.",
+        "Ihr Auftrag wurde erfolgreich abgeschickt.",
+        "Spiele", // 180
+        "SPIELE",
+        "SAMMLUNG",
+        "SHOP",
+        "Demnächst",
+        "Bestenliste",
+        "Als Gast spielen. Hol dir deine Gamer ID!",
+        "Spieler heute:"        
     ];
 
     /**
