@@ -2246,6 +2246,7 @@
                 }
                 else if (this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard) {
                     if (item.data) {
+                        let hasDisplayName = item.data.displayname && item.data.displayname !== "" ? true : false;
                         let isMe = (namespace.Core.currentAccount.friendlyAddress && item.data.name === namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "")) ? true : false;
                         if(isMe){
                             context.fillStyle = "rgb(36, 41, 46)";
@@ -2254,7 +2255,7 @@
                         context.font =  isMe ? this.getFont("Roboto-Bold") : this.getFont("Roboto-Medium");
                         context.textAlign = "left";
                         context.drawImage(isMe ? namespace.Pepper.Resources.lmtAccountLightImage : namespace.Pepper.Resources.lmtAccountImage, item.x + this.unit * 0.3, item.y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
-                        this.drawText(context, item.x + item.height * 1.2, item.y + item.height * 0.5, item.data.name, isMe ? "rgb(255, 255, 255)" : "rgb(36, 41, 46)", 0.7);
+                        this.drawText(context, item.x + item.height * 1.2, item.y + item.height * 0.5, hasDisplayName ? item.data.displayname : item.data.name, isMe ? "rgb(255, 255, 255)" : "rgb(36, 41, 46)", 0.7);
                         context.textAlign = "right";
                         context.font = this.getFont("Roboto-Bold");
                         this.drawText(context, item.x + item.width - item.height * 0.5, item.y + item.height * 0.5, item.data.score, isMe ? "rgb(23, 156, 75)" : "rgb(36, 41, 46)", 0.9);
