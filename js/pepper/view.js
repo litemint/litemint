@@ -2254,8 +2254,28 @@
                         }
                         context.font =  isMe ? this.getFont("Roboto-Bold") : this.getFont("Roboto-Medium");
                         context.textAlign = "left";
-                        context.drawImage(isMe ? namespace.Pepper.Resources.lmtAccountLightImage : namespace.Pepper.Resources.lmtAccountImage, item.x + this.unit * 0.3, item.y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
-                        this.drawText(context, item.x + item.height * 1.2, item.y + item.height * 0.5, hasDisplayName ? item.data.displayname : item.data.name, isMe ? "rgb(255, 255, 255)" : "rgb(36, 41, 46)", 0.7);
+
+                        if(item.data.image && !item.data.loadedImage){
+                            item.data.img = new Image();
+                            item.data.img.src = item.data.image;
+                        }
+                        
+                        context.drawImage(isMe ? namespace.Pepper.Resources.lmtAccountLightImage : namespace.Pepper.Resources.lmtAccountImage, item.x + this.unit * 0.8, item.y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        if(item.data.img){
+                            context.drawImage(item.data.img, item.x + this.unit * 0.8, item.y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        }
+
+                        context.save();
+                        context.beginPath();
+                        context.rect(item.x + item.height * 1.7, item.y, item.width - item.height * 3.5, item.height);
+                        context.clip();
+                        this.drawText(context, item.x + item.height * 1.7, item.y + item.height * 0.5, hasDisplayName ? item.data.displayname : item.data.name, isMe ? "rgb(255, 255, 255)" : "rgb(36, 41, 46)", 0.7);
+                        context.restore();
+
+                        context.font =  this.getFont("Roboto-Bold");
+                        context.textAlign = "center";
+                        this.drawText(context, item.x + this.unit * 0.41, item.y + item.height * 0.5, (i + 1).toString(), isMe ? "rgb(23, 156, 75)" : "rgba(36, 41, 46, 0.5)", 0.75);
+                        
                         context.textAlign = "right";
                         context.font = this.getFont("Roboto-Bold");
                         this.drawText(context, item.x + item.width - item.height * 0.5, item.y + item.height * 0.5, item.data.score, isMe ? "rgb(23, 156, 75)" : "rgb(36, 41, 46)", 0.9);
