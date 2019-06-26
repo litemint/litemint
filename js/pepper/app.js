@@ -146,7 +146,7 @@
                 namespace.Pepper.storeData.push(storeItem);
             };
 
-            $.ajax(namespace.config.apiUrl + "/.store/all").then(
+            $.ajax(namespace.config.apiUrl + "/.store/getdata").then(
                 function success(response) {
                     for (let i = 0; i < response.length; i += 1) {
                         loadStoreItem(response[i]);
@@ -157,6 +157,19 @@
             );
         };
         getStoreData();
+
+        // Get the authentication public key (ECDH).
+        const getAuthKey = function () {
+            $.ajax(namespace.config.apiUrl + "/.auth/getkey").then(
+                function success(response) {
+                    const ecdh = new elliptic.ec("curve25519");
+                    namespace.Pepper.authKey = ecdh.keyFromPublic(namespace.Core.Utils.hexToBytes(response));
+                },
+                function fail(data, status) {
+                }
+            );
+        };
+        getAuthKey();
 
         // Download the network message.
         namespace.Pepper.networkMessage = namespace.config.version;
@@ -1956,16 +1969,7 @@
                                     else if (item.id === 4) {
                                         if (!namespace.Core.currentAccount.friendlyAddress &&
                                             !namespace.Core.currentAccount.watchOnly) {
-                                            let nothingUpMySleeve = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-                                            let result = namespace.Core.currentAccount.keys.sign(nothingUpMySleeve);
-                                            let signedData = namespace.Core.Utils.bytesToHex(result);
-
-                                            if (namespace.Pepper.isDesktop) {
-                                                window.open("https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey(), "_blank");
-                                            }
-                                            else {
-                                                window.location = "https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey();
-                                            }
+                                                domShowGetFriendlyPage();
                                         }
                                         else if(namespace.Core.currentAccount.friendlyAddress) {
                                             if (window.Android) {
@@ -3024,16 +3028,7 @@
                                                 domShowTradeForm(false);
                                             });
 
-                                            let nothingUpMySleeve = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-                                            let result = namespace.Core.currentAccount.keys.sign(nothingUpMySleeve);
-                                            let signedData = namespace.Core.Utils.bytesToHex(result);
-
-                                            if (namespace.Pepper.isDesktop) {
-                                                window.open("https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey(), "_blank");
-                                            }
-                                            else {
-                                                window.location = "https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey();
-                                            }
+                                            domShowGetFriendlyPage();
                                         }
                                         else if(namespace.Core.currentAccount.friendlyAddress) {
                                             if (window.Android) {
@@ -3839,6 +3834,24 @@
 
         if (view.showScroller && view.scroller.type === namespace.Pepper.ScrollerType.AccountSettings) {
             domShowRenameForm(false);
+        }
+    }
+
+    function domShowGetFriendlyPage() {
+        if (namespace.Pepper.authKey) {
+            const ecdh = new elliptic.ec("curve25519");
+            const pair = ecdh.genKeyPair();
+            const sharedSecret = pair.derive(namespace.Pepper.authKey.getPublic());
+            const nothingUpMySleeve = namespace.Core.Utils.hexToBytes(sharedSecret.toString(16));
+            const result = namespace.Core.currentAccount.keys.sign(nothingUpMySleeve);
+            const signedData = namespace.Core.Utils.bytesToHex(result);
+
+            if (namespace.Pepper.isDesktop) {
+                window.open("https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey() + "&ecdh=" + pair.getPublic(true, "hex"), "_blank");
+            }
+            else {
+                window.location = "https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey() + "&ecdh=" + pair.getPublic(true, "hex");
+            }
         }
     }
 
