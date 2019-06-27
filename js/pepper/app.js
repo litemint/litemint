@@ -3001,7 +3001,7 @@
 
                                     testElement(2, point, view.promoBtn, isPointerDown, function () {
                                         if (namespace.Pepper.storeData.length > 1 && namespace.Pepper.storeData[1].valid) {
-                                            loadGame(namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true);
+                                            loadGame(namespace.Pepper.storeData[1].data.gameid, namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true);
                                         }
                                     });
 
@@ -3034,11 +3034,11 @@
                                     testStore(2, point, view.store, isPointerDown, function (item, index) {
                                         if (view.store.canClick) {                             
                                             if (!item.spot) {
-                                                if(index === 0 || index === 1){
-                                                    loadGame(item.data.data.link);
+                                                if((index === 0 || index === 1) && item.data.data.gameid){
+                                                    loadGame(item.data.data.gameid, item.data.data.link);
                                                 }
                                                 else if (item.overPlayBtn && item.data.data.gameid) {
-                                                    loadGame(item.data.data.link);
+                                                    loadGame(item.data.data.gameid, item.data.data.link);
                                                 }
                                                 else if (item.overScoreBtn && item.data.data.gameid) {
                                                     view.selectedGame = item.data;
@@ -3284,17 +3284,19 @@
         namespace.Core.currentAccount.queuedOrder = null;
     }
 
-    function loadGame(url, noloader){
-        getToken((token) => {
-            if (token) {
-                if(url[url.length - 1] !== "/"){
-                    url += "/";
+    function loadGame(id, url, noloader) {
+        if(id && id !== "") {
+            generateToken(id, (token) => {
+                if (token) {
+                    if(url[url.length - 1] !== "/"){
+                        url += "/";
+                    }
+                    // TODO: allow users to customize their account avatar.
+                    url += "?token=" + token + "&avatar=" + encodeURIComponent("https://app.litemint.com/res/img/lmtaccount.png");
+                    domShowApp(true, url, noloader);
                 }
-                // TODO: allow users to customize their account avatar.
-                url += "?token=" + token + "&avatar=" + encodeURIComponent("https://app.litemint.com/res/img/lmtaccount.png");
-                domShowApp(true, url, noloader);
-            }
-        });
+            });
+        }
     }
 
     function retrieveLeaderboard() {
@@ -3658,12 +3660,14 @@
             view.resetList(namespace.Pepper.ListType.Transactions);
             view.resetPinPage(signUp);
         }
+
+        generateToken("", (token) => {}); // Invalidate current token if any.
         new namespace.Core.StellarNetwork().detachAccount();
 
         domShowApp(false);
     }
 
-    function getToken (cb) {
+    function generateToken (purpose, cb) {
         const getAuthKey = function (cb) {
             // Get the authentication public key (ECDH).
             $.ajax(namespace.config.apiUrl + "/.auth/getkey").then(
@@ -3678,6 +3682,7 @@
 
         const getToken = function (pair, signed, cb) {
             $.post(namespace.config.apiUrl + "/.auth/gettoken", {
+                purpose: purpose,
                 address: namespace.Core.currentAccount.keys.publicKey(),
                 data: signed,
                 ecdh: pair.getPublic(true, "hex")
@@ -3885,7 +3890,7 @@
     }
 
     function domShowGetFriendlyPage() {
-        getToken((token) => {
+        generateToken("e1e4c072-b534-46e7-a362-0e5edc2cd12d", (token) => {
             if (namespace.Pepper.isDesktop) {
                 window.open("https://litemint.com/getfriendly/?token=" + token, "_blank");
             }
