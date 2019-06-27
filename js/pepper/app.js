@@ -3292,7 +3292,7 @@
                         url += "/";
                     }
                     // TODO: allow users to customize their account avatar.
-                    url += "?token=" + token + "&avatar=" + encodeURIComponent("https://app.litemint.com/res/img/lmtaccount.png");
+                    url += "?token=" + token + "&avatar=";
                     domShowApp(true, url, noloader);
                 }
             });
