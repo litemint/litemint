@@ -3285,13 +3285,16 @@
     }
 
     function loadGame(url, noloader){
-        if(namespace.Core.currentAccount.friendlyAddress){
-            if(url[url.length - 1] !== "/"){
-                url += "/";
+        getToken((token) => {
+            if (token) {
+                if(url[url.length - 1] !== "/"){
+                    url += "/";
+                }
+                // TODO: allow users to customize their account avatar.
+                url += "?token=" + token + "&avatar=" + encodeURIComponent("https://app.litemint.com/res/img/lmtaccount.png");
+                domShowApp(true, url, noloader);
             }
-            url += "?name=" + namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "");
-        }
-        domShowApp(true, url, noloader);
+        });
     }
 
     function retrieveLeaderboard() {
