@@ -158,19 +158,6 @@
         };
         getStoreData();
 
-        // Get the authentication public key (ECDH).
-        const getAuthKey = function () {
-            $.ajax(namespace.config.apiUrl + "/.auth/getkey").then(
-                function success(response) {
-                    const ecdh = new elliptic.ec("curve25519");
-                    namespace.Pepper.authKey = ecdh.keyFromPublic(namespace.Core.Utils.hexToBytes(response));
-                },
-                function fail(data, status) {
-                }
-            );
-        };
-        getAuthKey();
-
         // Download the network message.
         namespace.Pepper.networkMessage = namespace.config.version;
         const getmessage = function () {
@@ -3673,6 +3660,63 @@
         domShowApp(false);
     }
 
+    function getToken (cb) {
+        const getAuthKey = function (cb) {
+            // Get the authentication public key (ECDH).
+            $.ajax(namespace.config.apiUrl + "/.auth/getkey").then(
+                function success(response) {         
+                    cb(response);
+                },
+                function fail(data, status) {
+                    cb();
+                }
+            );
+        };
+
+        const getToken = function (pair, signed, cb) {
+            $.post(namespace.config.apiUrl + "/.auth/gettoken", {
+                address: namespace.Core.currentAccount.keys.publicKey(),
+                data: signed,
+                ecdh: pair.getPublic(true, "hex")
+            }).then(
+                function success(response) {
+                    if (response && !response.error) {
+                        cb(response.token);
+                    }
+                    else{
+                        cb();
+                    }
+                },
+                function fail(data, status) {
+                    cb();
+                }
+            );
+        };
+
+        getAuthKey((key) => {
+            if (key) {
+                // Create the authentication key.
+                const ecdh = new elliptic.ec("curve25519");
+                const authKey = ecdh.keyFromPublic(namespace.Core.Utils.hexToBytes(key));
+
+                // Generate a new ECDH key pair.
+                const pair = ecdh.genKeyPair();
+
+                // Derive the shared secret and sign it with the Stellar Key.
+                const sharedSecret = pair.derive(authKey.getPublic());
+                const nothingUpMySleeve = namespace.Core.Utils.hexToBytes(sharedSecret.toString(16));
+                getToken(pair, 
+                    namespace.Core.Utils.bytesToHex(namespace.Core.currentAccount.keys.sign(nothingUpMySleeve)), 
+                    (token) => {
+                        cb(token);
+                });
+            }
+            else {
+                cb();
+            }
+        });
+    };
+
     function domUpdate() {
         if (view && view.needDomUpdate) {
             view.needDomUpdate = false;
@@ -3838,21 +3882,14 @@
     }
 
     function domShowGetFriendlyPage() {
-        if (namespace.Pepper.authKey) {
-            const ecdh = new elliptic.ec("curve25519");
-            const pair = ecdh.genKeyPair();
-            const sharedSecret = pair.derive(namespace.Pepper.authKey.getPublic());
-            const nothingUpMySleeve = namespace.Core.Utils.hexToBytes(sharedSecret.toString(16));
-            const result = namespace.Core.currentAccount.keys.sign(nothingUpMySleeve);
-            const signedData = namespace.Core.Utils.bytesToHex(result);
-
+        getToken((token) => {
             if (namespace.Pepper.isDesktop) {
-                window.open("https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey() + "&ecdh=" + pair.getPublic(true, "hex"), "_blank");
+                window.open("https://litemint.com/getfriendly/?token=" + token, "_blank");
             }
             else {
-                window.location = "https://litemint.com/getfriendly/?sign=" + signedData + "&public=" + namespace.Core.currentAccount.keys.publicKey() + "&ecdh=" + pair.getPublic(true, "hex");
+                window.location = "https://litemint.com/getfriendly/?token=" + token;
             }
-        }
+        })
     }
 
     function domShowAboutPage(show) {
