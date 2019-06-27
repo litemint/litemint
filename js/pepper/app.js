@@ -3661,7 +3661,6 @@
             view.resetPinPage(signUp);
         }
 
-        generateToken("", (token) => {}); // Invalidate current token if any.
         new namespace.Core.StellarNetwork().detachAccount();
 
         domShowApp(false);
