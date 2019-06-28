@@ -813,7 +813,8 @@
                             item.overPlayBtn = true;
                         }
 
-                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.2, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)) {
+                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.2, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)
+                            && item.data && item.data.data && item.data.data.leaderboard) {
                             item.overScoreBtn = true;
                         }
                     }
@@ -3042,15 +3043,16 @@
                                                 }
                                                 else if (item.overScoreBtn && item.data.data.gameid) {
                                                     view.selectedGame = item.data;
-                                                    view.loadScroller(namespace.Pepper.ScrollerType.Leaderboard); 
-                                                    if(namespace.leaderBoardRequestId){
-                                                        clearTimeout(namespace.leaderBoardRequestId);
-                                                    }
-                                                    namespace.leaderBoardRequestId = setTimeout(() => { 
-                                                        namespace.leaderBoardRequestId = null;
-                                                        retrieveLeaderboard();                                                       
-                                                    }, 1000);
-                                                    
+                                                    if(view.selectedGame.data.leaderboard){
+                                                        view.loadScroller(namespace.Pepper.ScrollerType.Leaderboard); 
+                                                        if(namespace.leaderBoardRequestId){
+                                                            clearTimeout(namespace.leaderBoardRequestId);
+                                                        }
+                                                        namespace.leaderBoardRequestId = setTimeout(() => { 
+                                                            namespace.leaderBoardRequestId = null;
+                                                            retrieveLeaderboard();                                                       
+                                                        }, 1000);
+                                                    }                                                    
                                                 }
                                             }
 
@@ -3302,14 +3304,13 @@
     function retrieveLeaderboard() {
         if(view && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange 
             && view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard
-            && view.selectedGame && view.selectedGame.data) {
+            && view.selectedGame && view.selectedGame.data && view.selectedGame.data.leaderboard) {
             let playerName = "";
             if(namespace.Core.currentAccount.friendlyAddress){
                 playerName = namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "");
             }
-            $.post(namespace.config.apiUrl + "/.game/leader",
+            $.get(view.selectedGame.data.leaderboard,
             {
-                "gameid": view.selectedGame.data.gameid,
                 "playername": playerName
             })
             .done(function (response) {
@@ -4343,26 +4344,18 @@
 
     window.addEventListener("message", function (event) {
         if (typeof event.data === "string") {
-            if (event.data === "litemint_app_session_start") {
+            if (event.data === "litemint_app_requestad") {
                 if (window.Android) {
                     if(window.Android.showAd){
                         window.Android.showAd();
                     }
                 }
                 else if(namespace.Pepper.isDesktop) {
-                    this.setTimeout(() => {requestOutstreamAds(true);}, 100);       
+                    this.setTimeout(() => {requestOutstreamAds(true);}, 100);  
                 }
             }
-            else if (event.data === "litemint_app_session_end") {
+            else if (event.data === "litemint_app_close") {
                 domShowApp(false);
-                if (window.Android) {
-                    if(window.Android.showAd){
-                        window.Android.showAd();
-                    }
-                }
-                else if(namespace.Pepper.isDesktop) {
-                    this.setTimeout(() => {requestOutstreamAds(true);}, 100); 
-                }
             }
             else if (event.data === "litemint_app_ready") {
                 $('#activity-loader').fadeOut();

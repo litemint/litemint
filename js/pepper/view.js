@@ -2259,7 +2259,7 @@
                             item.data.img = new Image();
                             item.data.img.src = item.data.image;
                         }
-                        
+
                         context.drawImage(isMe ? namespace.Pepper.Resources.lmtAccountLightImage : namespace.Pepper.Resources.lmtAccountImage, item.x + this.unit * 0.8, item.y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
                         if(item.data.img){
                             context.drawImage(item.data.img, item.x + this.unit * 0.8, item.y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
@@ -4441,13 +4441,15 @@
                     context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.playImage : namespace.Pepper.Resources.playDisabledImage, item.x + item.width - item.height * 1.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
                     context.restore();   
                     
-                    context.save();
-                    if (item.overScoreBtn || !item.data.data.gameid) {
-                        context.globalAlpha = 0.5;
+                    if (item.data.data.leaderboard) {
+                        context.save();
+                        if (item.overScoreBtn || !item.data.data.gameid) {
+                            context.globalAlpha = 0.5;
+                        }
+                        context.font = this.getFont("Roboto-Regular");
+                        context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.scoreImage : namespace.Pepper.Resources.scoreDisabledImage, item.x + item.width - item.height * 2.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        context.restore();  
                     }
-                    context.font = this.getFont("Roboto-Regular");
-                    context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.scoreImage : namespace.Pepper.Resources.scoreDisabledImage, item.x + item.width - item.height * 2.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
-                    context.restore();  
                 }
             }
         }
