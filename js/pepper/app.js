@@ -129,7 +129,7 @@
                 storeItem.image.onerror = () => {
                     storeItem.valid = false;
                 };
-                storeItem.image.src = item.imageLink;            
+                storeItem.image.src = item.imageLink;
 
                 if(item.headerLink){
                     storeItem.headerImage = new Image();
@@ -344,10 +344,16 @@
             return "stay";
         }
         else if (view.isActivityMode) {
-            view.closeSendPage(() => {
-                domShowAddressForm(false);
-                domShowTradeForm(false);
-            });
+            if (view.activityType === namespace.Pepper.ActivityType.Exchange && view.selectedGameShop) {
+                view.selectedGameShop = null;
+                view.shopTime = 0.3;
+            }
+            else {
+                view.closeSendPage(() => {
+                    domShowAddressForm(false);
+                    domShowTradeForm(false);
+                });
+            }
             return "stay";
         }
         else if (view.isDashboardMenu) {
@@ -388,11 +394,21 @@
             }
         }
         else if (view.isActivityMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout && view.activityType === namespace.Pepper.ActivityType.Exchange) {
-            if (down && view.store.offset < view.store.maxOffset) {
-                view.store.offset += view.unit;
+            if (view.selectedGameShop) {
+                if (down && view.shop.offset < view.shop.maxOffset) {
+                    view.shop.offset += view.unit;
+                }
+                else if (!down && view.shop.offset > 0) {
+                    view.shop.offset -= view.unit;
+                }
             }
-            else if (!down && view.store.offset > 0) {
-                view.store.offset -= view.unit;
+            else {
+                if (down && view.store.offset < view.store.maxOffset) {
+                    view.store.offset += view.unit;
+                }
+                else if (!down && view.store.offset > 0) {
+                    view.store.offset -= view.unit;
+                }
             }
         }
         else if (!view.isActivityMode && !view.isDashboardMenu && !view.isPinMenu && !view.showAbout) {
@@ -805,6 +821,9 @@
                     item.selected = false;
                     item.hover = false;
                     item.hasClick = false;
+                    item.overPlayBtn = false;
+                    item.overScoreBtn = false;
+                    item.overShopBtn = false;
                     if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
                         item.selected = true;
                         item.hasClick = true;
@@ -813,9 +832,14 @@
                             item.overPlayBtn = true;
                         }
 
-                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.2, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)
+                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.9, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)
                             && item.data && item.data.data && item.data.data.leaderboard) {
                             item.overScoreBtn = true;
+                        }
+
+                        if (namespace.Core.currentAccount.data && namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)
+                            && item.data && item.data.data && item.data.data.shop && namespace.Core.currentAccount.friendlyAddress) {
+                            item.overShopBtn = true;
                         }
                     }
                     break;
@@ -831,8 +855,83 @@
                                     item.overPlayBtn = false;
                                 }
 
-                                if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.2, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)) {
+                                if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.9, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)) {
                                     item.overScoreBtn = false;
+                                }
+
+                                if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)) {
+                                    item.overShopBtn = false;
+                                }
+                            }
+                        }
+                        else {
+                            item.hover = true;
+                        }
+                    }
+                    else if (item.selected) {
+                        item.hasClick = false;
+                        item.selected = false;
+                    }
+                    break;
+                case 2:
+                    if (item.selected) {
+                        item.selected = false;
+                        item.hover = false;
+
+                        if (item.hasClick) {
+                            callback(item, i);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+    function testShop(testType, point, list, isDown, callback) {
+        for (let i = 0; i < list.items.length; i += 1) {
+            const item = list.items[i];
+
+            let y = item.y;
+
+            switch (testType) {
+                case 0:
+                    item.selected = false;
+                    item.hover = false;
+                    item.hasClick = false;
+                    item.overBuyBtn = false;
+                    item.overMoreBtn = false;
+                    // item.x + item.width - this.unit * 2.2, item.y + item.height - this.unit, this.unit * 2, this.unit * 0.8
+                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.shop.offset, item.x + item.width, y + item.height - view.shop.offset)) {
+                        item.selected = true;
+                        item.hasClick = true;
+
+                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - view.unit * 2.2, y - view.shop.offset + item.height - view.unit, item.x + item.width - view.unit * 0.2, y - view.shop.offset + item.height - view.unit + view.unit * 0.8)) {
+                            item.overBuyBtn = true;
+                        }
+
+                        if (item.data.moreLink) {
+                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 0.2, y - view.shop.offset + item.height - view.unit, item.x + view.unit * 2.2, y - view.shop.offset + item.height - view.unit + view.unit * 0.8)) {
+                                item.overMoreBtn = true;
+                            }
+                        }
+                    }
+                    break;
+                case 1:
+                    item.hover = false;
+                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.shop.offset, item.x + item.width, y + item.height - view.shop.offset)) {
+                        if (isDown) {
+                            if (item.hasClick) {
+                                item.selected = true;
+                                item.hover = true;
+
+                                if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - view.unit * 2.2, y - view.shop.offset + item.height - view.unit, item.x + item.width - view.unit * 0.2, y - view.shop.offset + item.height - view.unit + view.unit * 0.8)) {
+                                    item.overBuyBtn = false;
+                                }
+
+                                if (item.data.moreLink) {
+                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 0.2, y - view.shop.offset + item.height - view.unit, item.x + view.unit * 2.2, y - view.shop.offset + item.height - view.unit + view.unit * 0.8)) {
+                                        item.overMoreBtn = false;
+                                    }
                                 }
                             }
                         }
@@ -971,6 +1070,73 @@
                 else{
                     view.store.items.push({ "spot": (i == 1 ? true : false), "data": namespace.Pepper.storeData[i] });
                 }     
+            }
+        }
+    }
+
+    function loadShop () {
+        if (view) {        
+            view.resetShop();  
+            
+            for (let i = 0; i < view.carousel.items.length; i += 1) {
+                delete view.carousel.items[i].shopPriceRate;
+            }
+
+            if (view.selectedGameShop && view.selectedGameShop.data && view.selectedGameShop.data.shop) { 
+                view.shop.data = view.selectedGameShop;
+                let amount = 0;
+                if (view.selectedGameShop.data.shop.items) {
+                    for (let i = 0; i < view.selectedGameShop.data.shop.items.length; i += 1) {
+                        view.shop.items.push({ "data": view.selectedGameShop.data.shop.items[i] });
+
+                        // NOTE: Paths resolution will be executed on max amount needed across all shop items.
+                        // Actual price will be recalculated prior to buy order resulting in either 
+                        // better or equal price for buyer.
+                        // Only issue is when the supply is inferior to max amount in which case we would
+                        // fail payment path finding and fall back to display the shop original currency.
+                        amount = Math.max(amount, Number(view.selectedGameShop.data.shop.items[i].price));
+                    }
+                }
+
+                if (amount) {                   
+                    var stellarNet = new namespace.Core.StellarNetwork();
+                    stellarNet.findPaymentPaths(
+                        view.selectedGameShop.data.shop.account,
+                        view.selectedGameShop.data.shop.code,
+                        view.selectedGameShop.data.shop.issuer,
+                        namespace.Pepper.Tools.formatPrice(amount),
+                        (success, result) => {
+                            console.log(result);
+                            for (let i = 0; i < view.carousel.items.length; i += 1) {
+                                let item = view.carousel.items[i];
+                                item.shopPriceRate = {
+                                    "amount": namespace.Pepper.Tools.formatPrice(amount),
+                                };
+
+                                if (success) {
+                                    // Extract the best price from results.
+                                    let sourceAmount;
+                                    for (let v = 0; v < result.length; v += 1) {
+                                        if (result[v].source_asset_type === "native" && i === 0 || 
+                                            (item.asset.code === result[v].source_asset_code
+                                                && item.asset.issuer === result[v].source_asset_issuer)) {
+                                            if (!sourceAmount) {
+                                                sourceAmount = Number(result[v].source_amount);
+                                            }
+                                            else{
+                                                sourceAmount = Math.min(Number(result[v].source_amount), sourceAmount);
+                                            }
+                                        }
+                                    }
+                                    item.shopPriceRate.sourceAmount = namespace.Pepper.Tools.formatPrice(sourceAmount);
+                                }
+                                else {
+                                    item.shopPriceRate.sourceAmount = namespace.Pepper.Tools.formatPrice(0);
+                                    console.log(result);
+                                }                                
+                            }
+                        });
+                }
             }
         }
     }
@@ -1271,6 +1437,7 @@
                 const selected = testScroller(0, point, view.scroller, false);
                 if (!selected
                     && (view.scroller.type === namespace.Pepper.ScrollerType.AssetsMenu
+                        || view.scroller.type === namespace.Pepper.ScrollerType.ShopMenu
                         || view.scroller.type === namespace.Pepper.ScrollerType.FilterMenu
                         || view.scroller.type === namespace.Pepper.ScrollerType.QuotesMenu
                         || view.scroller.type === namespace.Pepper.ScrollerType.LastTrades
@@ -1346,7 +1513,7 @@
                     if (!clicked && !view.isActivityMode && !namespace.Core.currentAccount.watchOnly) {
                         clicked = testElement(0, point, view.tradeBtn, false);
                     }
-                    if (!clicked && !(view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange)) {
+                    if (!clicked && !(view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange && !view.selectedGameShop)) {
                         clicked = testElement(0, point, view.assetPicker, false);
                     }
                     if (!clicked && !view.isActivityMode) {
@@ -1377,7 +1544,7 @@
                     if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade && namespace.Core.currentAccount.offers.length) {
                         clicked = testElement(0, point, view.ordersBtn, false);
                     }
-                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange) {
+                    if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange && !view.selectedGameShop) {
                         clicked = testElement(0, point, view.gamerIdBtn, false);
                     }
                     if (!clicked && !view.isActivityMode) {
@@ -1399,7 +1566,8 @@
                         if (!view.isActivityMode
                             || view.activityType === namespace.Pepper.ActivityType.SelectSendAmount
                             || view.activityType === namespace.Pepper.ActivityType.Receive
-                            || view.activityType === namespace.Pepper.ActivityType.Trade) {
+                            || view.activityType === namespace.Pepper.ActivityType.Trade
+                            || (view.activityType === namespace.Pepper.ActivityType.Exchange && view.selectedGameShop)) {
                             view.carousel.downDistance = 0;
                             view.carousel.isDown = true;
                             view.carousel.canClick = true;
@@ -1442,16 +1610,31 @@
                                 }
                             }
                             else if (view.activityType === namespace.Pepper.ActivityType.Exchange) {
-                                testElement(0, point, view.promoBtn, false);
-                                if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
-                                    view.store.x, view.store.y, view.store.x + view.store.width, view.store.y + view.store.height)) {
-                                    view.store.downDistance = 0;
-                                    view.store.isDown = true;
-                                    view.store.canClick = true;
-                                    view.store.downTime = 0;
-                                    view.store.point = { "x": point.x, "y": point.y };
-                                    view.store.scrollTime = 1.5;
-                                    testStore(0, point, view.store, false);
+                                if (view.selectedGameShop) {
+                                    testElement(0, point, view.shopMenuBtn, false);
+                                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
+                                        view.shop.x, view.shop.y, view.shop.x + view.shop.width, view.shop.y + view.shop.height)) {
+                                        view.shop.downDistance = 0;
+                                        view.shop.isDown = true;
+                                        view.shop.canClick = true;
+                                        view.shop.downTime = 0;
+                                        view.shop.point = { "x": point.x, "y": point.y };
+                                        view.shop.scrollTime = 1.5;
+                                        testShop(0, point, view.shop, false);
+                                    }
+                                }
+                                else {
+                                    testElement(0, point, view.promoBtn, false);
+                                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
+                                        view.store.x, view.store.y, view.store.x + view.store.width, view.store.y + view.store.height)) {
+                                        view.store.downDistance = 0;
+                                        view.store.isDown = true;
+                                        view.store.canClick = true;
+                                        view.store.downTime = 0;
+                                        view.store.point = { "x": point.x, "y": point.y };
+                                        view.store.scrollTime = 1.5;
+                                        testStore(0, point, view.store, false);
+                                    }
                                 }
                             }
                         }
@@ -1620,28 +1803,53 @@
                                 }
                             }
                             else if (view.activityType === namespace.Pepper.ActivityType.Exchange) {
-                                testElement(1, point, view.promoBtn, isPointerDown);
-                                testStore(1, point, view.store, isPointerDown);
-                                testElement(1, point, view.gamerIdBtn, isPointerDown);
-                                if (view.store.maxOffset > 0) {
-                                    if (view.store.isDown && view.store.hasBar) {
-                                        let multiplier = 1;
-                                        if (view.store.offset < view.store.minOffset) {
-                                            multiplier = 0.35;
-                                        }
-                                        else if (view.store.offset > view.store.maxOffset) {
-                                            multiplier = 0.35;
-                                        }
+                                if (view.selectedGameShop) {
+                                    testElement(1, point, view.shopMenuBtn, isPointerDown);
+                                    testShop(1, point, view.shop, isPointerDown);
+                                    if (view.shop.maxOffset > 0) {
+                                        if (view.shop.isDown && view.shop.hasBar) {
+                                            let multiplier = 1;
+                                            if (view.shop.offset < view.shop.minOffset) {
+                                                multiplier = 0.35;
+                                            }
+                                            else if (view.shop.offset > view.shop.maxOffset) {
+                                                multiplier = 0.35;
+                                            }
 
-                                        if (Math.abs(view.store.point.y - point.y) > view.store.rowHeight * 0.05) {
-                                            view.store.offset += (view.store.point.y - point.y) * multiplier;
-                                            view.store.downDistance += view.store.point.y - point.y;
-                                            view.store.point = { "x": point.x, "y": point.y };
-                                            view.store.canClick = false;
+                                            if (Math.abs(view.shop.point.y - point.y) > view.shop.rowHeight * 0.05) {
+                                                view.shop.offset += (view.shop.point.y - point.y) * multiplier;
+                                                view.shop.downDistance += view.shop.point.y - point.y;
+                                                view.shop.point = { "x": point.x, "y": point.y };
+                                                view.shop.canClick = false;
+                                            }
                                         }
                                     }
+                                    view.shop.scrollTime = 1.5;
                                 }
-                                view.store.scrollTime = 1.5;
+                                else {
+                                    testElement(1, point, view.promoBtn, isPointerDown);
+                                    testStore(1, point, view.store, isPointerDown);
+                                    testElement(1, point, view.gamerIdBtn, isPointerDown);
+                                    if (view.store.maxOffset > 0) {
+                                        if (view.store.isDown && view.store.hasBar) {
+                                            let multiplier = 1;
+                                            if (view.store.offset < view.store.minOffset) {
+                                                multiplier = 0.35;
+                                            }
+                                            else if (view.store.offset > view.store.maxOffset) {
+                                                multiplier = 0.35;
+                                            }
+
+                                            if (Math.abs(view.store.point.y - point.y) > view.store.rowHeight * 0.05) {
+                                                view.store.offset += (view.store.point.y - point.y) * multiplier;
+                                                view.store.downDistance += view.store.point.y - point.y;
+                                                view.store.point = { "x": point.x, "y": point.y };
+                                                view.store.canClick = false;
+                                            }
+                                        }
+                                    }
+                                    view.store.scrollTime = 1.5;
+                                }
                             }
                         }
                         else {
@@ -2029,6 +2237,44 @@
                                 }
 
                                 break;
+                            case namespace.Pepper.ScrollerType.ShopConfirm:
+                                if (item.id === 3) {
+                                    view.selectedBuyItem.ready = false;
+                                    if (!view.selectedBuyItem.buying && !view.selectedBuyItem.failed && !view.selectedBuyItem.success) {
+                                        view.selectedBuyItem.buying = true;
+
+                                        let base = view.getActiveCarouselItem().asset;
+                                        stellarNet.sendPathPayment(
+                                            view.selectedBuyItem.data.id,
+                                            base.code,
+                                            base.issuer,
+                                            view.selectedBuyItem.data.orderPrice,
+                                            view.selectedGameShop.data.shop.code,
+                                            view.selectedGameShop.data.shop.issuer,
+                                            namespace.Pepper.Tools.formatPrice(view.selectedBuyItem.data.price),
+                                            view.selectedGameShop.data.shop.account,
+                                            view.selectedBuyItem.data.path,
+                                            (success, message) => {
+                                                view.selectedBuyItem.buying = false;
+                                                if (success) {
+                                                    view.selectedBuyItem.success = true;
+                                                }
+                                                else {
+                                                    view.selectedBuyItem.error = {
+                                                        error: true,
+                                                        status: message.response && message.response.data
+                                                            && message.response.data.extras
+                                                            && message.response.data.extras.result_codes
+                                                            && message.response.data.extras.result_codes.operations
+                                                            ? message.response.data.extras.result_codes.operations : message.response && message.response.data ? message.response.data.title : ""
+                                                    };
+                                                    console.log(view.selectedBuyItem.error);
+                                                    console.log(message);
+                                                }
+                                            });
+                                    }
+                                }
+                                break;
                             case namespace.Pepper.ScrollerType.AddAsset:
                                 if (!item.data.balance && item.overAddBtn && !namespace.Pepper.queryAsset && item.hasAdd) {
                                     item.overAddBtn = false;
@@ -2050,6 +2296,40 @@
                                     domShowAssetPage(true);
                                 }
                                 item.overAddBtn = false;
+                                break;
+                            case namespace.Pepper.ScrollerType.ShopMenu:
+                                view.scrollerEndTime = 0.1;
+                                switch (item.id) {
+                                    case 1:
+                                        if (namespace.Pepper.isDesktop) {
+                                            window.open(view.selectedGameShop.data.shop.website, "_blank");
+                                        }
+                                        else {
+                                            window.location = view.selectedGameShop.data.shop.website;
+                                        }                                       
+                                        break;
+                                    case 2:
+                                        if (namespace.Pepper.isDesktop) {
+                                            window.open(view.selectedGameShop.data.shop.terms, "_blank");
+                                        }
+                                        else {
+                                            window.location = view.selectedGameShop.data.shop.terms;
+                                        }    
+                                        break;
+                                    case 3:
+                                        if (namespace.Pepper.isDesktop) {
+                                            window.open(view.selectedGameShop.data.shop.privacy, "_blank");
+                                        }
+                                        else {
+                                            window.location = view.selectedGameShop.data.shop.privacy;
+                                        } 
+                                        break;
+                                    case 4:
+                                        view.selectedGameShop = null;
+                                        view.shopTime = 0.3;
+                                        break;
+                                }
+                                //view.selectedGameShop.data.shop.account
                                 break;
                             case namespace.Pepper.ScrollerType.AssetsMenu:
                                 if (item.enabled) {
@@ -2679,11 +2959,17 @@
 
                                 let close = false;
                                 testElement(2, point, view.numPadCloseBtn, isPointerDown, function () {
-                                    view.closeSendPage(() => {
-                                        domShowAddressForm(false);
-                                        domShowTradeForm(false);
-                                    });
-                                    close = true;
+                                    if (view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange && view.selectedGameShop) {
+                                        view.selectedGameShop = null;
+                                        view.shopTime = 0.3;
+                                    }
+                                    else {
+                                        view.closeSendPage(() => {
+                                            domShowAddressForm(false);
+                                            domShowTradeForm(false);
+                                        });
+                                        close = true;
+                                    }
                                 });
 
                                 if (view.activityType === namespace.Pepper.ActivityType.ConfirmSend && view.isActivityMode && view.numPad.length) {
@@ -2990,84 +3276,193 @@
                                     }
                                 }
                                 else if (view.activityType === namespace.Pepper.ActivityType.Exchange) {
-                                    if (view.store.isDown && view.store.hasBar) {
-                                        if (Math.abs(view.store.point.y - point.y) > view.store.rowHeight * 0.2) {
-                                            view.store.offset += (view.store.point.y - point.y) * 0.6;
-                                            view.store.downDistance += view.store.point.y - point.y;
-                                            view.store.point = { "x": point.x, "y": point.y };
-                                        }
-                                    }
-                                    view.store.isDown = false;
-                                    view.store.scrollTime = 1.5;
-
-                                    testElement(2, point, view.promoBtn, isPointerDown, function () {
-                                        if (namespace.Pepper.storeData.length > 1 && namespace.Pepper.storeData[1].valid) {
-                                            loadGame(namespace.Pepper.storeData[1].data.gameid, namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true);
-                                        }
-                                    });
-
-                                    
-                                    testElement(2, point, view.gamerIdBtn, isPointerDown, function () {
-                                        if (!namespace.Core.currentAccount.friendlyAddress &&
-                                            !namespace.Core.currentAccount.watchOnly) {
-
-                                            view.closeSendPage(() => {
-                                                domShowAddressForm(false);
-                                                domShowTradeForm(false);
-                                            });
-
-                                            domShowGetFriendlyPage();
-                                        }
-                                        else if(namespace.Core.currentAccount.friendlyAddress) {
-                                            if (window.Android) {
-                                                window.Android.copyToClipboard("address", namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
-                                            }
-                                            else if (namespace.Pepper.isWebkitHost()) {
-                                                webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": namespace.Core.currentAccount.friendlyAddress, "message": namespace.Pepper.Resources.localeText[122] });
-                                            }
-                                            else if (parent) {
-                                                parent.postMessage("litemint_copy:" + namespace.Core.currentAccount.friendlyAddress, "*");
-                                                parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                    if (view.selectedGameShop) {
+                                        if (view.shop.isDown && view.shop.hasBar) {
+                                            if (Math.abs(view.shop.point.y - point.y) > view.shop.rowHeight * 0.2) {
+                                                view.shop.offset += (view.shop.point.y - point.y) * 0.6;
+                                                view.shop.downDistance += view.shop.point.y - point.y;
+                                                view.shop.point = { "x": point.x, "y": point.y };
                                             }
                                         }
-                                    });
+                                        view.shop.isDown = false;
+                                        view.shop.scrollTime = 1.5;  
 
-                                    testStore(2, point, view.store, isPointerDown, function (item, index) {
-                                        if (view.store.canClick) {                             
-                                            if (!item.spot) {
-                                                if((index === 0 || index === 1) && item.data.data.gameid){
-                                                    loadGame(item.data.data.gameid, item.data.data.link);
-                                                }
-                                                else if (item.overPlayBtn && item.data.data.gameid) {
-                                                    loadGame(item.data.data.gameid, item.data.data.link);
-                                                }
-                                                else if (item.overScoreBtn && item.data.data.gameid) {
-                                                    view.selectedGame = item.data;
-                                                    if(view.selectedGame.data.leaderboard){
-                                                        view.loadScroller(namespace.Pepper.ScrollerType.Leaderboard); 
-                                                        if(namespace.leaderBoardRequestId){
-                                                            clearTimeout(namespace.leaderBoardRequestId);
+                                        testElement(2, point, view.shopMenuBtn, isPointerDown, function () {
+                                            view.loadScroller(namespace.Pepper.ScrollerType.ShopMenu);
+                                        });
+                                        
+                                        testShop(2, point, view.shop, isPointerDown, function (item, index) {
+                                            if (view.shop.canClick) {                             
+                                                if (!item.spot) {
+
+                                                    const shopPriceRate = view.getActiveCarouselItem().shopPriceRate;
+                                                    let convertedPrice;
+                                                    if(shopPriceRate && shopPriceRate.sourceAmount){
+                                                        convertedPrice = Number(item.data.price) * Number(shopPriceRate.sourceAmount) / Number(shopPriceRate.amount);
+                                                    }
+
+                                                    if (item.overBuyBtn && convertedPrice) {
+                                                        view.selectedBuyItem = item;
+                                                        view.selectedBuyItem.ready = false;
+                                                        view.selectedBuyItem.buying = false;
+                                                        view.selectedBuyItem.success = false;
+                                                        view.selectedBuyItem.error = null;
+                                                        let base = view.getActiveCarouselItem().asset;
+                                                        let hasEnough = convertedPrice <= namespace.Core.currentAccount.getMaxSend(base.balance, base) ? true : false;
+                                                        if (hasEnough) {
+                                                            let stellarNet = new namespace.Core.StellarNetwork();
+                                                            stellarNet.findPaymentPaths(
+                                                                view.selectedGameShop.data.shop.account,
+                                                                view.selectedGameShop.data.shop.code,
+                                                                view.selectedGameShop.data.shop.issuer,
+                                                                namespace.Pepper.Tools.formatPrice(view.selectedBuyItem.data.price),
+                                                                (success, result) => {                                 
+                                                                    if (success) {
+                                                                        // Extract the best price from results.
+                                                                        let sourceAmount;
+                                                                        let bestPath;
+                                                                        for (let v = 0; v < result.length; v += 1) {
+                                                                            if (result[v].source_asset_type === "native" && base.issuer === "native" || 
+                                                                                (base.code === result[v].source_asset_code && base.issuer === result[v].source_asset_issuer)) {
+                                                                                if (!sourceAmount) {
+                                                                                    sourceAmount = Number(result[v].source_amount);
+                                                                                    bestPath = result[v].path.slice();
+                                                                                }
+                                                                                else {
+                                                                                    if(Number(result[v].source_amount) < sourceAmount){
+                                                                                        sourceAmount = Number(result[v].source_amount);
+                                                                                        bestPath = result[v].path.slice();
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        if (sourceAmount) {                                                                            
+                                                                            view.selectedBuyItem.data.path = bestPath;
+                                                                            view.selectedBuyItem.data.orderPrice = namespace.Pepper.Tools.formatPrice(sourceAmount);
+                                                                            view.selectedBuyItem.ready = true;
+                                                                        }
+                                                                    }                            
+                                                                });
+
+                                                            view.loadScroller(namespace.Pepper.ScrollerType.ShopConfirm);
                                                         }
-                                                        namespace.leaderBoardRequestId = setTimeout(() => { 
-                                                            namespace.leaderBoardRequestId = null;
-                                                            retrieveLeaderboard();                                                       
-                                                        }, 1000);
-                                                    }                                                    
+                                                    }
+                                                    else if (item.overMoreBtn) {                                                       
+                                                        if (namespace.Pepper.isDesktop) {
+                                                            window.open(item.data.moreLink, "_blank");
+                                                        }
+                                                        else {
+                                                            window.location = item.data.moreLink;
+                                                        }
+                                                    }
+                                                }
+
+                                                if (item.overBuyBtn) {
+                                                    item.overBuyBtn = false;
+                                                }
+                                                if (item.overMoreBtn) {
+                                                    item.overMoreBtn = false;
                                                 }
                                             }
+                                            else {
+                                                item.overBuyBtn = false;
+                                                item.overMoreBtn = false;
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        if (view.store.isDown && view.store.hasBar) {
+                                            if (Math.abs(view.store.point.y - point.y) > view.store.rowHeight * 0.2) {
+                                                view.store.offset += (view.store.point.y - point.y) * 0.6;
+                                                view.store.downDistance += view.store.point.y - point.y;
+                                                view.store.point = { "x": point.x, "y": point.y };
+                                            }
+                                        }
+                                        view.store.isDown = false;
+                                        view.store.scrollTime = 1.5;
 
-                                            if (item.overPlayBtn) {
+                                        testElement(2, point, view.promoBtn, isPointerDown, function () {
+                                            if (namespace.Pepper.storeData.length > 1 && namespace.Pepper.storeData[1].valid) {
+                                                loadGame(namespace.Pepper.storeData[1].data.gameid, namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true);
+                                            }
+                                        });
+
+                                        
+                                        testElement(2, point, view.gamerIdBtn, isPointerDown, function () {
+                                            if (!namespace.Core.currentAccount.friendlyAddress &&
+                                                !namespace.Core.currentAccount.watchOnly) {
+
+                                                view.closeSendPage(() => {
+                                                    domShowAddressForm(false);
+                                                    domShowTradeForm(false);
+                                                });
+
+                                                domShowGetFriendlyPage();
+                                            }
+                                            else if(namespace.Core.currentAccount.friendlyAddress) {
+                                                if (window.Android) {
+                                                    window.Android.copyToClipboard("address", namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
+                                                }
+                                                else if (namespace.Pepper.isWebkitHost()) {
+                                                    webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": namespace.Core.currentAccount.friendlyAddress, "message": namespace.Pepper.Resources.localeText[122] });
+                                                }
+                                                else if (parent) {
+                                                    parent.postMessage("litemint_copy:" + namespace.Core.currentAccount.friendlyAddress, "*");
+                                                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                }
+                                            }
+                                        });
+
+                                        testStore(2, point, view.store, isPointerDown, function (item, index) {
+                                            if (view.store.canClick) {                             
+                                                if (!item.spot) {
+                                                    if((index === 0 || index === 1) && item.data.data.gameid){
+                                                        loadGame(item.data.data.gameid, item.data.data.link);
+                                                    }
+                                                    else if (item.overPlayBtn && item.data.data.gameid) {
+                                                        loadGame(item.data.data.gameid, item.data.data.link);
+                                                    }
+                                                    else if (item.overScoreBtn && item.data.data.gameid) {
+                                                        view.selectedGame = item.data;
+                                                        if(view.selectedGame.data.leaderboard){
+                                                            view.loadScroller(namespace.Pepper.ScrollerType.Leaderboard); 
+                                                            if(namespace.leaderBoardRequestId){
+                                                                clearTimeout(namespace.leaderBoardRequestId);
+                                                            }
+                                                            namespace.leaderBoardRequestId = setTimeout(() => { 
+                                                                namespace.leaderBoardRequestId = null;
+                                                                retrieveLeaderboard();                                                       
+                                                            }, 1000);
+                                                        }                                                    
+                                                    }
+                                                    else if (item.overShopBtn && item.data.data.gameid) {
+                                                        if(item.data.data.shop){
+                                                            // TODO: bring the shop scroller to the top.
+                                                            // Enable the currency swapping.
+                                                            view.selectedGameShop = item.data;
+                                                            view.shopTime = 0.3;
+                                                            loadShop();
+                                                        }                                                    
+                                                    }
+                                                }
+
+                                                if (item.overPlayBtn) {
+                                                    item.overPlayBtn = false;
+                                                }
+                                                if (item.overScoreBtn) {
+                                                    item.overScoreBtn = false;
+                                                }
+                                                if (item.overShopBtn) {
+                                                    item.overShopBtn = false;
+                                                }
+                                            }
+                                            else {
                                                 item.overPlayBtn = false;
-                                            }
-                                            if (item.overScoreBtn) {
                                                 item.overScoreBtn = false;
+                                                item.overShopBtn = false;
                                             }
-                                        }
-                                        else {
-                                            item.overPlayBtn = false;
-                                            item.overScoreBtn = false;
-                                        }
-                                    });
+                                        });
+                                    }
                                 }
                             }
                             else {
@@ -3172,7 +3567,7 @@
                                                 if (!item.data.balance && item.overAddBtn && !namespace.Pepper.queryAsset && item.hasAdd) {
                                                     item.overAddBtn = false;
                                                     namespace.Pepper.queryAsset = item.data;
-                                                    var stellarNet = new namespace.Core.StellarNetwork();
+                                                    let stellarNet = new namespace.Core.StellarNetwork();
                                                     stellarNet.setTrust(
                                                         new StellarSdk.Asset(
                                                             item.data.code,
@@ -3293,8 +3688,7 @@
                     if(url[url.length - 1] !== "/"){
                         url += "/";
                     }
-                    // TODO: allow users to customize their account avatar.
-                    url += "?token=" + token + "&avatar=";
+                    url += "?token=" + token;
                     domShowApp(true, url, noloader);
                 }
             });
@@ -3303,6 +3697,7 @@
 
     function retrieveLeaderboard() {
         if(view && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange 
+            && view.showScroller
             && view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard
             && view.selectedGame && view.selectedGame.data && view.selectedGame.data.leaderboard) {
             let playerName = "";
@@ -3556,7 +3951,6 @@
                 }
 
                 if (orders) {
-                    console.log(namespace.Core.currentAccount.offers);
                     view.cancellingOffer = 0;
                     if (view.showScroller && view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders) {
                         view.scroller.items = [];

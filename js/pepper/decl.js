@@ -44,7 +44,9 @@
             "QuotesMenu": 9,
             "LastTrades": 10,
             "LiveOrders": 11,
-            "Leaderboard": 12
+            "Leaderboard": 12,
+            "ShopMenu": 13,
+            "ShopConfirm": 14
         },
 
         /**

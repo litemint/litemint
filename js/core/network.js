@@ -398,6 +398,63 @@
             });
     };
 
+    // Find payment paths.
+    namespace.Core.StellarNetwork.prototype.findPaymentPaths = function (account, code, issuer, amount, cb) {
+        const asset = (issuer === "native") 
+            ? StellarSdk.Asset.native() 
+            : new StellarSdk.Asset(code, issuer);
+        stellarServer.paths(namespace.Core.currentAccount.keys.publicKey(), account, asset, amount)
+            .call()
+            .then(function (pathResult) {
+                cb(true, pathResult.records);
+            })
+            .catch(function (error) {
+                cb(false, error);
+            });
+    };
+
+    // Send path payment.
+    namespace.Core.StellarNetwork.prototype.sendPathPayment = function (id, srccode, srcissuer, srcamount, 
+        destcode, destissuer, destamount, destaccount, pathassets, cb) {
+        const srcasset = (srcissuer === "native") 
+            ? StellarSdk.Asset.native() : new StellarSdk.Asset(srccode, srcissuer);    
+        const destasset = (destissuer === "native") 
+            ? StellarSdk.Asset.native() : new StellarSdk.Asset(destcode, destissuer);
+
+        const memo = StellarSdk.Memo.text(id);
+
+        let path = [];
+        for (let i = 0; i < pathassets.length; i += 1) {
+            let asset = (pathassets[i].asset_type === "native")
+                ? StellarSdk.Asset.native() : new StellarSdk.Asset(pathassets[i].asset_code, pathassets[i].asset_issuer);
+            path.push(asset);
+        }
+
+        stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
+            .then((sourceAccount) => {
+                const transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE })
+                    .addOperation(StellarSdk.Operation.pathPayment({
+                        sendAsset: srcasset,
+                        sendMax: srcamount,
+                        destination: destaccount,
+                        destAsset: destasset,
+                        destAmount: destamount,
+                        path: path
+                    }))
+                    .addMemo(memo)
+                    .setTimeout(60)
+                    .build();
+                transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
+                return stellarServer.submitTransaction(transaction);
+            })
+            .then(function (result) {
+                cb(true, result);
+            })
+            .catch(function (error) {
+                cb(false, error);
+            });
+    };
+
     // Check the account has established a trustline to the asset.
     namespace.Core.StellarNetwork.prototype.hasTrustline = function (account, asset) {
         const trusted =

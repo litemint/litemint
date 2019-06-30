@@ -80,6 +80,7 @@
         this.error = namespace.Pepper.ViewErrorType.None;
         this.retryTime = 0;
         this.deleteStep = 0;
+        this.shopTime = 0;
     };
 
     // Load the view.
@@ -135,12 +136,14 @@
         this.activityLabel = new namespace.Pepper.HudElement();
         this.promoBtn = new namespace.Pepper.HudElement();
         this.gamerIdBtn = new namespace.Pepper.HudElement();
+        this.shopMenuBtn = new namespace.Pepper.HudElement();
         this.scroller = namespace.Pepper.createScrollElement();
         this.carousel = namespace.Pepper.createScrollElement();
         this.carousel.oldActive = 0;
         this.list = namespace.Pepper.createScrollElement();
         this.book = namespace.Pepper.createScrollElement();
         this.store = namespace.Pepper.createScrollElement();
+        this.shop = namespace.Pepper.createScrollElement();
         this.resize(width, height);
         this.setupLanguage(languageId, cb);
     };
@@ -198,6 +201,7 @@
         this.scrollerTime = updateTimer(elapsed, this.scrollerTime, 1.2);
         this.modalPageTime = updateTimer(elapsed, this.modalPageTime, 1.2);
         this.retryTime = updateTimer(elapsed, this.retryTime, 0.2);
+        this.shopTime = updateTimer(elapsed, this.shopTime);
         this.scrollerEndTime = 
             updateTimer(elapsed, this.scrollerEndTime, 1,
             () => {
@@ -381,6 +385,21 @@
                 this.scroller.width = this.viewport.width * 0.7 - this.unit * 0.8;
                 this.scroller.height = this.viewport.height - this.scroller.headerHeight;
                 this.scroller.translatePoint = { "x": this.moreBtn.x + this.moreBtn.width, "y": this.moreBtn.y };
+                break;
+            case namespace.Pepper.ScrollerType.ShopConfirm:
+                this.scroller.headerHeight = this.viewport.height - this.unit * 4;
+                this.scroller.x = this.viewport.x;
+                this.scroller.y = this.viewport.y + this.scroller.headerHeight;
+                this.scroller.width = this.viewport.width;
+                this.scroller.height = this.viewport.height - this.scroller.headerHeight;
+                break;
+            case namespace.Pepper.ScrollerType.ShopMenu:
+                this.scroller.headerHeight = this.unit * 1.7;
+                this.scroller.width = this.viewport.width * 0.68 - this.unit * 0.8;
+                this.scroller.x = this.shopMenuBtn.x + this.shopMenuBtn.width - this.scroller.width;
+                this.scroller.y = this.shopMenuBtn.y;
+                this.scroller.height = this.viewport.height - this.scroller.headerHeight;
+                this.scroller.translatePoint = { "x": this.shopMenuBtn.x + this.shopMenuBtn.width, "y": this.shopMenuBtn.y };
                 break;
             case namespace.Pepper.ScrollerType.AccountSettings:
                 this.scroller.headerHeight = this.unit * 2.7;
@@ -604,7 +623,14 @@
         this.updateTabs(elapsed);
         this.updateList(elapsed);
         this.updateBook(elapsed);
-        this.updateStore(elapsed);
+
+        if (this.selectedGameShop || this.shopTime) {
+            this.updateShop(elapsed);
+        }
+
+        if (!this.selectedGameShop || this.shopTime) {
+            this.updateStore(elapsed);
+        }
 
         this.needRedraw |= this.menuBtn.update(elapsed);
         this.needRedraw |= this.accountBtn.update(elapsed);
@@ -1333,7 +1359,7 @@
 
         this.store.headerHeight = this.unit * 2.39;
         this.store.rowHeight = this.unit * 1.5;
-        this.store.x = this.viewport.x;
+        this.store.x = this.viewport.x - (this.selectedGameShop ? this.width * 6 * (0.3 - this.shopTime) : this.width * 6 * this.shopTime);
         this.store.y = this.viewport.y + this.unit * 4 + this.store.headerHeight;
         this.store.width = this.viewport.width;
         this.store.height = this.viewport.height - (this.store.headerHeight + this.unit * 5.2);
@@ -1439,7 +1465,7 @@
 
         this.promoBtn.width = this.viewport.width;
         this.promoBtn.height = this.store.headerHeight - this.unit * 0.52;
-        this.promoBtn.x = this.viewport.x;
+        this.promoBtn.x = this.store.x;
         this.promoBtn.y = this.store.y - this.store.headerHeight + this.unit * 0.3;
         this.promoBtn.tx = this.promoBtn.x;
         this.promoBtn.ty = this.promoBtn.y;
@@ -1456,6 +1482,126 @@
             this.gamerIdBtn.speed = 7;
         }
     };
+
+    // Update the shop.
+    namespace.Pepper.View.prototype.updateShop = function (elapsed) {
+        this.needRedraw |= this.shopMenuBtn.update(elapsed);
+        this.shop.startTime = updateTimer(elapsed, this.shop.startTime);
+
+        this.shop.headerHeight = this.unit * 2.39;
+        this.shop.rowHeight = this.unit * 2.5;
+        this.shop.x = this.viewport.x + (!this.selectedGameShop ? this.width * 2 * (0.3 - this.shopTime) : this.width * 2 * this.shopTime);
+        this.shop.y = this.viewport.y + this.unit * 4 + this.shop.headerHeight;
+        this.shop.width = this.viewport.width;
+        this.shop.height = this.viewport.height - (this.shop.headerHeight + this.unit * 5.2);
+
+        if (!this.shop.isDown) {
+            this.shop.scrollTime = updateTimer(elapsed, this.shop.scrollTime, 2);
+        }
+
+        this.shop.spotOffset = 0;
+        this.shop.minOffset = 0;
+        this.shop.maxOffset = 0;
+        let x = this.shop.x;
+        let y = this.shop.y;
+        this.shop.maxOffset = y - (this.unit * 4 + this.shop.headerHeight + namespace.Pepper.barHeight);
+
+        for (let i = 0; i < this.shop.items.length; i += 1) {
+            let item = this.shop.items[i];
+            item.x = x;
+            item.y = y;
+            item.width = this.shop.width;
+            item.height = this.shop.rowHeight;
+            this.shop.maxOffset += item.height;
+            y += item.height;
+
+            if (item.spot && !this.shop.isDown) {
+                this.shop.spotOffset = Math.max(0, this.shop.maxOffset - item.height * 0.5 - this.shop.height * 0.5);
+            }
+        }
+
+        if (this.shop.adjustOffset) {
+            this.shop.adjustOffset = false;
+            this.shop.offset = this.shop.spotOffset;
+        }
+
+        this.shop.hasBar = false;
+        if (this.shop.maxOffset > this.shop.height) {
+            this.shop.hasBar = true;
+            this.shop.barSize = this.shop.height * this.shop.height / this.shop.maxOffset;
+        }
+        else {
+            this.shop.offset = 0;
+        }
+
+        this.shop.maxOffset -= this.shop.height;
+
+        if (this.shop.maxOffset > 0) {
+            if (!this.shop.isDown) {
+                if (this.shop.wasDown) {
+                    this.shop.wasDown = false;
+                }
+                if (this.shop.downDistance !== 0) {
+                    const threshold = 0.3;
+                    const velocity = Math.max(0, threshold - this.shop.downTime) * 1.5;
+                    if (velocity) {
+                        this.shop.offset += this.shop.downDistance * velocity;
+                        this.shop.downTime += elapsed * 0.15;
+
+                        if (this.shop.offset < this.shop.minOffset - this.shop.rowHeight * 1.3) {
+                            this.shop.offset = this.shop.minOffset - this.shop.rowHeight * 1.3;
+                            this.shop.downTime = threshold;
+                        }
+                        else if (this.shop.offset > this.shop.maxOffset + this.shop.rowHeight * 1.3) {
+                            this.shop.offset = this.shop.maxOffset + this.shop.rowHeight * 1.3;
+                            this.shop.downTime = threshold;
+                        }
+                        this.needRedraw = true;
+                    }
+
+                    if (this.shop.downTime >= threshold) {
+                        this.shop.downDistance = 0;
+                    }
+                }
+            }
+
+            if (!this.shop.isDown) {
+                if (this.shop.offset < this.shop.minOffset) {
+                    this.shop.offset += this.shop.rowHeight * elapsed * 13;
+                    if (this.shop.offset > this.shop.minOffset) {
+                        this.shop.offset = this.shop.minOffset;
+                    }
+                    this.needRedraw = true;
+                }
+                else if (this.shop.offset > this.shop.maxOffset) {
+                    this.shop.offset -= this.shop.rowHeight * elapsed * 13;
+                    if (this.shop.offset < this.shop.maxOffset) {
+                        this.shop.offset = this.shop.maxOffset;
+                    }
+                    this.needRedraw = true;
+                }
+            }
+            else {
+                this.shop.wasDown = true;
+                this.shop.downTime += elapsed;
+
+                if (this.shop.offset < this.shop.minOffset - this.shop.rowHeight * 1.3) {
+                    this.shop.offset = this.shop.minOffset - this.shop.rowHeight * 1.3;
+                }
+                else if (this.shop.offset > this.shop.maxOffset + this.shop.rowHeight * 1.3) {
+                    this.shop.offset = this.shop.maxOffset + this.shop.rowHeight * 1.3;
+                }
+            }
+        }
+
+        this.shopMenuBtn.width = this.unit * 1;
+        this.shopMenuBtn.height = this.unit * 1;
+        this.shopMenuBtn.x = this.shop.x + this.shop.width - this.unit * 1.2;
+        this.shopMenuBtn.y = this.carousel.y + this.carousel.height + this.unit * 0.5;
+        this.shopMenuBtn.tx = this.shopMenuBtn.x;
+        this.shopMenuBtn.ty = this.shopMenuBtn.y;
+        this.shopMenuBtn.spawned = false;
+    }; 
 
     // Update the numpad.
     namespace.Pepper.View.prototype.updateNumPad = function (elapsed) {
@@ -1930,12 +2076,25 @@
 
         context.save();
 
+
+        if (this.scroller.type === namespace.Pepper.ScrollerType.ShopConfirm) {
+            if (this.showScroller && !this.scrollerEndTime) {
+                context.fillStyle = "rgba(0, 0, 0, " + 2 * (0.3 - this.scrollerTime) + ")";
+                context.fillRect(this.scroller.x, this.scroller.y - this.scroller.headerHeight - namespace.Pepper.barHeight, this.width, this.scroller.height + this.scroller.headerHeight + namespace.Pepper.barHeight);
+            }
+            else if(this.scrollerEndTime){
+                context.fillStyle = "rgba(0, 0, 0, " + 2 * this.scrollerEndTime + ")";
+                context.fillRect(this.scroller.x, this.scroller.y - this.scroller.headerHeight - namespace.Pepper.barHeight, this.width, this.scroller.height + this.scroller.headerHeight + namespace.Pepper.barHeight);   
+            }
+        }
+
         switch (this.scroller.type) {
             case namespace.Pepper.ScrollerType.Leaderboard:
             case namespace.Pepper.ScrollerType.LiveOrders:
             case namespace.Pepper.ScrollerType.LastTrades:
                 context.translate(-this.scrollerTime * this.viewport.width * 6, 0);
                 break;
+            case namespace.Pepper.ScrollerType.ShopConfirm:
             case namespace.Pepper.ScrollerType.AddAsset:
             case namespace.Pepper.ScrollerType.Assets:
             case namespace.Pepper.ScrollerType.Currencies:
@@ -1944,6 +2103,7 @@
             case namespace.Pepper.ScrollerType.QuotesMenu:
             case namespace.Pepper.ScrollerType.FilterMenu:
             case namespace.Pepper.ScrollerType.AssetsMenu:
+            case namespace.Pepper.ScrollerType.ShopMenu:
                 context.translate(this.scroller.translatePoint.x, this.scroller.translatePoint.y);
                 context.scale(1 - this.scrollerTime * 3, 1 - this.scrollerTime * 3);
                 context.translate(-this.scroller.translatePoint.x, -this.scroller.translatePoint.y);
@@ -1961,6 +2121,7 @@
                 case namespace.Pepper.ScrollerType.LastTrades:
                     context.translate(-(0.3 - this.scrollerEndTime) * this.width * 5, 0);
                     break;
+                case namespace.Pepper.ScrollerType.ShopConfirm:
                 case namespace.Pepper.ScrollerType.AddAsset:
                 case namespace.Pepper.ScrollerType.Assets:
                 case namespace.Pepper.ScrollerType.Currencies:
@@ -1969,6 +2130,7 @@
                 case namespace.Pepper.ScrollerType.QuotesMenu:
                 case namespace.Pepper.ScrollerType.FilterMenu:
                 case namespace.Pepper.ScrollerType.AssetsMenu:
+                case namespace.Pepper.ScrollerType.ShopMenu:
                     context.globalAlpha = context.globalAlpha * this.scrollerEndTime * 3;
                     context.translate(this.scroller.translatePoint.x, this.scroller.translatePoint.y);
                     context.scale(this.scrollerEndTime * 3, this.scrollerEndTime * 3);
@@ -2027,6 +2189,7 @@
             case namespace.Pepper.ScrollerType.QuotesMenu:
             case namespace.Pepper.ScrollerType.FilterMenu:
             case namespace.Pepper.ScrollerType.AssetsMenu:
+            case namespace.Pepper.ScrollerType.ShopMenu:
                 context.save();
                 context.fillStyle = "rgb(255, 255, 255)";
                 context.shadowColor = "rgba(0, 0, 0, 0.3)";
@@ -2038,6 +2201,7 @@
                 }
                 context.restore();
                 break;
+            case namespace.Pepper.ScrollerType.ShopConfirm:
             case namespace.Pepper.ScrollerType.AddAsset:
             case namespace.Pepper.ScrollerType.Assets:
             case namespace.Pepper.ScrollerType.Currencies:
@@ -2062,10 +2226,12 @@
             case namespace.Pepper.ScrollerType.LastTrades:
                 this.roundRect(context, this.scroller.x - this.unit * 0.2, this.scroller.y, this.scroller.width + this.unit * 0.2, this.scroller.height, this.unit * 0.2, "rgb(255, 255, 255)");
                 break;
+            case namespace.Pepper.ScrollerType.ShopConfirm:
             case namespace.Pepper.ScrollerType.AccountSettings:
             case namespace.Pepper.ScrollerType.QuotesMenu:
             case namespace.Pepper.ScrollerType.FilterMenu:
             case namespace.Pepper.ScrollerType.AssetsMenu:
+            case namespace.Pepper.ScrollerType.ShopMenu:            
             case namespace.Pepper.ScrollerType.AddAsset:
             case namespace.Pepper.ScrollerType.Assets:
             case namespace.Pepper.ScrollerType.Currencies:
@@ -2081,6 +2247,7 @@
         context.translate(0, -this.scroller.offset);
 
         switch (this.scroller.type) {
+            case namespace.Pepper.ScrollerType.ShopConfirm:
             case namespace.Pepper.ScrollerType.AddAsset:
             case namespace.Pepper.ScrollerType.Assets:
             case namespace.Pepper.ScrollerType.Currencies:
@@ -2107,7 +2274,7 @@
                 }
 
                 let textColor = "rgb(36, 41, 46)";
-                if (this.scroller.type === namespace.Pepper.ScrollerType.AssetsMenu) {
+                if (this.scroller.type === namespace.Pepper.ScrollerType.AssetsMenu || this.scroller.type === namespace.Pepper.ScrollerType.ShopMenu) {
                     context.fillStyle = (item.selected || item.hover) && item.enabled ? "rgba(36, 41, 46, 0.07)" : "rgb(255, 255, 255)";
                 }
                 else {
@@ -2140,10 +2307,29 @@
                     }
                 }
 
-                if (this.scroller.type !== namespace.Pepper.ScrollerType.AccountSettings) {
+                if (this.scroller.type !== namespace.Pepper.ScrollerType.AccountSettings && this.scroller.type !== namespace.Pepper.ScrollerType.ShopConfirm) {
                     context.fillRect(item.x, item.y, item.width, item.height);
                     context.fillStyle = "rgba(36, 41, 46, 0.07)";
                     context.fillRect(item.x, item.y + item.height - this.unit * 0.03, item.width, this.unit * 0.03);
+                }
+                else if (this.scroller.type === namespace.Pepper.ScrollerType.ShopConfirm) {
+                    if (item.id === 3) {
+                        textColor = "rgb(255, 255, 255)";
+                        if (this.selectedBuyItem.ready && (item.selected || item.hover)) {
+                            textColor = "rgba(255, 255, 255, 0.6)";
+                        }
+                        else if (!this.selectedBuyItem.ready) {
+                            textColor = "rgba(36, 41, 46, 0.5)";
+                        }
+                        context.font = this.getFont("Roboto-Medium");
+                        if (!this.selectedBuyItem.success && !this.selectedBuyItem.error) {
+                            this.roundRect(context, item.x + this.unit * 0.2, item.y, item.width - this.unit * 0.4, item.height - this.unit * 0.1, this.unit * 0.18, this.selectedBuyItem.ready ? "rgb(23, 156, 75)" : "rgba(36, 41, 46, 0.1)");
+                        }
+                    }
+                    else {
+                        context.fillStyle = "rgb(255, 255, 255)";
+                        context.fillRect(item.x, item.y, item.width, item.height);
+                    }
                 }
 
                 if (this.scroller.type === namespace.Pepper.ScrollerType.FilterMenu) {
@@ -2383,13 +2569,70 @@
                 else if (this.scroller.type === namespace.Pepper.ScrollerType.Assets) {
                     this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, item.label, textColor, 0.79);
                 }
+                else if (this.scroller.type === namespace.Pepper.ScrollerType.ShopConfirm) {
+                    context.save();
+                    if (item.id === 3) {
+                        if (!this.selectedBuyItem.success && !this.selectedBuyItem.error) {
+                            if (this.selectedBuyItem.ready) {
+                                this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, namespace.Pepper.Resources.localeText[197], textColor, 0.79);
+                            }
+                            else {
+                                this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, namespace.Pepper.Resources.localeText[196], textColor, 0.79);
+                            }
+                        }
+                    }
+                    else if (item.id === 2) {
+                        if (!this.selectedBuyItem.ready && !this.selectedBuyItem.success && !this.selectedBuyItem.error) {
+                            this.drawLoader(context, item.x + item.width * 0.5, item.y + item.height * 0.4, this.unit * 0.8, true);
+                        }
+                        else {
+                            context.textAlign = "left";
+                            context.font = this.getFont("Roboto-Bold");
+                            let base = this.getActiveCarouselItem().asset;
+                            if (this.selectedBuyItem.error) {
+                                context.textAlign = "center";
+                                context.font = this.getFont("Roboto-Regular");
+                                this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.3, this.selectedBuyItem.error.status, textColor, 0.79);
+                            }
+                            else if (!this.selectedBuyItem.success) {
+                                this.drawText(context, item.x + this.unit * 2, item.y + item.height * 0.3, namespace.Pepper.Resources.localeText[198] + ": " + this.selectedBuyItem.data.orderPrice + " " + base.code, textColor, 0.79);
+                            }                            
+                        }
+
+                        context.translate (0, -item.height);
+                        if (!this.selectedBuyItem.ready) {
+                            context.font = this.getFont("Roboto-Bold");
+                            context.textAlign = "center";
+                            if (this.selectedBuyItem.success || this.selectedBuyItem.error) {
+                                this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, 
+                                    this.selectedBuyItem.success ? namespace.Pepper.Resources.localeText[201] : namespace.Pepper.Resources.localeText[178], 
+                                    this.selectedBuyItem.success ? "rgb(23, 156, 75)" : "#db5365", 0.79);
+                            }
+                            else {
+                                this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, this.selectedBuyItem.buying ? namespace.Pepper.Resources.localeText[202] : namespace.Pepper.Resources.localeText[195], textColor, 0.79);
+                            }                            
+                        }
+                        else {
+                            if (this.selectedBuyItem.imagevalid) {
+                                context.drawImage(this.selectedBuyItem.image, item.x + this.unit * 0.2, item.y + this.unit * 0.2, this.unit * 1.5, this.unit * 1.5);
+                            }
+                            context.textAlign = "left";
+                            context.font = this.getFont("Roboto-Regular");
+                            this.drawText(context, item.x + this.unit * 2, item.y + item.height * 0.85, this.shop.data.data.name, textColor, 0.7);
+                            context.font = this.getFont("Roboto-Bold");
+                            this.drawText(context, item.x + this.unit * 2, item.y + item.height * 0.46, this.selectedBuyItem.data.name, textColor, 0.79);
+                            
+                        }
+                    }
+                    context.restore();
+                }
                 else if (this.scroller.type === namespace.Pepper.ScrollerType.Currencies) {
                     this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, item.label, textColor, 0.79);
                 }
                 else if (this.scroller.type === namespace.Pepper.ScrollerType.AddAsset) {
                     this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, item.label, textColor, 0.79);
                 }
-                else if (this.scroller.type === namespace.Pepper.ScrollerType.AssetsMenu) {
+                else if (this.scroller.type === namespace.Pepper.ScrollerType.AssetsMenu || this.scroller.type === namespace.Pepper.ScrollerType.ShopMenu) {
                     textColor = item.enabled ? textColor : "rgba(36, 41, 46, 0.3)";
                     this.drawText(context, item.x + this.unit * 0.5, item.y + item.height * 0.5, item.label, textColor, 0.79);
                 }
@@ -2413,9 +2656,11 @@
         context.restore();
 
         if (this.scroller.type !== namespace.Pepper.ScrollerType.AddAsset
+            && this.scroller.type !== namespace.Pepper.ScrollerType.ShopConfirm
             && this.scroller.type !== namespace.Pepper.ScrollerType.Assets
             && this.scroller.type !== namespace.Pepper.ScrollerType.Currencies
             && this.scroller.type !== namespace.Pepper.ScrollerType.AssetsMenu
+            && this.scroller.type !== namespace.Pepper.ScrollerType.ShopMenu
             && this.scroller.type !== namespace.Pepper.ScrollerType.QuotesMenu
             && this.scroller.type !== namespace.Pepper.ScrollerType.LastTrades
             && this.scroller.type !== namespace.Pepper.ScrollerType.Leaderboard
@@ -2444,9 +2689,11 @@
                     text = namespace.Pepper.Resources.localeText[138];
                     break;
                 case namespace.Pepper.ScrollerType.AddAsset:
+                case namespace.Pepper.ScrollerType.ShopConfirm:
                 case namespace.Pepper.ScrollerType.Assets:
                 case namespace.Pepper.ScrollerType.Currencies:
                 case namespace.Pepper.ScrollerType.AssetsMenu:
+                case namespace.Pepper.ScrollerType.ShopMenu:
                 case namespace.Pepper.ScrollerType.FilterMenu:
                 case namespace.Pepper.ScrollerType.QuotesMenu:
                 case namespace.Pepper.ScrollerType.LastTrades:
@@ -2831,7 +3078,12 @@
                 labelText = namespace.Pepper.Resources.localeText[46];
                 break;
             case namespace.Pepper.ActivityType.Exchange:
-                labelText = namespace.Pepper.Resources.localeText[180];
+                if (this.selectedGameShop) {
+                    labelText = namespace.Pepper.Resources.localeText[200];
+                }
+                else {
+                    labelText = namespace.Pepper.Resources.localeText[180];
+                }
                 break;
         }
         context.font = this.getFont("Roboto-Medium");
@@ -3096,7 +3348,7 @@
         if (this.isActivityMode && this.activityType === namespace.Pepper.ActivityType.Exchange) {
             context.save();
             context.fillStyle = namespace.Pepper.Resources.primaryColor;
-            context.fillRect(this.carousel.x - this.unit * 5, this.carousel.y - this.carousel.headerHeight - namespace.Pepper.barHeight, this.carousel.width + this.unit * 5, this.carousel.height + this.unit * 0.5 + this.carousel.headerHeight + namespace.Pepper.barHeight);
+            context.fillRect(this.store.x, namespace.Pepper.barHeight, this.store.width, this.carousel.height + this.unit * 0.5 + this.carousel.headerHeight);
             if (namespace.Pepper.storeData.length && namespace.Pepper.storeData[0].validHeader) {
                 context.drawImage(namespace.Pepper.storeData[0].headerImage, this.store.x, namespace.Pepper.barHeight, this.store.width, this.carousel.height + this.unit * 0.5 + this.carousel.headerHeight);
             }
@@ -3850,6 +4102,85 @@
         context.restore();
     };
 
+    // Draw the shop.
+    namespace.Pepper.View.prototype.drawShop = function (context) {
+        context.save();
+
+        context.textAlign = "left";
+        context.font = this.getFont("Roboto-Regular");
+
+        context.fillStyle = "rgb(36, 41, 46)";
+        context.fillRect(this.shop.x, this.shop.y - this.shop.headerHeight + this.unit * 0.3, this.promoBtn.width, this.promoBtn.height);
+        if(this.shop.data){
+            const topY = this.shop.y - this.shop.headerHeight + this.unit * 0.5;
+            if (this.shop.data.image) {
+                context.drawImage(this.shop.data.image, this.shop.x + this.unit * 0.2, topY, this.promoBtn.height - this.unit * 0.4, this.promoBtn.height - this.unit * 0.4);
+            }
+            context.font = this.getFont("Roboto-Bold");
+            context.textAlign = "left";
+            this.drawText(context, this.shop.x + this.unit * 1.9, topY + this.unit * 0.4, this.shop.data.data.name, "rgb(255, 255, 255)", 0.8);
+            context.font = this.getFont("Roboto-Thin");
+            this.drawText(context, this.shop.x + this.unit * 1.9, topY + this.unit * 1, this.shop.data.data.shop.description, "rgba(255, 255, 255, 0.7)", 0.65);
+        }
+
+        context.save();
+        context.beginPath();
+        context.rect(this.shop.x, this.shop.y - this.unit * 0.2, this.shop.width, this.shop.height + this.unit * 0.2);
+        context.clip();
+
+        context.save();
+        context.translate(0, -this.shop.offset);
+
+        for (let i = 0; i < this.shop.items.length; i += 1) {
+            let item = this.shop.items[i];
+            if (item.y - this.shop.offset + item.height > this.shop.y
+                && item.y - this.shop.offset - item.height < this.shop.y + this.shop.height || item.spot) {
+                this.drawShopItem(context, item, i);
+            }
+        }
+
+        context.restore();
+
+        context.fillStyle = "rgba(36, 41, 46, 0.12)";
+        //context.fillRect(this.shop.x, this.shop.y - this.unit * 0.2, this.shop.width, this.unit * 0.03);
+
+        if (this.shop.hasBar && (this.shop.isDown || this.shop.scrollTime)) {
+            const barwidth = this.unit * 0.1;
+            const alpha = context.globalAlpha;
+            const limitedOffset = Math.max(0, Math.min(this.shop.maxOffset, this.shop.offset));
+            const offset = limitedOffset * this.shop.height / (this.shop.maxOffset + this.shop.height);
+            context.globalAlpha = Math.min(1, this.shop.scrollTime) * alpha;
+            this.roundRect(context, this.shop.x - barwidth + this.shop.width, this.shop.y, barwidth, this.shop.height, barwidth * 0.5, "rgba(0, 0, 0, 0.1)");
+            this.roundRect(context, this.shop.x - barwidth + this.shop.width, this.shop.y + offset, barwidth, this.shop.barSize, barwidth * 0.5, "rgba(0, 0, 0, 0.3)");
+            context.globalAlpha = alpha;
+        }
+
+        context.restore();        
+      
+
+        // Loading.
+        if (!this.shop.items.length) {
+            context.font = this.getFont("Roboto-Regular");
+            context.textAlign = "center";
+            this.drawText(context, this.shop.x + this.shop.width * 0.5, this.shop.y + this.shop.height * 0.31, namespace.Pepper.Resources.localeText[41], "rgba(36, 41, 46, 1)", 0.8);
+            this.drawLoader(context, this.shop.x + this.shop.width * 0.5, this.shop.y + this.shop.height * 0.4, this.unit, true);
+        }
+
+        context.save();
+        context.fillStyle = "rgb(255, 255, 255)";
+        context.fillRect(this.shop.x, this.shop.y + this.shop.height, this.shop.width, this.unit * 2);
+        context.fillStyle = "rgb(36, 41, 46, 0.18)";
+        context.fillRect(this.shop.x, this.shop.y + this.shop.height, this.shop.width, this.unit * 0.02);
+        context.restore();
+
+        context.textAlign = "center";
+        context.font = this.getFont("Roboto-Medium");
+        this.drawText(context, this.shop.x + this.shop.width * 0.5, this.shop.y + this.shop.height + this.unit * 0.55, namespace.Pepper.Resources.localeText[193], "rgba(36, 41, 46)" , 0.55);
+
+
+        context.restore();
+    };
+
     // Draw a list item.
     namespace.Pepper.View.prototype.drawListItem = function (context, item) {
         let amount, price, text, extent, now, fdate, quoteCurrency, baseCurrency;
@@ -4403,10 +4734,10 @@
             context.font = this.getFont("Roboto-Light");
             this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
             context.font = this.getFont("Roboto-Medium");
-            context.textAlign = "right";
-            this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Resources.localeText[183], "rgba(255, 255, 255, 0.3)", 0.7);
-            context.font = this.getFont("Roboto-Light");
-            this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
+           // context.textAlign = "right";
+           // this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Resources.localeText[183], "rgba(255, 255, 255, 0.3)", 0.7);
+           // context.font = this.getFont("Roboto-Light");
+           // this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
         }
         else {
             if(index === 0) {
@@ -4431,27 +4762,128 @@
                 context.textAlign = "left";
                 context.font = this.getFont("Roboto-Medium");
                 if(item.data.data.name) {
-                    this.drawText(context, item.x + this.unit * 2, y + item.height * 0.5, item.data.data.name + (item.data.data.gameid ? "" : " (" + namespace.Pepper.Resources.localeText[184] + ")"), item.data.data.gameid ? "rgb(36, 41, 46)" : "rgba(36, 41, 46, 0.3)", 0.7);
-                
+                    this.drawText(context, item.x + this.unit * 2, y + item.height * 0.5, item.data.data.name, item.data.data.gameid ? "rgb(36, 41, 46)" : "rgba(36, 41, 46, 0.3)", 0.7);
+                    if (!item.data.data.gameid) {
+                        this.drawText(context, item.x + this.unit * 2, y + item.height * 0.75, namespace.Pepper.Resources.localeText[184], "rgba(36, 41, 46, 0.3)", 0.55);
+                    }
                     context.save();
-                    if (item.overPlayBtn || !item.data.data.gameid) {
+                    if ((item.selected && item.overPlayBtn) || !item.data.data.gameid) {
                         context.globalAlpha = 0.5;
                     }
                     context.font = this.getFont("Roboto-Regular");
                     context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.playImage : namespace.Pepper.Resources.playDisabledImage, item.x + item.width - item.height * 1.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
                     context.restore();   
                     
-                    if (item.data.data.leaderboard) {
+                    context.save();
+                    if ((item.selected && item.overScoreBtn) || !item.data.data.gameid || !item.data.data.leaderboard) {
+                        context.globalAlpha = 0.5;
+                    }
+                    context.font = this.getFont("Roboto-Regular");
+                    context.drawImage(item.data.data.gameid && item.data.data.leaderboard ? namespace.Pepper.Resources.scoreImage : namespace.Pepper.Resources.scoreDisabledImage, item.x + item.width - item.height * 1.9, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                    context.restore();  
+
+                    if (item.data.data.shop) {
                         context.save();
-                        if (item.overScoreBtn || !item.data.data.gameid) {
+                        if ((item.selected && item.overShopBtn) || !item.data.data.gameid || !item.data.data.shop || !namespace.Core.currentAccount.friendlyAddress || !namespace.Core.currentAccount.data) {
                             context.globalAlpha = 0.5;
                         }
                         context.font = this.getFont("Roboto-Regular");
-                        context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.scoreImage : namespace.Pepper.Resources.scoreDisabledImage, item.x + item.width - item.height * 2.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        context.drawImage(namespace.Core.currentAccount.data && item.data.data.gameid && item.data.data.shop && namespace.Core.currentAccount.friendlyAddress ? namespace.Pepper.Resources.shopImage : namespace.Pepper.Resources.shopDisabledImage, item.x + item.width - item.height * 2.7, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
                         context.restore();  
                     }
                 }
             }
+        }
+
+        context.restore();
+    };
+
+    // Draw a shop item.
+    namespace.Pepper.View.prototype.drawShopItem = function (context, item, index) {
+        context.save();
+
+        let y = item.spot ? item.y - this.store.offset + this.unit * 0.2 < this.store.y ? this.store.y + this.store.offset - this.unit * 0.2 : item.y : item.y;
+        y = item.spot ? item.y + item.height - this.store.offset + this.unit * 0.2 > this.store.y + this.store.height ? this.store.y + this.store.height + this.store.offset - item.height : y : y;
+
+        context.textAlign = "left";
+
+        context.fillStyle = item.spot ? "rgb(36, 41, 46)" : "rgb(255, 255, 255)";
+        context.fillRect(item.x, y, item.width, item.height);
+
+
+        context.font = this.getFont("Roboto-Regular");
+
+        const base = this.getActiveCarouselItem().asset;
+        const quote = this.quoteAssets[base.code + base.issuer] || base;
+        const shopPriceRate = this.getActiveCarouselItem().shopPriceRate;
+        let showLoader = !shopPriceRate ? true : false;
+        let convertedPrice;
+        if(shopPriceRate && shopPriceRate.sourceAmount){
+            convertedPrice = Number(item.data.price) * Number(shopPriceRate.sourceAmount) / Number(shopPriceRate.amount);
+        }
+
+        if(!item.image){
+            item.image = new Image();
+            item.image.onload = () => {
+                item.imagevalid = true;
+            };
+            item.image.onerror = () => {
+                item.imagevalid = false;
+            };
+            item.image.src = item.data.imageLink; 
+        }
+
+        if(item.imagevalid){
+            context.drawImage(item.image, item.x + this.unit * 0.2, y + this.unit * 0.2, this.unit * 1.1, this.unit * 1.1);
+        }
+
+        context.textAlign = "left";
+        context.font = this.getFont("Roboto-Bold");
+        this.drawText(context, item.x + this.unit * 1.5, y + this.unit * 0.5, item.data.name, "rgb(36, 41, 46)", 0.78);
+        context.font = this.getFont("Roboto-Regular");
+        this.drawText(context, item.x + this.unit * 1.5, y + this.unit * 1, item.data.description, "rgba(36, 41, 46, 0.7)", 0.63);
+
+        context.fillStyle = "rgba(36, 41, 46, 0.07)";
+        context.fillRect(item.x, y + item.height - this.unit * 0.03, item.width, this.unit * 0.03);
+
+        if (showLoader) {
+            context.textAlign = "right";
+            context.font = this.getFont("Roboto-Medium");
+            this.drawText(context, item.x + item.width - this.unit * 1.4, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[188], "rgba(36, 41, 46, 0.5)" , 0.65);
+            this.drawLoader(context, item.x + item.width - this.unit * 1, item.y + item.height - this.unit * 0.58, this.unit * 0.6, true);
+        }
+        else if(convertedPrice) {
+            let hasEnough = convertedPrice <= namespace.Core.currentAccount.getMaxSend(base.balance, base) ? true : false;
+            this.roundRect(context, item.x + item.width - this.unit * 2.2, item.y + item.height - this.unit, this.unit * 2, this.unit * 0.8, this.unit * 0.18, (this.scroller.type === namespace.Pepper.ScrollerType.ShopConfirm && this.showScroller || !hasEnough) ? "rgba(36, 41, 46, 0.1)" : "rgb(23, 156, 75)");
+            context.textAlign = "center";
+            context.font = this.getFont("Roboto-Medium");
+            context.save();
+            if (item.selected && item.overBuyBtn && hasEnough) {
+                context.globalAlpha *= 0.5;
+            }
+            this.drawText(context, item.x + item.width - this.unit * 1.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[161], "rgba(255, 255, 255)", 0.65);
+            context.restore();
+
+            context.textAlign = "right";
+            context.font = this.getFont("Roboto-Medium");
+            this.drawText(context, item.x + item.width - this.unit * 2.4, item.y + item.height - this.unit * 0.58, "≈ " + namespace.Pepper.Tools.formatPrice(convertedPrice) + " " + base.code, "rgba(36, 41, 46)" , 0.7);
+        }
+        else {            
+            context.textAlign = "right";
+            context.font = this.getFont("Roboto-Medium");
+            this.drawText(context, item.x + item.width - this.unit * 0.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[189], "rgba(36, 41, 46, 0.5)" , 0.65);
+        }
+
+        if (item.data.moreLink) {
+            this.roundRect(context, item.x + this.unit * 0.2, item.y + item.height - this.unit, this.unit * 2, this.unit * 0.8, this.unit * 0.18, "rgba(36, 41, 46, 0)", true, "rgba(36, 41, 46, 0.2)");
+            context.save();
+            context.textAlign = "center";
+            context.font = this.getFont("Roboto-Regular");
+            if (item.selected && item.overMoreBtn) {
+                context.globalAlpha *= 0.5;
+            }
+            this.drawText(context, item.x + this.unit * 1.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[77], "rgba(36, 41, 46, 0.7)" , 0.6);
+            context.restore();
         }
 
         context.restore();
@@ -4670,7 +5102,12 @@
             if (this.numPadCloseBtn.hover || this.numPadCloseBtn.selected) {
                 context.globalAlpha = 0.7 * context.globalAlpha;
             }
-            context.drawImage(namespace.Pepper.Resources.closeImage, this.numPadCloseBtn.x, this.numPadCloseBtn.y, this.numPadCloseBtn.width, this.numPadCloseBtn.height);
+            if (this.selectedGameShop) {
+                context.drawImage(namespace.Pepper.Resources.arrowLeftImage, this.numPadCloseBtn.x + this.unit * 0.2, this.numPadCloseBtn.y + this.unit * 0.2, this.numPadCloseBtn.width * 0.6, this.numPadCloseBtn.height * 0.6);
+            }
+            else {
+                context.drawImage(namespace.Pepper.Resources.closeImage, this.numPadCloseBtn.x, this.numPadCloseBtn.y, this.numPadCloseBtn.width, this.numPadCloseBtn.height);
+            }
             context.restore();
         }
 
@@ -4739,13 +5176,18 @@
             this.drawBook(context);
         }
         else if (this.activityType === namespace.Pepper.ActivityType.Exchange) {
+            if (this.selectedGameShop || this.shopTime) {
+                this.drawShop(context);
 
-            this.drawStore(context);
-
-            if (namespace.Pepper.Resources.sponsors[2]) {
-                let middleY = this.carousel.y + this.carousel.height + this.unit * 0.1 + (this.numPad[0].y - (this.carousel.y + this.carousel.height + this.unit * 0.1)) * 0.5 - this.unit * 0.7;
-                let size = Math.min(this.numPadArea.width, this.numPadSendBtn.y - middleY - this.unit);
-               // context.drawImage(namespace.Pepper.Resources.sponsors[2].image, this.numPadSendBtn.x + this.numPadSendBtn.width * 0.5 - size * 0.5, middleY, size, size);
+                context.save();
+                if (this.shopMenuBtn.hover || this.shopMenuBtn.selected) {
+                    context.globalAlpha = 0.7 * context.globalAlpha;
+                }
+                context.drawImage(namespace.Pepper.Resources.moreImage, this.shopMenuBtn.x + this.unit * 0.1, this.shopMenuBtn.y+ this.unit * 0.1, this.shopMenuBtn.width - this.unit * 0.2, this.shopMenuBtn.height - this.unit * 0.2);
+                context.restore();
+            }
+            if (!this.selectedGameShop || this.shopTime) {
+                this.drawStore(context);
             }
         }
 
@@ -4933,6 +5375,13 @@
                 this.showScroller = true;
                 this.scrollerTime = 0.25;
                 break;
+            case namespace.Pepper.ScrollerType.ShopConfirm:
+                this.scroller.items.push({ "id": 1, "label": namespace.Pepper.Resources.localeText[194], "current": false, "enabled": true });
+                this.scroller.items.push({ "id": 2, "label": namespace.Pepper.Resources.localeText[190], "current": false, "enabled": true });
+                this.scroller.items.push({ "id": 3, "label": namespace.Pepper.Resources.localeText[191], "current": false, "enabled": true });
+                this.showScroller = true;
+                this.scrollerTime = 0.25;
+                break;
             case namespace.Pepper.ScrollerType.Assets:
                 for (let i = 0; i < this.carousel.items.length; i += 1) {
                     const item = this.carousel.items[i];
@@ -4996,6 +5445,14 @@
                     "current": false
                 });
                 this.deleteStep = 0;
+                this.showScroller = true;
+                this.scrollerTime = 0.25;
+                break;
+            case namespace.Pepper.ScrollerType.ShopMenu:
+                this.scroller.items.push({ "id": 1, "label": namespace.Pepper.Resources.localeText[194], "current": false, "enabled": true });
+                this.scroller.items.push({ "id": 2, "label": namespace.Pepper.Resources.localeText[190], "current": false, "enabled": true });
+                this.scroller.items.push({ "id": 3, "label": namespace.Pepper.Resources.localeText[191], "current": false, "enabled": true });
+                this.scroller.items.push({ "id": 4, "label": namespace.Pepper.Resources.localeText[28], "current": false, "enabled": true });
                 this.showScroller = true;
                 this.scrollerTime = 0.25;
                 break;
@@ -5131,6 +5588,21 @@
         this.store.spotOffset = 0;
         this.store.adjustOffset = false;
         this.store.items = [];
+    };
+
+    // Reset the shop.
+    namespace.Pepper.View.prototype.resetShop = function (type) {
+        this.shop.type = type;
+        this.shop.offset = 0;
+        this.shop.maxOffset = 0;
+        this.shop.minOffset = 0;
+        this.shop.isDown = false;
+        this.shop.downTime = 0;
+        this.shop.downDistance = 0;
+        this.shop.spotOffset = 0;
+        this.shop.adjustOffset = false;
+        this.shop.items = [];
+        this.shop.data = null; 
     };
 
     // Reset the carousel.

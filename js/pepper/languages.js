@@ -201,7 +201,22 @@
         "Coming Soon",
         "Leaderboard",
         "Playing as 'Guest'. Get your Gamer ID!",
-        "Players Today:"
+        "Players Today:",
+        "Refreshing prices...",
+        "Not available for this currency.",
+        "Terms", // 190
+        "Privacy",
+        "Refresh Prices",
+        "Prices are calculated from Stellar DEX current best offers.",
+        "Seller Website",
+        "Finding best price...",
+        "Please wait...",
+        "Buy Now",
+        "Price",
+        "Checkout",
+        "Shopping", // 200
+        "Thank you for your payment!",
+        "Processing..."
     ];
 
     /**

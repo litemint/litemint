@@ -112,7 +112,9 @@
         "playDisabledImage": "playdisabled.png",
         "scoreImage": "score.png",
         "scoreDisabledImage": "scoredisabled.png",
-        "lmtAccountLightImage": "lmtaccountlight.png"
+        "lmtAccountLightImage": "lmtaccountlight.png",
+        "shopDisabledImage": "shopdisabled.png",
+        "shopImage": "shop.png"
     };
 
 })(window.Litemint = window.Litemint || {});
