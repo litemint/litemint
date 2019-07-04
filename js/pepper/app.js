@@ -131,7 +131,7 @@
                 };
                 storeItem.image.src = item.imageLink;
 
-                if(item.headerLink){
+                if (item.headerLink) {
                     storeItem.headerImage = new Image();
                     storeItem.headerImage.onload = () => {
                         storeItem.validHeader = true;
@@ -3383,7 +3383,24 @@
 
                                         testElement(2, point, view.promoBtn, isPointerDown, function () {
                                             if (namespace.Pepper.storeData.length > 1 && namespace.Pepper.storeData[1].valid) {
-                                                loadGame(namespace.Pepper.storeData[1].data.gameid, namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true);
+                                                if (namespace.Pepper.storeData[1].data.action === "open_shop_activity" && namespace.Core.currentAccount.friendlyAddress) {
+                                                    let itemData;
+                                                    for (let v = 0; v < namespace.Pepper.storeData.length; v += 1) {
+                                                        if (namespace.Pepper.storeData[v].data.gameid === namespace.Pepper.storeData[1].data.gameid
+                                                            && namespace.Pepper.storeData[v].data.shop) {
+                                                                itemData = namespace.Pepper.storeData[v];
+                                                                break;
+                                                            }
+                                                    }
+                                                    if (itemData) {
+                                                        view.selectedGameShop = itemData;
+                                                        view.shopTime = 0.3;
+                                                        loadShop();
+                                                    }
+                                                }
+                                                else {
+                                                    loadGame(namespace.Pepper.storeData[1].data.gameid, namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true);
+                                                }
                                             }
                                         });
 
@@ -3437,8 +3454,6 @@
                                                     }
                                                     else if (item.overShopBtn && item.data.data.gameid) {
                                                         if(item.data.data.shop){
-                                                            // TODO: bring the shop scroller to the top.
-                                                            // Enable the currency swapping.
                                                             view.selectedGameShop = item.data;
                                                             view.shopTime = 0.3;
                                                             loadShop();
