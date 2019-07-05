@@ -2272,6 +2272,10 @@
                                                     console.log(message);
                                                 }
                                             });
+
+                                            if (gtag) {
+                                                gtag("event", "click", { "event_category": "app", "event_label": "buy" });
+                                            }
                                     }
                                 }
                                 break;
@@ -3994,6 +3998,10 @@
             loadCarousel();
             if (cb) {
                 cb();
+
+                if (gtag) {
+                    gtag("event", "click", { "event_category": "app", "event_label": "signin" });
+                }
             }
         }).catch(function (err) {
             if (cb) {
