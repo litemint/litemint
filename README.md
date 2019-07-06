@@ -248,3 +248,20 @@ Build on the shoulders of giants!
     <td>None</td>
   </tr>
 </table>
+
+### bulma
+
+<table>
+  <tr>
+    <td>URL</td>
+    <td>https://github.com/jgthms/bulma</td>
+  </tr>
+  <tr>
+    <td>License</td>
+    <td>MIT License</td>
+  </tr>
+  <tr>
+    <td>Local Modifications</td>
+    <td>None</td>
+  </tr>
+</table>
