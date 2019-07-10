@@ -114,7 +114,10 @@
         "scoreDisabledImage": "scoredisabled.png",
         "lmtAccountLightImage": "lmtaccountlight.png",
         "shopDisabledImage": "shopdisabled.png",
-        "shopImage": "shop.png"
+        "shopImage": "shop.png",
+        "rocketImage": "rocket.png",
+        "rocketDarkImage": "rocketdark.png",
+        "closeCircleImage": "closecircle.png"
     };
 
 })(window.Litemint = window.Litemint || {});

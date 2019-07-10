@@ -3063,7 +3063,7 @@
             if (this.marketBtn.hover || this.marketBtn.selected) {
                 context.globalAlpha = 0.7 * context.globalAlpha;
             }
-            context.drawImage(namespace.Pepper.Resources.gamepadImage, this.marketBtn.x, this.marketBtn.y, this.marketBtn.width, this.marketBtn.width);
+            context.drawImage(namespace.Pepper.Resources.rocketImage, this.marketBtn.x + this.unit * 0.125, this.marketBtn.y + this.unit * 0.125, this.marketBtn.width - this.unit * 0.25, this.marketBtn.width - this.unit * 0.25);
             context.restore();
         }
 
@@ -3082,7 +3082,7 @@
                     labelText = namespace.Pepper.Resources.localeText[200];
                 }
                 else {
-                    labelText = namespace.Pepper.Resources.localeText[180];
+                    labelText = namespace.Pepper.Resources.localeText[203];
                 }
                 break;
         }
@@ -3242,8 +3242,8 @@
                         this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[91], "rgb(36, 41, 46)", 0.8);
                         break;
                     case 1:
-                        context.drawImage(namespace.Pepper.Resources.gamepadDarkImage, element.x + element.height * 0.6, element.y + element.height * 0.26, element.height * 0.45, element.height * 0.45);
-                        this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[180], "rgb(36, 41, 46)", 0.8);
+                        context.drawImage(namespace.Pepper.Resources.rocketDarkImage, element.x + element.height * 0.6, element.y + element.height * 0.26, element.height * 0.45, element.height * 0.45);
+                        this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[203], "rgb(36, 41, 46)", 0.8);
                         break;
                     case 2:
                         context.fillStyle = "rgba(36, 41, 46, 0.16)";
@@ -4730,14 +4730,14 @@
             context.font = this.getFont("Roboto-Medium");
             this.drawText(context, item.x + this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Resources.localeText[181], "rgb(255, 255, 255)", 0.7);
             context.textAlign = "center";
-            this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.5, namespace.Pepper.Resources.localeText[182], "rgba(255, 255, 255, 0.3)", 0.7);
+            this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.5, namespace.Pepper.Resources.localeText[204], "rgba(255, 255, 255, 0.3)", 0.7);
             context.font = this.getFont("Roboto-Light");
             this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
             context.font = this.getFont("Roboto-Medium");
-           // context.textAlign = "right";
-           // this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Resources.localeText[183], "rgba(255, 255, 255, 0.3)", 0.7);
-           // context.font = this.getFont("Roboto-Light");
-           // this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
+            context.textAlign = "right";
+            this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Resources.localeText[182], "rgba(255, 255, 255, 0.3)", 0.7);
+            context.font = this.getFont("Roboto-Light");
+            this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
         }
         else {
             if(index === 0) {
@@ -4771,7 +4771,12 @@
                         context.globalAlpha = 0.5;
                     }
                     context.font = this.getFont("Roboto-Regular");
-                    context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.playImage : namespace.Pepper.Resources.playDisabledImage, item.x + item.width - item.height * 1.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                    if (this.appId !== item.data.data.gameid) {
+                        context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.playImage : namespace.Pepper.Resources.playDisabledImage, item.x + item.width - item.height * 1.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                    }
+                    else {
+                        context.drawImage(namespace.Pepper.Resources.closeCircleImage, item.x + item.width - item.height * 1.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                    }
                     context.restore();   
                     
                     context.save();

@@ -19,7 +19,7 @@
         "Confirm your PIN",
         "Sign In",
         "Next",
-        "Put your crypto into play.",
+        "Explore the crypto world.",
         "Incorrect PIN. Please try again.",
         "Your PIN can be 4-12 digits.",
         "Make sure you choose one that's hard to guess.",
@@ -216,7 +216,9 @@
         "Checkout",
         "Shopping", // 200
         "Thank you for your payment!",
-        "Processing..."
+        "Processing...",
+        "Explore",
+        "APPS"
     ];
 
     /**

@@ -29,7 +29,7 @@
     <link rel="stylesheet" type="text/css" href="res/css/spear.css" />
     <link rel="icon" type="image/x-icon" href="res/img/favicon.ico" />
 
-    <title>Litemint - Put your crypto into play.</title>
+    <title>Litemint Web App</title>
     <base target="_blank">
 </head>
 <body>
@@ -37,11 +37,11 @@
         <div id="activity-loader"></div>
         <iframe id="activity-frame" src="https://dashboard.litemint.com" frameBorder="0"></iframe>
         <div class="toggle-wallet-wrapper">
-            <img id="open-wallet-button" src="res/img/openwallet.png" style="display:none;" />
-            <img id="close-wallet-button" src="res/img/closewallet.png" />
+            <img id="open-wallet-button" class="unselectable" src="res/img/openwallet.png" style="display:none;" />
+            <img id="close-wallet-button" class="unselectable" src="res/img/closewallet.png" />
         </div>
     </div>
-    <canvas id="mainview"></canvas>
+    <canvas id="mainview" class="unselectable"></canvas>
     <div id="outstreamContainer"></div>
 
     <section id="loader" class="hero is-fullheight is-white">

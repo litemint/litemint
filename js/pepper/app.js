@@ -305,7 +305,7 @@
 
         view.needRedraw = true;
         
-        if(view.appMode){
+        if(view.appId){
             domShowApp(false);
             // Request and ad from native layer.
             if (window.Android) {
@@ -1368,6 +1368,10 @@
 
         setCapture($("#mainview")[0], event);
 
+        if (namespace.Pepper.isDesktop) {
+            $("#activity-view iframe").css("pointer-events", "none");
+        }
+
         if (rotateScreen || !view || showLoader ||
             view.scrollerTime || view.scrollerEndTime || view.showPinLoader
             || view.modalPageEndTime) {
@@ -1903,6 +1907,10 @@
             "x": event.pageX * pixelRatio,
             "y": event.pageY * pixelRatio
         };
+
+        if (namespace.Pepper.isDesktop) {
+            $("#activity-view iframe").css("pointer-events", "auto");
+        }
 
         if (rotateScreen || !view || showLoader || view.scrollerTime || view.showPinLoader) {
             return;
@@ -3441,7 +3449,12 @@
                                                         loadGame(item.data.data.gameid, item.data.data.link);
                                                     }
                                                     else if (item.overPlayBtn && item.data.data.gameid) {
-                                                        loadGame(item.data.data.gameid, item.data.data.link);
+                                                        if (view.appId !== item.data.data.gameid) {
+                                                            loadGame(item.data.data.gameid, item.data.data.link);
+                                                        }
+                                                        else {
+                                                            domShowApp(false);
+                                                        }
                                                     }
                                                     else if (item.overScoreBtn && item.data.data.gameid) {
                                                         view.selectedGame = item.data;
@@ -3708,7 +3721,7 @@
                         url += "/";
                     }
                     url += "?token=" + token;
-                    domShowApp(true, url, noloader);
+                    domShowApp(true, id, url, noloader);
                 }
             });
         }
@@ -4236,10 +4249,11 @@
         }
     }
 
-    function domShowApp(show, url, noloader) {
+    function domShowApp(show, id, url, noloader) {
         if(show) {
             if (view) {
-                view.appMode = true;
+                view.appId = id;
+                view.needRedraw = true;
             }
             if(!noloader){
                 // Temporary fix for iOS till new host is available on App Store.
@@ -4262,7 +4276,8 @@
         }
         else {
             if (view) {
-                view.appMode = false;
+                view.appId = null;
+                view.needRedraw = true;
             }
             if(!namespace.Pepper.isDesktop) {
                 $("#activity-frame").attr("src","");
