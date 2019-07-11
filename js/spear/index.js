@@ -50,6 +50,30 @@
         }
         else{
             $("#activity-loader").hide();
+            let data = Litemint.Pepper.loadWalletData();
+            if (!data.accounts.length){
+                $("#activity-frame").hide();
+                Litemint.Pepper.showWallet = false;
+                $("#activity-view").css("width", "100%");
+                $("#close-wallet-button").hide();
+                $("#open-wallet-button").hide();
+            }
+            else{
+                $("#activity-frame").show();
+                $("#signup-frame").hide();
+                $("#activity-frame").attr("src", "https://hello.litemint.com");
+            }           
+
+            Litemint.Pepper.onSignIn = function () {
+                $("#signup-frame").hide();
+                $("#close-wallet-button").show();
+                $("#activity-frame").show();
+                $("#activity-frame").attr("src", "https://dashboard.litemint.com");
+            };
+
+            Litemint.Pepper.onSignOut = function () {
+                $("#activity-frame").attr("src", "https://hello.litemint.com");
+            };
         }
 
         initOutstream();
@@ -80,6 +104,19 @@
                 copyTextToClipboard(event.data.substr(14));
             }
         }
+    });
+
+    $("#signup-getstarted").click(function () {
+        Litemint.Pepper.showWallet = true;
+        $("#signup-step-one").fadeOut();
+        $("#signup-step-two").fadeIn();
+        $("#signup-step-two").animate({"margin-left": "30px"}, 500);
+        $("#activity-view").animate({
+            width: $(window).width() - $(window).height() * 0.5 + "px"
+        }, 350, "swing", function () {
+            $("#open-wallet-button").hide();
+            $("#close-wallet-button").hide();
+        });
     });
 
     $(".toggle-wallet-wrapper").click(function () {

@@ -218,7 +218,10 @@
         "Thank you for your payment!",
         "Processing...",
         "Explore",
-        "APPS"
+        "APPS",
+        "Choose your PIN.",
+        "Confirm it.",
+        "Done."
     ];
 
     /**
@@ -428,7 +431,7 @@
         "Confirmez votre code PIN",
         "Se connecter",
         "Suivant",
-        "Le monde des cryptos est sans limite, explorez le.",
+        "Explorez le monde des cryptos.",
         "Code PIN incorrect. Veuillez réessayer.",
         "Votre code PIN peut être composé de 4 à 12 chiffres.",
         "Assurez-vous d'en choisir un difficile à deviner.",
@@ -583,7 +586,54 @@
         "Commerce",
         "Coup de coeur?",
         "Si vous aimez Litemint, aidez-nous à grandir et faites passer le message.",
-        "Pas encore supporté!"
+        "Pas encore supporté!", // 160
+        "Acheter",
+        "Vendre",
+        "Echanger",
+        "Le carnets d'ordres est vide.",
+        "Prix",
+        "Montant",
+        "Dernières Transactions",
+        "Ajouter Token",
+        "Sélectionner Token",
+        "Ordres", // 170
+        "Offres",
+        "Annuler Offre",
+        "Annulation...",
+        "Confirmer?",
+        "Placer Ordre",
+        "Total:",
+        "Votre ordre est en cours, patientez...",
+        "La transaction a échoué.",
+        "Votre ordre a été soumis.",
+        "Jeux", // 180
+        "JEUX",
+        "COLLECTIONS",
+        "SHOP",
+        "Bientôt disponible",
+        "Classement",
+        "Vous jouez en 'Invité'. Obtenez un Gamer ID!",
+        "Joueurs Aujourd'hui:",
+        "Mise à jour des prix...",
+        "Non disponible dans cette devise.",
+        "Termes", // 190
+        "Vie privée",
+        "Mise à jour des prix",
+        "Les prix sont calculés selon les meilleures offres sur le Stellar DEX.",
+        "Site du vendeur",
+        "Recherche du meilleur prix...",
+        "Veuillez Patienter...",
+        "Acheter Maintenant",
+        "Prix",
+        "Checkout",
+        "Achats", // 200
+        "Merci pour votre paiement!",
+        "En cours...",
+        "Explore",
+        "APPS",
+        "Choisissez un code PIN.",
+        "Confirmez-le.",
+        "Prêt."
     ];
 
     /**

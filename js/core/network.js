@@ -213,7 +213,14 @@
         }
 
         if (watchEventSrc) {
-            watchEventSrc();
+            try {
+                watchEventSrc();
+            }
+            catch (err) {
+                // Event source not available seems to be causing exception
+                // in stellar sdk for MS Edge. Let's not bother during the signout process.
+                console.error(err);
+            }
         }
     };
 

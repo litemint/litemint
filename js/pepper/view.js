@@ -64,6 +64,7 @@
         this.dashboardMenu = [];
         this.dashboardMenuOffset = 0;
         this.pinErrorTime = 0;
+        this.resizeTime = 0;
         this.pinMsgTime = 0;
         this.pinMin = 4;
         this.pinMax = 12;
@@ -160,6 +161,7 @@
         this.viewport.height = height - namespace.Pepper.barHeight;
         this.unit = this.viewport.width * 0.1;
         this.baseFontSize = Math.round(this.unit * 0.52);
+        this.resizeTime = 0.35;
         this.setActiveCarouselItem(this.carousel.active, true);
 
         // Coalesce the dom updates on resize.
@@ -196,6 +198,7 @@
 
     // Update the view.
     namespace.Pepper.View.prototype.update = function (elapsed) {
+        this.resizeTime = updateTimer(elapsed, this.resizeTime);
         this.dashboardTime = updateTimer(elapsed, this.dashboardTime, 1.2);
         this.startTime = updateTimer(elapsed, this.startTime);
         this.scrollerTime = updateTimer(elapsed, this.scrollerTime, 1.2);
@@ -5639,7 +5642,7 @@
         this.pinStep = 0;
         this.pinError = false;
         this.pinAccountName = !signUpMode ? data.accounts[data.lastaccount].name : "";
-        this.hasPinSwitchBtn = signUpMode && data.accounts.length > 0 || !signUpMode && data.accounts.length > 1 ? true : false;
+        this.hasPinSwitchBtn = (signUpMode && data.accounts.length > 0) || (!signUpMode && data.accounts.length > 1) ? true : false;
         this.pinCode = [];
         this.pinCodeCheck = [];
     };

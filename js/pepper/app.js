@@ -4012,6 +4012,10 @@
             if (cb) {
                 cb();
 
+                if(namespace.Pepper.onSignIn){
+                    namespace.Pepper.onSignIn();
+                }
+
                 if (gtag) {
                     gtag("event", "click", { "event_category": "app", "event_label": "signin" });
                 }
@@ -4059,6 +4063,15 @@
             if (namespace.Core.currentAccount.keys) {
                 if (error.response && error.response.status === 404) {
                     view.error = namespace.Pepper.ViewErrorType.AccountNotCreated;
+
+                    if(namespace.Pepper.onSignIn){
+                        namespace.Pepper.onSignIn();
+                    }
+
+                    if (gtag) {
+                        gtag("event", "click", { "event_category": "app", "event_label": "signin" });
+                    }
+
                     // Install a watch on the account to get notified of creation.
                     const stellarNet = new namespace.Core.StellarNetwork();
                     stellarNet.watchAccount(namespace.Core.currentAccount.keys.publicKey(),
@@ -4095,6 +4108,10 @@
         new namespace.Core.StellarNetwork().detachAccount();
 
         domShowApp(false);
+
+        if(namespace.Pepper.onSignOut){
+            namespace.Pepper.onSignOut();
+        }
     }
 
     function generateToken (purpose, cb) {
@@ -4514,6 +4531,12 @@
         $("#import").attr("placeholder", namespace.Pepper.Resources.localeText[149]);
         $("#about-page-rate").html(namespace.Pepper.Resources.localeText[158]);
         $("#about-page-rate-text").html(namespace.Pepper.Resources.localeText[159]);
+
+        if (namespace.Pepper.isDesktop) {
+            $("#signup-page-text1").html(namespace.Pepper.Resources.localeText[205]);
+            $("#signup-page-text2").html(namespace.Pepper.Resources.localeText[206]);
+            $("#signup-page-text3").html(namespace.Pepper.Resources.localeText[207]);
+        }
     }
 
     function domGenerateCode() {
