@@ -4736,11 +4736,6 @@
             this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.5, namespace.Pepper.Resources.localeText[204], "rgba(255, 255, 255, 0.3)", 0.7);
             context.font = this.getFont("Roboto-Light");
             this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
-            context.font = this.getFont("Roboto-Medium");
-            context.textAlign = "right";
-            this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Resources.localeText[182], "rgba(255, 255, 255, 0.3)", 0.7);
-            context.font = this.getFont("Roboto-Light");
-            this.drawText(context, item.x + item.width - this.unit * 0.3, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
         }
         else {
             if(index === 0) {
@@ -4824,10 +4819,16 @@
         const base = this.getActiveCarouselItem().asset;
         const quote = this.quoteAssets[base.code + base.issuer] || base;
         const shopPriceRate = this.getActiveCarouselItem().shopPriceRate;
+        const collectiblePrices = this.getActiveCarouselItem().collectiblePrices;
         let showLoader = !shopPriceRate ? true : false;
         let convertedPrice;
         if(shopPriceRate && shopPriceRate.sourceAmount){
             convertedPrice = Number(item.data.price) * Number(shopPriceRate.sourceAmount) / Number(shopPriceRate.amount);
+        }
+
+        let collectiblePrice;
+        if(collectiblePrices && collectiblePrices[item.data.code + item.data.issuer]) {
+            collectiblePrice = Number(collectiblePrices[item.data.code + item.data.issuer]);
         }
 
         if(!item.image){
@@ -4876,6 +4877,23 @@
             context.font = this.getFont("Roboto-Medium");
             this.drawText(context, item.x + item.width - this.unit * 2.4, item.y + item.height - this.unit * 0.58, "≈ " + namespace.Pepper.Tools.formatPrice(convertedPrice) + " " + base.code, "rgba(36, 41, 46)" , 0.7);
         }
+        else if (collectiblePrice) {
+            let ownAsset = namespace.Core.currentAccount.assets.find(x => x.code === item.data.code && x.issuer === item.data.issuer);
+            let hasEnough = ownAsset && collectiblePrice <= namespace.Core.currentAccount.getMaxSend(base.balance, base) ? true : false;
+            this.roundRect(context, item.x + item.width - this.unit * 2.2, item.y + item.height - this.unit, this.unit * 2, this.unit * 0.8, this.unit * 0.18, (this.scroller.type === namespace.Pepper.ScrollerType.ShopConfirm && this.showScroller || !hasEnough) ? "rgba(36, 41, 46, 0.1)" : "rgb(23, 156, 75)");
+            context.textAlign = "center";
+            context.font = this.getFont("Roboto-Medium");
+            context.save();
+            if (item.selected && item.overBuyBtn && hasEnough) {
+                context.globalAlpha *= 0.5;
+            }
+            this.drawText(context, item.x + item.width - this.unit * 1.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[161], "rgba(255, 255, 255)", 0.65);
+            context.restore();
+
+            context.textAlign = "right";
+            context.font = this.getFont("Roboto-Medium");
+            this.drawText(context, item.x + item.width - this.unit * 2.4, item.y + item.height - this.unit * 0.58, "≈ " + namespace.Pepper.Tools.formatPrice(collectiblePrice) + " " + base.code, "rgba(36, 41, 46)" , 0.7);
+        }
         else {            
             context.textAlign = "right";
             context.font = this.getFont("Roboto-Medium");
@@ -4892,6 +4910,36 @@
             }
             this.drawText(context, item.x + this.unit * 1.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[77], "rgba(36, 41, 46, 0.7)" , 0.6);
             context.restore();
+        }
+        else if (item.data.code) {
+            let ownAsset = namespace.Core.currentAccount.assets.find(x => x.code === item.data.code && x.issuer === item.data.issuer);
+            let nativeAsset = namespace.Core.currentAccount.assets.find(x => x.code === "XLM" && x.issuer === "native");
+            let canAdd = nativeAsset && namespace.Core.currentAccount.assets.length && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee() ? true : false;
+            if (canAdd && !ownAsset) {
+                this.roundRect(context, item.x + this.unit * 0.2, item.y + item.height - this.unit, this.unit * 2, this.unit * 0.8, this.unit * 0.18, namespace.Pepper.Resources.primaryColor, true, namespace.Pepper.Resources.primaryColor);
+            }
+            else{
+                this.roundRect(context, item.x + this.unit * 0.2, item.y + item.height - this.unit, this.unit * 2, this.unit * 0.8, this.unit * 0.18, "rgba(36, 41, 46, 0)", true, "rgba(36, 41, 46, 0.2)");
+            }
+
+            context.save();
+            context.textAlign = "center";
+            context.font = this.getFont("Roboto-Regular");
+            if (item.selected && item.overMoreBtn) {
+                context.globalAlpha *= 0.5;
+            }
+
+            if (canAdd && !ownAsset) {
+                this.drawText(context, item.x + this.unit * 1.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[168], "rgb(255, 255, 255)", 0.6);
+            } 
+            else {
+                this.drawText(context, item.x + this.unit * 1.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[77], "rgba(36, 41, 46, 0.7)" , 0.6);
+            }          
+            context.restore();
+
+            context.textAlign = "right";
+            context.font = this.getFont("Roboto-Medium");
+            this.drawText(context, item.x + item.width - this.unit * 0.3, y + this.unit * 0.2, namespace.Pepper.Resources.localeText[208], "rgb(61, 157, 255)", 0.6);
         }
 
         context.restore();
@@ -5704,7 +5752,7 @@
                 if (asset && this.currentIndex > 0) {
                     this.rotateSponsor(); // Get the next sponsor as we have this one already.
                 }
-                else if (this.currentIndex === 0) {
+                else if (asset && this.currentIndex === 0) {
                     // Disable sponsoring.
                     namespace.Pepper.Resources.currentSponsor = null;
                 }

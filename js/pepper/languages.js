@@ -221,7 +221,8 @@
         "APPS",
         "Choose your PIN.",
         "Confirm it.",
-        "Done."
+        "Done.",
+        "Can be traded (DEX)"
     ];
 
     /**
@@ -633,7 +634,8 @@
         "APPS",
         "Choisissez un code PIN.",
         "Confirmez-le.",
-        "Prêt."
+        "Prêt.",
+        "Peut être échangé (DEX)"
     ];
 
     /**

@@ -413,7 +413,7 @@
         stellarServer.paths(namespace.Core.currentAccount.keys.publicKey(), account, asset, amount)
             .call()
             .then(function (pathResult) {
-                cb(true, pathResult.records);
+                cb(true, pathResult.records, code, issuer);
             })
             .catch(function (error) {
                 cb(false, error);
@@ -534,7 +534,7 @@
                 // Note that with Stellar, numerator and denominator
                 // are limited to 32-bit integers!
                 const checkPriceBounds = (price) => {
-                    return price.d < namespace.Core.Utils.MaxInt32 && price.n < namespace.Core.Utils.MaxInt32;
+                    return price.d && price.n && price.d < namespace.Core.Utils.MaxInt32 && price.n < namespace.Core.Utils.MaxInt32;
                 }
 
                 let rational = new Fraction(price);
@@ -721,7 +721,7 @@
      * @param {string} code Asset issuer code
      * @param {string} balance Asset account balance (if any).
      */
-    namespace.Core.Asset = function (issuer, code, balance) {
+    namespace.Core.Asset = function (issuer, code, balance, loadedCb) {
         if (!(this instanceof namespace.Core.Asset)) {
             throw new Error("ctor error");
         }
@@ -740,6 +740,9 @@
             this.domain = "stellar.org";
             this.verified = true;
             this.loaded = true;
+            if (loadedCb) {
+                loadedCb();
+            }
         }
         else {
             const stellarNet = new namespace.Core.StellarNetwork();
@@ -761,16 +764,25 @@
                                         this.image.onload = () => {
                                             this.validImage = true;
                                             this.loaded = true;
+                                            if (loadedCb) {
+                                                loadedCb();
+                                            }
                                         };
                                         this.image.onerror = () => {
                                             this.validImage = false;
                                             this.image = null;
                                             this.loaded = true;
+                                            if (loadedCb) {
+                                                loadedCb();
+                                            }
                                         };
                                         this.image.src = currency.image;
                                     }
                                     else {
                                         this.loaded = true;
+                                        if (loadedCb) {
+                                            loadedCb();
+                                        }
                                     }
                                     this.verified = true;
                                     this.decimals = currency.display_decimals;
@@ -798,6 +810,9 @@
                                 this.name = this.code;
                                 this.domain = result.home_domain;
                                 this.loaded = true;
+                                if (loadedCb) {
+                                    loadedCb();
+                                }
                             }
                         })
                         .catch(error => {
@@ -805,12 +820,18 @@
                             // Unverified home domain (no toml).
                             this.name = this.code;
                             this.loaded = true;
+                            if (loadedCb) {
+                                loadedCb();
+                            }
                         });
                 }
                 else {
                     // Unverified - no home domain.
                     this.name = this.code;
                     this.loaded = true;
+                    if (loadedCb) {
+                        loadedCb();
+                    }
                 }
             }).catch((error) => {
                 console.error(JSON.stringify(error));
@@ -818,6 +839,9 @@
                 this.name = this.code;
                 this.errored = true;
                 this.loaded = true;
+                if (loadedCb) {
+                    loadedCb();
+                }
             });
         }
     };

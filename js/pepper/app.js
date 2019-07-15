@@ -909,7 +909,7 @@
                             item.overBuyBtn = true;
                         }
 
-                        if (item.data.moreLink) {
+                        if (item.data.moreLink || item.data.code) {
                             if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 0.2, y - view.shop.offset + item.height - view.unit, item.x + view.unit * 2.2, y - view.shop.offset + item.height - view.unit + view.unit * 0.8)) {
                                 item.overMoreBtn = true;
                             }
@@ -928,7 +928,7 @@
                                     item.overBuyBtn = false;
                                 }
 
-                                if (item.data.moreLink) {
+                                if (item.data.moreLink || item.data.code) {
                                     if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 0.2, y - view.shop.offset + item.height - view.unit, item.x + view.unit * 2.2, y - view.shop.offset + item.height - view.unit + view.unit * 0.8)) {
                                         item.overMoreBtn = false;
                                     }
@@ -1067,7 +1067,7 @@
                     view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
                     view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
                 }
-                else{
+                else {
                     view.store.items.push({ "spot": (i == 1 ? true : false), "data": namespace.Pepper.storeData[i] });
                 }     
             }
@@ -1082,6 +1082,7 @@
                 delete view.carousel.items[i].shopPriceRate;
             }
 
+            const stellarNet = new namespace.Core.StellarNetwork();
             if (view.selectedGameShop && view.selectedGameShop.data && view.selectedGameShop.data.shop) { 
                 view.shop.data = view.selectedGameShop;
                 let amount = 0;
@@ -1094,12 +1095,47 @@
                         // better or equal price for buyer.
                         // Only issue is when the supply is inferior to max amount in which case we would
                         // fail payment path finding and fall back to display the shop original currency.
-                        amount = Math.max(amount, Number(view.selectedGameShop.data.shop.items[i].price));
+                        if (view.selectedGameShop.data.shop.items[i].price) {
+                            amount = Math.max(amount, Number(view.selectedGameShop.data.shop.items[i].price));
+                        }
+                        else if(view.selectedGameShop.data.shop.items[i].collectible) {
+                            stellarNet.findPaymentPaths(
+                                view.selectedGameShop.data.shop.account,
+                                view.selectedGameShop.data.shop.items[i].code,
+                                view.selectedGameShop.data.shop.items[i].issuer,
+                                namespace.Pepper.Tools.formatPrice(view.selectedGameShop.data.shop.items[i].priceScale || 1),
+                                (success, result, code, issuer) => {
+                                    console.log(result);
+                                    for (let i = 0; i < view.carousel.items.length; i += 1) {
+                                        let item = view.carousel.items[i];
+        
+                                        if (success) {
+                                            // Extract the best price from results.
+                                            let sourceAmount;
+                                            for (let v = 0; v < result.length; v += 1) {
+                                                if (result[v].source_asset_type === "native" && i === 0 || 
+                                                    (item.asset.code === result[v].source_asset_code
+                                                        && item.asset.issuer === result[v].source_asset_issuer)) {
+                                                    if (!sourceAmount) {
+                                                        sourceAmount = Number(result[v].source_amount);
+                                                    }
+                                                    else{
+                                                        sourceAmount = Math.min(Number(result[v].source_amount), sourceAmount);
+                                                    }
+                                                }
+                                            }
+                                            if (!item.collectiblePrices) {
+                                                item.collectiblePrices = {};
+                                            }    
+                                            item.collectiblePrices[code + issuer] = namespace.Pepper.Tools.formatPrice(sourceAmount);
+                                        }
+                                    }
+                                });
+                        }
                     }
                 }
 
                 if (amount) {                   
-                    var stellarNet = new namespace.Core.StellarNetwork();
                     stellarNet.findPaymentPaths(
                         view.selectedGameShop.data.shop.account,
                         view.selectedGameShop.data.shop.code,
@@ -2083,7 +2119,9 @@
                                     };
                                     if (!asset.data) {
                                         asset = {
-                                            "data": new namespace.Core.Asset(namespace.Pepper.Resources.currentSponsor.issuer, namespace.Pepper.Resources.currentSponsor.code),
+                                            "data": new namespace.Core.Asset(namespace.Pepper.Resources.currentSponsor.issuer, namespace.Pepper.Resources.currentSponsor.code, 0, () => {
+                                                domUpdateAssetPage();
+                                            }),
                                             "hasAdd": true
                                         };
                                     }
@@ -2251,16 +2289,27 @@
                                     if (!view.selectedBuyItem.buying && !view.selectedBuyItem.failed && !view.selectedBuyItem.success) {
                                         view.selectedBuyItem.buying = true;
 
+                                        let destAccount = view.selectedGameShop.data.shop.account;
+                                        let destCode = view.selectedGameShop.data.shop.code;
+                                        let destIssuer = view.selectedGameShop.data.shop.issuer;
+                                        let destPrice = namespace.Pepper.Tools.formatPrice(view.selectedBuyItem.data.price);
+                                        if (view.selectedBuyItem.data.collectible) {
+                                            destAccount = namespace.Core.currentAccount.keys.publicKey();
+                                            destCode = view.selectedBuyItem.data.code;
+                                            destIssuer = view.selectedBuyItem.data.issuer;
+                                            destPrice = namespace.Pepper.Tools.formatPrice(view.selectedBuyItem.data.priceScale || 1);
+                                        }
+
                                         let base = view.getActiveCarouselItem().asset;
                                         stellarNet.sendPathPayment(
                                             view.selectedBuyItem.data.id,
                                             base.code,
                                             base.issuer,
                                             view.selectedBuyItem.data.orderPrice,
-                                            view.selectedGameShop.data.shop.code,
-                                            view.selectedGameShop.data.shop.issuer,
-                                            namespace.Pepper.Tools.formatPrice(view.selectedBuyItem.data.price),
-                                            view.selectedGameShop.data.shop.account,
+                                            destCode,
+                                            destIssuer,
+                                            destPrice,
+                                            destAccount,
                                             view.selectedBuyItem.data.path,
                                             (success, message) => {
                                                 view.selectedBuyItem.buying = false;
@@ -2995,7 +3044,9 @@
                                                 };
                                                 if (!asset.data) {
                                                     asset = {
-                                                        "data": new namespace.Core.Asset(namespace.Pepper.Resources.currentSponsor.issuer, namespace.Pepper.Resources.currentSponsor.code),
+                                                        "data": new namespace.Core.Asset(namespace.Pepper.Resources.currentSponsor.issuer, namespace.Pepper.Resources.currentSponsor.code, 0, () => {
+                                                            domUpdateAssetPage();
+                                                        }),
                                                         "hasAdd": true
                                                     };
                                                 }
@@ -3308,7 +3359,11 @@
                                                 if (!item.spot) {
 
                                                     const shopPriceRate = view.getActiveCarouselItem().shopPriceRate;
+                                                    const collectiblePrices = view.getActiveCarouselItem().collectiblePrices;
+                                                    let base = view.getActiveCarouselItem().asset;
                                                     let convertedPrice;
+                                                    let collectiblePrice = collectiblePrices && collectiblePrices[item.data.code + item.data.issuer]
+                                                                            ? Number(collectiblePrices[item.data.code + item.data.issuer]) : 0;
                                                     if(shopPriceRate && shopPriceRate.sourceAmount){
                                                         convertedPrice = Number(item.data.price) * Number(shopPriceRate.sourceAmount) / Number(shopPriceRate.amount);
                                                     }
@@ -3319,7 +3374,6 @@
                                                         view.selectedBuyItem.buying = false;
                                                         view.selectedBuyItem.success = false;
                                                         view.selectedBuyItem.error = null;
-                                                        let base = view.getActiveCarouselItem().asset;
                                                         let hasEnough = convertedPrice <= namespace.Core.currentAccount.getMaxSend(base.balance, base) ? true : false;
                                                         if (hasEnough) {
                                                             let stellarNet = new namespace.Core.StellarNetwork();
@@ -3359,12 +3413,80 @@
                                                             view.loadScroller(namespace.Pepper.ScrollerType.ShopConfirm);
                                                         }
                                                     }
-                                                    else if (item.overMoreBtn) {                                                       
-                                                        if (namespace.Pepper.isDesktop) {
-                                                            window.open(item.data.moreLink, "_blank");
+                                                    if (item.overBuyBtn && collectiblePrice) {
+                                                        view.selectedBuyItem = item;
+                                                        view.selectedBuyItem.ready = false;
+                                                        view.selectedBuyItem.buying = false;
+                                                        view.selectedBuyItem.success = false;
+                                                        view.selectedBuyItem.error = null;
+                                                        
+                                                        let ownAsset = namespace.Core.currentAccount.assets.find(x => x.code === view.selectedBuyItem.data.code && x.issuer === view.selectedBuyItem.data.issuer);
+                                                        let hasEnough = ownAsset && collectiblePrice <= namespace.Core.currentAccount.getMaxSend(base.balance, base) ? true : false;
+                                                        if (hasEnough) {
+                                                            let stellarNet = new namespace.Core.StellarNetwork();
+                                                            stellarNet.findPaymentPaths(
+                                                                namespace.Core.currentAccount.keys.publicKey(),
+                                                                view.selectedBuyItem.data.code,
+                                                                view.selectedBuyItem.data.issuer,
+                                                                namespace.Pepper.Tools.formatPrice(view.selectedBuyItem.data.priceScale || 1),
+                                                                (success, result) => {                                 
+                                                                    if (success) {
+                                                                        // Extract the best price from results.
+                                                                        let sourceAmount;
+                                                                        let bestPath;
+                                                                        for (let v = 0; v < result.length; v += 1) {
+                                                                            if (result[v].source_asset_type === "native" && base.issuer === "native" || 
+                                                                                (base.code === result[v].source_asset_code && base.issuer === result[v].source_asset_issuer)) {
+                                                                                if (!sourceAmount) {
+                                                                                    sourceAmount = Number(result[v].source_amount);
+                                                                                    bestPath = result[v].path.slice();
+                                                                                }
+                                                                                else {
+                                                                                    if(Number(result[v].source_amount) < sourceAmount){
+                                                                                        sourceAmount = Number(result[v].source_amount);
+                                                                                        bestPath = result[v].path.slice();
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        if (sourceAmount) {                                                                            
+                                                                            view.selectedBuyItem.data.path = bestPath;
+                                                                            view.selectedBuyItem.data.orderPrice = namespace.Pepper.Tools.formatPrice(sourceAmount);
+                                                                            view.selectedBuyItem.ready = true;
+                                                                        }
+                                                                    }                            
+                                                                });
+
+                                                            view.loadScroller(namespace.Pepper.ScrollerType.ShopConfirm);
                                                         }
+                                                    }
+                                                    else if (item.overMoreBtn) {
+                                                        if(item.data.code) {
+                                                            let ownAsset = namespace.Core.currentAccount.assets.find(x => x.code === item.data.code && x.issuer === item.data.issuer);
+                                                            let nativeAsset = namespace.Core.currentAccount.assets.find(x => x.code === "XLM" && x.issuer === "native");
+                                                            let canAdd = nativeAsset && namespace.Core.currentAccount.assets.length && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee() ? true : false;
+                                                            let asset = {
+                                                                "data": ownAsset
+                                                            };
+                                                            if (!asset.data) {
+                                                                asset = {
+                                                                    "data": new namespace.Core.Asset(item.data.issuer, item.data.code, 0, () => {
+                                                                        domUpdateAssetPage();
+                                                                    }),
+                                                                    "hasAdd": canAdd
+                                                                };
+                                                            }
+                                                            view.selectedAsset = asset;
+                                                            domShowModalPage(true, namespace.Pepper.WizardType.ViewAsset);
+                                                            domShowAssetPage(true);
+                                                        }   
                                                         else {
-                                                            window.location = item.data.moreLink;
+                                                            if (namespace.Pepper.isDesktop) {
+                                                                window.open(item.data.moreLink, "_blank");
+                                                            }
+                                                            else {
+                                                                window.location = item.data.moreLink;
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -4000,6 +4122,12 @@
                         }
                     }
                 }
+
+                if (view.selectedGameShop && 
+                    view.selectedGameShop.data && 
+                    view.selectedGameShop.data.shop) { 
+                    loadShop();
+                }
             });
         }).then(function () {
             view.error = namespace.Pepper.ViewErrorType.None;
@@ -4484,6 +4612,41 @@
             $("#asset-page").hide();
         }
         domUpdate();
+    }
+
+    function domUpdateAssetPage() {
+        view.needRedraw = true;
+        console.log("called")
+        if (view.selectedAsset && view.selectedAsset.data) {
+            if (view.selectedAsset.data.issuer !== "native") {
+                if (view.selectedAsset.data.issuer) {
+                    $("#asset-issuer").html(namespace.Pepper.Tools.truncateKey(view.selectedAsset.data.issuer));
+                }
+                else {
+                    $("#asset-issuer").html("");
+                }
+                if (view.selectedAsset.data.description) {
+                    $("#asset-description").html(view.selectedAsset.data.description);
+                }
+                else {
+                    $("#asset-description").html("");
+                }
+                if (view.selectedAsset.data.conditions) {
+                    $("#asset-conditions").html(view.selectedAsset.data.conditions);
+                }
+                else {
+                    $("#asset-conditions").html("");
+                }
+            }
+            else {
+                $("#asset-issuer").html("stellar.org");
+                $("#asset-issuer").click(() => {
+                    window.copyIssuer("https://stellar.org");
+                });
+                $("#asset-description").html(namespace.Pepper.Resources.localeText[130]);
+                $("#asset-conditions").html(namespace.Pepper.Resources.localeText[131]);
+            }
+        }
     }
 
     function domShowAddressForm(show) {
