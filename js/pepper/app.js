@@ -206,6 +206,8 @@
         };
         getSponsors();
 
+        namespace.Pepper.coinSwitch = {};
+
         Chart.defaults.global.defaultFontFamily = 'Roboto-Regular';
         Chart.defaults.global.defaultFontColor = "rgb(118, 231, 214)";
 
@@ -609,6 +611,7 @@
                         }
 
                         if ((view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders
+                            || view.scroller.type === namespace.Pepper.ScrollerType.CoinSwap
                             || view.scroller.type === namespace.Pepper.ScrollerType.LastTrades
                             || view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard)
                             && point.x < view.scroller.x + view.scroller.width) {
@@ -1482,6 +1485,7 @@
                         || view.scroller.type === namespace.Pepper.ScrollerType.QuotesMenu
                         || view.scroller.type === namespace.Pepper.ScrollerType.LastTrades
                         || view.scroller.type === namespace.Pepper.ScrollerType.LiveOrders
+                        || view.scroller.type === namespace.Pepper.ScrollerType.CoinSwap
                         || view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard
                         || view.scroller.type === namespace.Pepper.ScrollerType.AccountSettings)) {
                     if (view.scroller.type !== namespace.Pepper.ScrollerType.AccountSettings) {
@@ -1634,6 +1638,9 @@
                                 testElement(0, point, view.bookBtn, false);
                                 testElement(0, point, view.pasteBtn, false);
                                 testElement(0, point, view.qrBtn, false);
+                            }
+                            else if (view.activityType === namespace.Pepper.ActivityType.Receive) {
+                                testElement(0, point, view.depositBtn, false);
                             }
                             else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
                                 if (!namespace.Core.currentAccount.queuedOrder) {
@@ -1809,6 +1816,9 @@
                                 testElement(1, point, view.bookBtn, isPointerDown);
                                 testElement(1, point, view.pasteBtn, isPointerDown);
                                 testElement(1, point, view.qrBtn, isPointerDown);
+                            }
+                            else if (view.activityType === namespace.Pepper.ActivityType.Receive) {
+                                testElement(1, point, view.depositBtn, isPointerDown);
                             }
                             else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
                                 
@@ -2490,6 +2500,80 @@
                                 break;
                             case namespace.Pepper.ScrollerType.Leaderboard:
                                 // TODO
+                                break;
+                            case namespace.Pepper.ScrollerType.CoinSwap:
+                                if (item.id === 5 && namespace.Pepper.coinSwitch.coinBtnId && !namespace.Pepper.coinSwitch.loading) {
+                                    let amountBtnId = namespace.Pepper.coinSwitch.amountBtnId || 1;
+                                    let code = namespace.Pepper.coinSwitch.currencies[namespace.Pepper.coinSwitch.coinBtnId - 1].code.toLowerCase();
+                                    let amount = (namespace.Pepper.coinSwitch.minDeposit * amountBtnId).toFixed(namespace.Pepper.coinSwitch.coinBtnId === 1 ? 3 : 2);
+                                    namespace.Pepper.coinSwitch.loading = true;
+                                    $.post( namespace.config.apiUrl + "/.coinswitch/order", { from: code, address: namespace.Core.currentAccount.keys.publicKey(), amount: amount })
+                                        .done(function( response ) {
+                                            namespace.Pepper.coinSwitch.loading = false;
+                                            if (response) {
+                                                let payload = JSON.parse(response);
+                                                if(payload.success && payload.data) {
+                                                    let url = "https://exchange.litemint.com/order/" + payload.data.orderId
+                                                    if (namespace.Pepper.isDesktop) {
+                                                        window.open(url, "_blank");
+                                                    }
+                                                    else {
+                                                        window.location = url;
+                                                    }
+                                                    view.scrollerEndTime = 0.3;
+                                                }
+                                            }
+                                        })
+                                        .fail(function(xhr, status, error) {
+                                            namespace.Pepper.coinSwitch.loading = false;
+                                        });
+                                }
+                                else if (item.id === 4 && namespace.Pepper.coinSwitch.coinBtnId && !namespace.Pepper.coinSwitch.loading) {
+                                    let btnWidth = item.width / 4;
+                                    let amountBtnId = Math.ceil((point.x - item.x) / btnWidth);
+                                    namespace.Pepper.coinSwitch.amountBtnId = amountBtnId;
+                                }
+                                else if (item.id === 2) {
+                                    let btnWidth = item.width / 5;
+                                    let coinBtnId = Math.ceil((point.x - item.x) / btnWidth);
+                                    if (coinBtnId !== 5) {
+                                        if(!namespace.Pepper.coinSwitch.loading && namespace.Pepper.coinSwitch.coinBtnId !== coinBtnId){
+                                            namespace.Pepper.coinSwitch.coinBtnId = coinBtnId;
+                                            namespace.Pepper.coinSwitch.loading = true;
+                                            const getSwapRates = function () {
+                                                let code = namespace.Pepper.coinSwitch.currencies[namespace.Pepper.coinSwitch.coinBtnId - 1].code.toLowerCase();
+                                                $.post( namespace.config.apiUrl + "/.coinswitch/rate", { from: code })
+                                                    .done(function( response ) {
+                                                        namespace.Pepper.coinSwitch.loading = false;
+                                                        if (response) {
+                                                            let payload = JSON.parse(response);
+                                                            if (payload.success && payload.data && payload.data.limitMinDestinationCoin) {
+                                                                console.log(payload.data);
+                                                                namespace.Pepper.coinSwitch.rate = payload.data.rate;
+                                                                namespace.Pepper.coinSwitch.minDeposit = (payload.data.limitMinDepositCoin * 2).toFixed(namespace.Pepper.coinSwitch.coinBtnId === 1 ? 3 : 2);
+                                                            }
+                                                        }
+                                                    })
+                                                    .fail(function(xhr, status, error) {
+                                                        namespace.Pepper.coinSwitch.loading = false;
+                                                    });
+                                            };
+                                            getSwapRates();
+                                        }
+                                    }
+                                    else {
+                                        let btnId = namespace.Pepper.coinSwitch.coinBtnId || 1;
+                                        let code = namespace.Pepper.coinSwitch.currencies[btnId - 1].code.toLowerCase();
+                                        let url = "https://exchange.litemint.com/?from="+ code + "&to=xlm&address=" + namespace.Core.currentAccount.keys.publicKey();
+                                        if (namespace.Pepper.isDesktop) {
+                                            window.open(url, "_blank");
+                                        }
+                                        else {
+                                            window.location = url;
+                                        }
+                                    }
+
+                                }
                                 break;
                             case namespace.Pepper.ScrollerType.LiveOrders:
                                 if (!view.cancellingOffer) {
@@ -3207,7 +3291,14 @@
                                     });
                                 }
                                 else if (!close && view.activityType === namespace.Pepper.ActivityType.Receive && view.getActiveCarouselItem()) {
-                                    if (view.numPadCloseBtn.y + view.unit < point.y) {
+
+                                    let clickedDeposit = false;
+                                    testElement(2, point, view.depositBtn, isPointerDown, function () {
+                                        clickedDeposit = true;
+                                        view.loadScroller(namespace.Pepper.ScrollerType.CoinSwap);
+                                    });
+
+                                    if (!clickedDeposit && !view.scrollerEndTime && view.numPadCloseBtn.y + view.unit < point.y) {
                                         let key = view.getActiveCarouselItem().asset.deposit || namespace.Core.currentAccount.keys.publicKey();
                                         if (window.Android) {
                                             window.Android.copyToClipboard("address", key, namespace.Pepper.Resources.localeText[122]);

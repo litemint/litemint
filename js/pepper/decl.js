@@ -46,7 +46,8 @@
             "LiveOrders": 11,
             "Leaderboard": 12,
             "ShopMenu": 13,
-            "ShopConfirm": 14
+            "ShopConfirm": 14,
+            "CoinSwap": 15
         },
 
         /**

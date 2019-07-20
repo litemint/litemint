@@ -125,6 +125,7 @@
         this.numPadCloseBtn = new namespace.Pepper.HudElement();
         this.bookBtn = new namespace.Pepper.HudElement();
         this.pasteBtn = new namespace.Pepper.HudElement();
+        this.depositBtn = new namespace.Pepper.HudElement();
         this.addAssetBtn = new namespace.Pepper.HudElement();
         this.qrBtn = new namespace.Pepper.HudElement();
         this.accountBtn = new namespace.Pepper.HudElement();
@@ -356,6 +357,15 @@
                 this.scroller.height = this.viewport.height - this.scroller.headerHeight - this.unit * 0.3;
                 this.scroller.translatePoint = { "x": this.quoteBtn.x + this.quoteBtn.width, "y": this.quoteBtn.y + this.unit * 0.7 };
                 break;
+            case namespace.Pepper.ScrollerType.CoinSwap:
+                this.scroller.rowHeight = this.unit * 1.3;
+                this.scroller.headerHeight = (this.viewport.height - this.unit * 9.5) / 2;
+                this.scroller.x = this.viewport.x;
+                this.scroller.y = this.viewport.y + this.scroller.headerHeight;
+                this.scroller.width = this.viewport.width - this.unit * 0.3;
+                this.scroller.height = this.unit * 9.5;
+                this.scroller.translatePoint = { "x": this.quoteBtn.x + this.quoteBtn.width, "y": this.quoteBtn.y + this.unit * 0.7 };
+                break;
             case namespace.Pepper.ScrollerType.Leaderboard:
                 this.scroller.rowHeight = this.unit * 1.3;
                 this.scroller.headerHeight = this.unit * 3.17;
@@ -422,6 +432,8 @@
         if (!this.scroller.isDown) {
             this.scroller.scrollTime = updateTimer(elapsed, this.scroller.scrollTime, 2);
         }
+
+        this.setupTime = updateTimer(elapsed, this.setupTime, 1.25);
 
         let x = this.scroller.x;
         let y = this.scroller.y;
@@ -1613,6 +1625,7 @@
         this.needRedraw |=this.bookBtn.update(elapsed);
         this.needRedraw |=this.qrBtn.update(elapsed);
         this.needRedraw |=this.pasteBtn.update(elapsed);
+        this.needRedraw |=this.depositBtn.update(elapsed);
 
         this.numPadArea.x = this.viewport.x + this.unit * 0.5;
         this.numPadArea.width = this.viewport.width - this.unit;
@@ -1713,6 +1726,14 @@
         this.qrBtn.tx = this.qrBtn.x;
         this.qrBtn.ty = this.qrBtn.y;
         this.qrBtn.spawned = false;
+
+        this.depositBtn.width = this.unit * 3.7;
+        this.depositBtn.height = this.unit * 0.8;
+        this.depositBtn.x = this.viewport.x + this.viewport.width - this.depositBtn.width - this.unit * 0.15;
+        this.depositBtn.y = this.carousel.y + this.carousel.height + this.unit * 0.5;
+        this.depositBtn.tx = this.depositBtn.x;
+        this.depositBtn.ty = this.depositBtn.y;
+        this.depositBtn.spawned = false;
     };
 
     // Draw the view.
@@ -2094,6 +2115,7 @@
         switch (this.scroller.type) {
             case namespace.Pepper.ScrollerType.Leaderboard:
             case namespace.Pepper.ScrollerType.LiveOrders:
+            case namespace.Pepper.ScrollerType.CoinSwap:
             case namespace.Pepper.ScrollerType.LastTrades:
                 context.translate(-this.scrollerTime * this.viewport.width * 6, 0);
                 break;
@@ -2120,6 +2142,7 @@
         if (this.scrollerEndTime > 0) {
             switch (this.scroller.type) {
                 case namespace.Pepper.ScrollerType.Leaderboard:
+                case namespace.Pepper.ScrollerType.CoinSwap:
                 case namespace.Pepper.ScrollerType.LiveOrders:
                 case namespace.Pepper.ScrollerType.LastTrades:
                     context.translate(-(0.3 - this.scrollerEndTime) * this.width * 5, 0);
@@ -2181,6 +2204,7 @@
                     this.drawText(context, this.scroller.x + this.scroller.width - this.unit * 0.3, this.scroller.y - this.unit * 0.6, namespace.Pepper.Resources.localeText[185], "rgba(255, 255, 255, 0.6)", 0.8);
                 }
                 break;
+            case namespace.Pepper.ScrollerType.CoinSwap:
             case namespace.Pepper.ScrollerType.LiveOrders:
                 context.save();
                 context.fillStyle = "rgb(255, 255, 255)";
@@ -2224,6 +2248,7 @@
         context.save();
         context.beginPath();
         switch (this.scroller.type) {
+            case namespace.Pepper.ScrollerType.CoinSwap:
             case namespace.Pepper.ScrollerType.Leaderboard:
             case namespace.Pepper.ScrollerType.LiveOrders:
             case namespace.Pepper.ScrollerType.LastTrades:
@@ -2281,7 +2306,7 @@
                     context.fillStyle = (item.selected || item.hover) && item.enabled ? "rgba(36, 41, 46, 0.07)" : "rgb(255, 255, 255)";
                 }
                 else {
-                    context.fillStyle = item.selected || item.hover && this.scroller.type !== namespace.Pepper.ScrollerType.LiveOrders ? "rgba(36, 41, 46, 0.07)" : "rgb(255, 255, 255)";
+                    context.fillStyle = (item.selected || item.hover) && this.scroller.type !== namespace.Pepper.ScrollerType.LiveOrders && this.scroller.type !== namespace.Pepper.ScrollerType.CoinSwap ? "rgba(36, 41, 46, 0.07)" : "rgb(255, 255, 255)";
                 }
                 if (item.current) {
                     context.font = this.getFont("Roboto-Bold");
@@ -2310,7 +2335,7 @@
                     }
                 }
 
-                if (this.scroller.type !== namespace.Pepper.ScrollerType.AccountSettings && this.scroller.type !== namespace.Pepper.ScrollerType.ShopConfirm) {
+                if (this.scroller.type !== namespace.Pepper.ScrollerType.AccountSettings && this.scroller.type !== namespace.Pepper.ScrollerType.ShopConfirm && this.scroller.type !== namespace.Pepper.ScrollerType.CoinSwap) {
                     context.fillRect(item.x, item.y, item.width, item.height);
                     context.fillStyle = "rgba(36, 41, 46, 0.07)";
                     context.fillRect(item.x, item.y + item.height - this.unit * 0.03, item.width, this.unit * 0.03);
@@ -2366,6 +2391,113 @@
                         this.drawText(context, item.x + this.unit * 1.5, item.y + item.height * 0.5, item.label, textColor, 0.79);
                         context.drawImage(namespace.Pepper.Resources.add2Image, item.x + this.unit * 0.2, item.y + item.height * 0.17, this.unit * 0.8, this.unit * 0.8);
                     }
+                }
+                else if (this.scroller.type === namespace.Pepper.ScrollerType.CoinSwap) {
+                    context.save();
+
+                    if (item.id === 0) {
+                        context.fillStyle = "rgb(36, 164, 160)";
+                        context.fillRect(item.x, item.y, item.width, item.height);
+                        context.save();
+                        context.globalAlpha = 1 - this.setupTime * 4;
+                        context.drawImage(namespace.Pepper.Resources.coinswitchImage, item.x + this.unit * 0.2 + item.width * 0.5 * this.setupTime * 4, item.y + this.unit * 0.2, this.unit * 4 * 0.8, this.unit * 0.5 * 0.8);
+                        context.restore();
+                        context.font = this.getFont("Roboto-Regular");
+                        context.textAlign = "left";
+                        this.drawText(context, item.x + this.unit * 0.2 - item.width * 0.5 * this.setupTime * 4, item.y + this.unit * 1, item.label, "rgba(255, 255, 255, 0.6)", 0.65);
+                    }
+                    else if (item.id === 4 && namespace.Pepper.coinSwitch.coinBtnId) {
+                        if (!namespace.Pepper.coinSwitch.loading) {
+                            context.textAlign = "center";
+                            context.font = this.getFont("Roboto-Regular");
+
+                            let btnMargin = this.unit * 0.06;
+                            let btnWidth = item.width / 4 - btnMargin * 2;
+                            let btnOffset = btnMargin * 3;
+                            let amountBtnId = namespace.Pepper.coinSwitch.amountBtnId || 1;
+                            for (let i = 0; i < 4; i += 1) {
+                                if (i + 1 === amountBtnId) {
+                                    this.roundRect(context, item.x + btnOffset - this.unit * 0.05, item.y + btnMargin - this.unit * 0.05, btnWidth - btnMargin + this.unit * 0.1, item.height - btnMargin * 2 + this.unit * 0.1, this.unit * 0.18, "rgb(61, 157, 255)");
+                                }
+                                this.roundRect(context, item.x + btnOffset, item.y + btnMargin, btnWidth - btnMargin, item.height - btnMargin * 2, this.unit * 0.18, (i + 1 === amountBtnId) ? "rgb(61, 157, 255)" : "rgba(36, 41, 46, 0.2)");
+                                context.save();
+                                context.font = this.getFont("Roboto-Bold");
+                                let code = namespace.Pepper.coinSwitch.currencies[namespace.Pepper.coinSwitch.coinBtnId - 1].code
+                                this.drawText(context, item.x  + btnOffset + btnWidth * 0.5, item.y + item.height * 0.5,  (namespace.Pepper.coinSwitch.minDeposit * (i + 1)).toFixed(namespace.Pepper.coinSwitch.coinBtnId === 1 ? 3 : 2) + " " + code, "rgba(255, 255, 255)", (i + 1 === amountBtnId) ? 0.68 : 0.63);
+
+                                context.restore();
+                                btnOffset += btnWidth + btnMargin;
+                            }
+                        }
+                        else {
+                            this.drawLoader(context, item.x + item.width * 0.5, item.y + item.height * 0.5, this.unit, true);
+                        }
+                    }
+                    else if (item.id === 2) {
+                        context.textAlign = "center";
+                        context.font = this.getFont("Roboto-Regular");
+
+                        if (!namespace.Pepper.coinSwitch.currencies) {
+                            namespace.Pepper.coinSwitch.currencies = [
+                                    { "image": namespace.Pepper.Resources.btcImage, "code": "BTC" },
+                                    { "image": namespace.Pepper.Resources.ethImage, "code": "ETH" },
+                                    { "image": namespace.Pepper.Resources.xrpImage, "code": "XRP" },
+                                    { "image": namespace.Pepper.Resources.ltcImage, "code": "LTC" }];
+                        }
+
+                        let coinBtnId = namespace.Pepper.coinSwitch.coinBtnId;
+                        let btnMargin = this.unit * 0.06;
+                        let btnWidth = item.width / 5 - btnMargin * 2;
+                        let btnOffset = btnMargin * 3; 
+                        for (let i = 0; i < 5; i += 1) {
+                            context.save();
+                            if (i + 1 !== coinBtnId && i !== 4) {
+                                context.globalAlpha *= 0.3;
+                            }
+
+                            if(i < 4) {
+                                context.save();
+                                context.translate(item.x + btnOffset + btnWidth * 0.5, item.y + item.height * 0.5);
+                                context.scale((0.5 - this.setupTime) * 2, (0.5 - this.setupTime) * 2);
+                                context.translate(-(item.x + btnOffset + btnWidth * 0.5), -(item.y + item.height * 0.5));
+                                if (i + 1 === coinBtnId) {
+                                    this.circle(context, item.x + btnOffset + btnWidth * 0.5, item.y + item.height * 0.5, item.height * 0.57, "rgb(61, 157, 255)");
+                                }
+                                context.drawImage(namespace.Pepper.coinSwitch.currencies[i].image, item.x + btnOffset + btnWidth * 0.5 - item.height * 0.5, item.y, item.height, item.height);
+                                context.restore();
+                            }
+                            else {
+                                this.roundRect(context, item.x + btnOffset, item.y + btnMargin, btnWidth - btnMargin, item.height - btnMargin * 2, this.unit * 0.18, namespace.Pepper.Resources.primaryColor);
+                                context.font = this.getFont("Roboto-Regular");
+                                this.drawText(context, item.x + btnOffset + btnWidth * 0.5, item.y + item.height * 0.5,  namespace.Pepper.Resources.localeText[212], "rgba(255, 255, 255)", 0.65);
+                            }
+                            context.restore();
+                            btnOffset += btnWidth + btnMargin;
+                        }
+                    }
+                    else if ((namespace.Pepper.coinSwitch.coinBtnId && !namespace.Pepper.coinSwitch.loading) || item.id === 1) {
+                        context.font = this.getFont("Roboto-Bold");
+                        context.textAlign = "center";
+                        if (item.id === 5) {
+                            context.save();
+                            let btnMargin = this.unit * 0.1;
+                            this.roundRect(context, item.x + btnMargin * 2, item.y + btnMargin * 2, item.width - btnMargin * 4, item.height - btnMargin, this.unit * 0.18, namespace.Pepper.Resources.primaryColor);
+                            if (item.selected || item.hover) {
+                                context.globalAlpha *= 0.6;
+                            }
+                            this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.6,  namespace.Pepper.Resources.localeText[214], "rgba(255, 255, 255)", 0.7);
+                            context.restore();
+                        }
+                        else if (item.id === 6) {
+                            let amountBtnId = namespace.Pepper.coinSwitch.amountBtnId || 1;
+                            let amount = Math.floor(namespace.Pepper.coinSwitch.minDeposit * amountBtnId * namespace.Pepper.coinSwitch.rate);
+                            this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, namespace.Pepper.Resources.localeText[213] + " ≈ " + amount + " XLM", "rgb(36, 41, 46)", 0.85);
+                        }
+                        else {
+                            this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, item.label, "rgb(36, 41, 46)", 0.7);
+                        }
+                    }
+                    context.restore();
                 }
                 else if (this.scroller.type === namespace.Pepper.ScrollerType.LiveOrders) {
                     if (item.data) {
@@ -2668,6 +2800,7 @@
             && this.scroller.type !== namespace.Pepper.ScrollerType.LastTrades
             && this.scroller.type !== namespace.Pepper.ScrollerType.Leaderboard
             && this.scroller.type !== namespace.Pepper.ScrollerType.LiveOrders
+            && this.scroller.type !== namespace.Pepper.ScrollerType.CoinSwap
             && this.scroller.type !== namespace.Pepper.ScrollerType.FilterMenu) {
             context.save();
             context.shadowColor = "rgba(0, 0, 0, 0.14)";
@@ -2701,6 +2834,7 @@
                 case namespace.Pepper.ScrollerType.QuotesMenu:
                 case namespace.Pepper.ScrollerType.LastTrades:
                 case namespace.Pepper.ScrollerType.LiveOrders:
+                case namespace.Pepper.ScrollerType.CoinSwap:
                 case namespace.Pepper.ScrollerType.Leaderboard:
                     break;
             }
@@ -3267,6 +3401,19 @@
                 }
             }
 
+            context.restore();
+        }
+
+        if (this.showScroller && (this.scroller.type === namespace.Pepper.ScrollerType.CoinSwap || this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard)) {
+            context.save();
+            let alpha = (0.25 - this.scrollerTime) * 4 * context.globalAlpha;
+            if (this.scrollerEndTime) {
+                alpha = (this.scrollerEndTime) * 3 * context.globalAlpha;
+            }
+            if (alpha) {
+                context.fillStyle = "rgba(0, 0, 0," + alpha * 0.32 + ")";
+                context.fillRect(this.carousel.x, this.carousel.y - this.carousel.headerHeight - namespace.Pepper.barHeight, this.carousel.width, this.viewport.height + namespace.Pepper.barHeight);
+            }
             context.restore();
         }
     };
@@ -3989,7 +4136,7 @@
         this.drawText(context, this.ordersBtn.x + this.ordersBtn.width * 0.5, this.ordersBtn.y + this.ordersBtn.height * 0.5, namespace.Pepper.Resources.localeText[170], namespace.Core.currentAccount.offers.length ? "rgba(255, 255, 255)" : "rgba(36, 41, 46, 0.16)", 0.65);
         context.restore();
 
-        if (this.showScroller && (this.scroller.type === namespace.Pepper.ScrollerType.LastTrades || this.scroller.type === namespace.Pepper.ScrollerType.LiveOrders || this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard)) {
+        if (this.showScroller && (this.scroller.type === namespace.Pepper.ScrollerType.LastTrades || this.scroller.type === namespace.Pepper.ScrollerType.CoinSwap || this.scroller.type === namespace.Pepper.ScrollerType.LiveOrders || this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard)) {
             context.save();
             let alpha = (0.25 - this.scrollerTime) * 4 * context.globalAlpha;
             if (this.scrollerEndTime) {
@@ -5059,7 +5206,16 @@
             context.scale(0.67 + Math.max(0, (this.carouselItem.selectTime - 0.3) * 5) * 0.1, 0.67 + Math.max(0, (this.carouselItem.selectTime - 0.3) * 5) * 0.1);
             context.translate(-(this.list.x + this.unit * 1.5 + (this.list.width - this.unit * 3) * 0.5), -(middleY + this.unit * 1.8));
             context.drawImage(namespace.Pepper.Resources.qrCodeImage, this.list.x + this.unit * 1.5, middleY + this.unit * 1.8, this.list.width - this.unit * 3, this.list.width - this.unit * 3);
+            context.restore();
 
+            context.save();
+            this.roundRect(context, this.depositBtn.x, this.depositBtn.y, this.depositBtn.width, this.depositBtn.height, this.unit * 0.18, namespace.Pepper.Resources.primaryColor);
+            if (this.depositBtn.hover || this.depositBtn.selected) {
+                context.globalAlpha = 0.7 * context.globalAlpha;
+            }
+            context.font = this.getFont("Roboto-Regular");
+            context.textAlign = "center";
+            this.drawText(context, this.depositBtn.x + this.depositBtn.width * 0.5, this.depositBtn.y + this.depositBtn.height * 0.5, namespace.Pepper.Resources.localeText[215], "rgb(255, 255, 255)", 0.68);
             context.restore();
             context.restore();
         }
@@ -5527,6 +5683,19 @@
             case namespace.Pepper.ScrollerType.Leaderboard:
                 this.showScroller = true;
                 this.scrollerTime = 0.25;
+                break;
+            case namespace.Pepper.ScrollerType.CoinSwap:
+                this.scroller.items.push({ "id": 0,"label": namespace.Pepper.Resources.localeText[209] });
+                this.scroller.items.push({ "id": 1,"label": namespace.Pepper.Resources.localeText[211] });
+                this.scroller.items.push({ "id": 2,"label": "" });
+                this.scroller.items.push({ "id": 3,"label": namespace.Pepper.Resources.localeText[210] });
+                this.scroller.items.push({ "id": 4,"label": "" });
+                this.scroller.items.push({ "id": 6,"label": "" });
+                this.scroller.items.push({ "id": 5,"label": "" });
+                this.showScroller = true;
+                this.scrollerTime = 0.25;
+                this.setupTime = 0.5;
+                namespace.Pepper.coinSwitch.coinBtnId = 0;
                 break;
             case namespace.Pepper.ScrollerType.LiveOrders:
                 for (let i = 0; i < namespace.Core.currentAccount.offers.length; i += 1) {

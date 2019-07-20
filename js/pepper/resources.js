@@ -117,7 +117,13 @@
         "shopImage": "shop.png",
         "rocketImage": "rocket.png",
         "rocketDarkImage": "rocketdark.png",
-        "closeCircleImage": "closecircle.png"
+        "closeCircleImage": "closecircle.png",
+        "coinswitchImage": "coinswitch.png",
+        "btcImage": "btc.png",
+        "ethImage": "eth.png",
+        "xrpImage": "xrp.png",
+        "ltcImage": "ltc.png",
+        "usdImage": "usd.png"
     };
 
 })(window.Litemint = window.Litemint || {});

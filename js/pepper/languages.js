@@ -222,7 +222,14 @@
         "Choose your PIN.",
         "Confirm it.",
         "Done.",
-        "Can be traded (DEX)"
+        "Can be traded (DEX)",
+        "Quick deposit with CoinSwitch",
+        "Select Deposit Amount", // 210
+        "Select Deposit Currency",
+        "More...",
+        "You receive:",
+        "CONTINUE",
+        "Quick Deposit"
     ];
 
     /**
