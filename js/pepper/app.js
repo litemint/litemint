@@ -2529,9 +2529,22 @@
                                         });
                                 }
                                 else if (item.id === 4 && namespace.Pepper.coinSwitch.coinBtnId && !namespace.Pepper.coinSwitch.loading) {
-                                    let btnWidth = item.width / 4;
+                                    let btnWidth = item.width / 5;
                                     let amountBtnId = Math.ceil((point.x - item.x) / btnWidth);
-                                    namespace.Pepper.coinSwitch.amountBtnId = amountBtnId;
+                                    if (amountBtnId !== 5) {
+                                        namespace.Pepper.coinSwitch.amountBtnId = amountBtnId;
+                                    }
+                                    else {
+                                        let btnId = namespace.Pepper.coinSwitch.coinBtnId || 1;
+                                        let code = namespace.Pepper.coinSwitch.currencies[btnId - 1].code.toLowerCase();
+                                        let url = "https://exchange.litemint.com/?from="+ code + "&to=xlm&address=" + namespace.Core.currentAccount.keys.publicKey();
+                                        if (namespace.Pepper.isDesktop) {
+                                            window.open(url, "_blank");
+                                        }
+                                        else {
+                                            window.location = url;
+                                        }
+                                    }
                                 }
                                 else if (item.id === 2) {
                                     let btnWidth = item.width / 5;
@@ -2545,6 +2558,7 @@
                                                 $.post( namespace.config.apiUrl + "/.coinswitch/rate", { from: code })
                                                     .done(function( response ) {
                                                         namespace.Pepper.coinSwitch.loading = false;
+                                                        view.setupTime = 0.5;
                                                         if (response) {
                                                             let payload = JSON.parse(response);
                                                             if (payload.success && payload.data && payload.data.limitMinDestinationCoin) {

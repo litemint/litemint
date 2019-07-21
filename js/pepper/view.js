@@ -2396,36 +2396,47 @@
                     context.save();
 
                     if (item.id === 0) {
+                        let setupTime = !namespace.Pepper.coinSwitch.coinBtnId ? this.setupTime : 0;
                         context.fillStyle = "rgb(36, 164, 160)";
                         context.fillRect(item.x, item.y, item.width, item.height);
                         context.save();
-                        context.globalAlpha = 1 - this.setupTime * 4;
-                        context.drawImage(namespace.Pepper.Resources.coinswitchImage, item.x + this.unit * 0.2 + item.width * 0.5 * this.setupTime * 4, item.y + this.unit * 0.2, this.unit * 4 * 0.8, this.unit * 0.5 * 0.8);
+                        context.globalAlpha = 1 - setupTime * 4;
+                        context.drawImage(namespace.Pepper.Resources.coinswitchImage, item.x + this.unit * 0.2 + item.width * 0.5 * setupTime * 4, item.y + this.unit * 0.2, this.unit * 4 * 0.8, this.unit * 0.5 * 0.8);
                         context.restore();
                         context.font = this.getFont("Roboto-Regular");
                         context.textAlign = "left";
-                        this.drawText(context, item.x + this.unit * 0.2 - item.width * 0.5 * this.setupTime * 4, item.y + this.unit * 1, item.label, "rgba(255, 255, 255, 0.6)", 0.65);
+                        this.drawText(context, item.x + this.unit * 0.2 - item.width * 0.5 * setupTime * 4, item.y + this.unit * 1, item.label, "rgba(255, 255, 255, 0.6)", 0.65);
                     }
                     else if (item.id === 4 && namespace.Pepper.coinSwitch.coinBtnId) {
                         if (!namespace.Pepper.coinSwitch.loading) {
+                            context.globalAlpha = 1 - this.setupTime * 2;
                             context.textAlign = "center";
                             context.font = this.getFont("Roboto-Regular");
 
                             let btnMargin = this.unit * 0.06;
-                            let btnWidth = item.width / 4 - btnMargin * 2;
+                            let btnWidth = item.width / 5 - btnMargin * 2;
                             let btnOffset = btnMargin * 3;
                             let amountBtnId = namespace.Pepper.coinSwitch.amountBtnId || 1;
-                            for (let i = 0; i < 4; i += 1) {
-                                if (i + 1 === amountBtnId) {
-                                    this.roundRect(context, item.x + btnOffset - this.unit * 0.05, item.y + btnMargin - this.unit * 0.05, btnWidth - btnMargin + this.unit * 0.1, item.height - btnMargin * 2 + this.unit * 0.1, this.unit * 0.18, "rgb(61, 157, 255)");
-                                }
-                                this.roundRect(context, item.x + btnOffset, item.y + btnMargin, btnWidth - btnMargin, item.height - btnMargin * 2, this.unit * 0.18, (i + 1 === amountBtnId) ? "rgb(61, 157, 255)" : "rgba(36, 41, 46, 0.2)");
-                                context.save();
-                                context.font = this.getFont("Roboto-Bold");
-                                let code = namespace.Pepper.coinSwitch.currencies[namespace.Pepper.coinSwitch.coinBtnId - 1].code
-                                this.drawText(context, item.x  + btnOffset + btnWidth * 0.5, item.y + item.height * 0.5,  (namespace.Pepper.coinSwitch.minDeposit * (i + 1)).toFixed(namespace.Pepper.coinSwitch.coinBtnId === 1 ? 3 : 2) + " " + code, "rgba(255, 255, 255)", (i + 1 === amountBtnId) ? 0.68 : 0.63);
+                            for (let i = 0; i < 5; i += 1) {
+                                if (i < 4) {
+                                    if (i + 1 === amountBtnId) {
+                                        this.roundRect(context, item.x + btnOffset - this.unit * 0.05, item.y + btnMargin - this.unit * 0.05, btnWidth - btnMargin + this.unit * 0.1, item.height - btnMargin * 2 + this.unit * 0.1, this.unit * 0.18, "rgb(61, 157, 255)");
+                                    }
+                                    this.roundRect(context, item.x + btnOffset, item.y + btnMargin, btnWidth - btnMargin, item.height - btnMargin * 2, this.unit * 0.18, (i + 1 === amountBtnId) ? "rgb(61, 157, 255)" : "rgba(36, 41, 46, 0.2)");
+                                    context.save();
+                                    context.font = this.getFont("Roboto-Bold");
+                                    let code = namespace.Pepper.coinSwitch.currencies[namespace.Pepper.coinSwitch.coinBtnId - 1].code
+                                    this.drawText(context, item.x  + btnOffset + btnWidth * 0.5, item.y + item.height * 0.39,  (namespace.Pepper.coinSwitch.minDeposit * (i + 1)).toFixed(namespace.Pepper.coinSwitch.coinBtnId === 1 ? 3 : 2), "rgba(255, 255, 255)", (i + 1 === amountBtnId) ? 0.75 : 0.7);
+                                    context.font = this.getFont("Roboto-Regular");
+                                    this.drawText(context, item.x  + btnOffset + btnWidth * 0.5, item.y + item.height * 0.71,  code, "rgba(255, 255, 255)", (i + 1 === amountBtnId) ? 0.68 : 0.63);
 
-                                context.restore();
+                                    context.restore();
+                                }
+                                else {
+                                    this.roundRect(context, item.x + btnOffset, item.y + btnMargin, btnWidth - btnMargin, item.height - btnMargin * 2, this.unit * 0.18, namespace.Pepper.Resources.primaryColor);
+                                    context.font = this.getFont("Roboto-Regular");
+                                    this.drawText(context, item.x + btnOffset + btnWidth * 0.5, item.y + item.height * 0.5,  namespace.Pepper.Resources.localeText[212], "rgba(255, 255, 255)", 0.65);
+                                }
                                 btnOffset += btnWidth + btnMargin;
                             }
                         }
@@ -2434,6 +2445,7 @@
                         }
                     }
                     else if (item.id === 2) {
+                        let setupTime = !namespace.Pepper.coinSwitch.coinBtnId ? this.setupTime : 0;
                         context.textAlign = "center";
                         context.font = this.getFont("Roboto-Regular");
 
@@ -2458,7 +2470,7 @@
                             if(i < 4) {
                                 context.save();
                                 context.translate(item.x + btnOffset + btnWidth * 0.5, item.y + item.height * 0.5);
-                                context.scale((0.5 - this.setupTime) * 2, (0.5 - this.setupTime) * 2);
+                                context.scale((0.5 - setupTime) * 2, (0.5 - setupTime) * 2);
                                 context.translate(-(item.x + btnOffset + btnWidth * 0.5), -(item.y + item.height * 0.5));
                                 if (i + 1 === coinBtnId) {
                                     this.circle(context, item.x + btnOffset + btnWidth * 0.5, item.y + item.height * 0.5, item.height * 0.57, "rgb(61, 157, 255)");
@@ -2479,6 +2491,7 @@
                         context.font = this.getFont("Roboto-Bold");
                         context.textAlign = "center";
                         if (item.id === 5) {
+                            context.globalAlpha = 1 - this.setupTime * 2;
                             context.save();
                             let btnMargin = this.unit * 0.1;
                             this.roundRect(context, item.x + btnMargin * 2, item.y + btnMargin * 2, item.width - btnMargin * 4, item.height - btnMargin, this.unit * 0.18, namespace.Pepper.Resources.primaryColor);
@@ -2489,9 +2502,15 @@
                             context.restore();
                         }
                         else if (item.id === 6) {
+                            context.globalAlpha = 1 - this.setupTime * 2;
                             let amountBtnId = namespace.Pepper.coinSwitch.amountBtnId || 1;
                             let amount = Math.floor(namespace.Pepper.coinSwitch.minDeposit * amountBtnId * namespace.Pepper.coinSwitch.rate);
                             this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, namespace.Pepper.Resources.localeText[213] + " ≈ " + amount + " XLM", "rgb(36, 41, 46)", 0.85);
+                        }
+                        else if (item.id === 3) {
+                            context.globalAlpha = 1 - this.setupTime * 2;
+                            let code = namespace.Pepper.coinSwitch.currencies[namespace.Pepper.coinSwitch.coinBtnId - 1].code;
+                            this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, item.label + " (" + code + ")", "rgb(36, 41, 46)", 0.7);
                         }
                         else {
                             this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, item.label, "rgb(36, 41, 46)", 0.7);
