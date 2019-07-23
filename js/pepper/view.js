@@ -48,12 +48,14 @@
         this.unit = 0;
         this.scrollerTime = 0;
         this.scrollerEndTime = 0;
+        this.shopTabTime = 0;
         this.modalPageTime = 0;
         this.modalPageEndTime = 0;
         this.modalPageTransitionTime = 0;
         this.modalStep = namespace.Pepper.WizardType.None;
         this.mnemonicSuccess = true;
         this.activityType = namespace.Pepper.ActivityType.SelectSendAmount;
+        this.exploreType = namespace.Pepper.ExploreType.Game;
         this.sendTransition = 0;
         this.sendFormOffset = 0;
         this.sendFormTime = 0;
@@ -1368,6 +1370,7 @@
     // Update the store.
     namespace.Pepper.View.prototype.updateStore = function (elapsed) {
         this.store.startTime = updateTimer(elapsed, this.store.startTime);
+        this.shopTabTime = updateTimer(elapsed, this.shopTabTime, 2.5);
 
         this.needRedraw |=this.promoBtn.update(elapsed);
         this.needRedraw |= this.gamerIdBtn.update(elapsed);
@@ -4895,13 +4898,32 @@
         const quote = this.quoteAssets[base.code + base.issuer] || base;
 
         if (item.spot) {
-            context.textAlign = "left";
-            context.font = this.getFont("Roboto-Medium");
-            this.drawText(context, item.x + this.unit * 0.3, y + item.height * 0.5, namespace.Pepper.Resources.localeText[181], "rgb(255, 255, 255)", 0.7);
             context.textAlign = "center";
-            this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.5, namespace.Pepper.Resources.localeText[204], "rgba(255, 255, 255, 0.3)", 0.7);
-            context.font = this.getFont("Roboto-Light");
-            this.drawText(context, item.x + item.width * 0.5, y + item.height * 0.8, namespace.Pepper.Resources.localeText[184], "rgba(255, 255, 255, 0.3)", 0.5);
+            context.font = this.getFont("Roboto-Medium");
+
+            context.save();
+            if (item.selected && item.overGamesBtn) {
+                context.globalAlpha = 0.5;
+            }            
+            let color = this.exploreType === namespace.Pepper.ExploreType.Game ? "rgb(255, 255, 255)" : "rgba(255, 255, 255, 0.3)";
+            this.drawText(context, item.x + item.width * 0.15, y + item.height * 0.5, namespace.Pepper.Resources.localeText[181], color, 0.7);
+            if  (this.exploreType === namespace.Pepper.ExploreType.Game) {
+                context.fillStyle = color;
+                context.fillRect(item.x, y + item.height - this.unit * 0.2, item.width * 0.3, this.unit * 0.1);
+            }
+            context.restore();
+
+            context.save();
+            if (item.selected && item.overAppsBtn) {
+                context.globalAlpha = 0.5;
+            }
+            color = this.exploreType === namespace.Pepper.ExploreType.App ? "rgb(255, 255, 255)" : "rgba(255, 255, 255, 0.3)";
+            this.drawText(context, item.x + item.width * 0.45, y + item.height * 0.5, namespace.Pepper.Resources.localeText[204], color, 0.7);
+            if  (this.exploreType === namespace.Pepper.ExploreType.App) {
+                context.fillStyle = color;
+                context.fillRect(item.x + item.width * 0.3, y + item.height - this.unit * 0.2, item.width * 0.3, this.unit * 0.1);
+            }
+            context.restore();
         }
         else {
             if(index === 0) {
@@ -4913,6 +4935,8 @@
                 }
             }
             else{
+                context.translate((this.exploreType === namespace.Pepper.ExploreType.App ? 1 : -1) * this.shopTabTime * this.unit * 10, 0);
+                context.globalAlpha = 1 - this.shopTabTime * 2;
                 if (item.data.valid) {
                     context.drawImage(item.data.image, item.x + this.unit * 0.3, y + this.unit * 0.1, item.height - this.unit * 0.2, item.height - this.unit * 0.2);
                 }
@@ -4986,15 +5010,15 @@
         const quote = this.quoteAssets[base.code + base.issuer] || base;
         const shopPriceRate = this.getActiveCarouselItem().shopPriceRate;
         const collectiblePrices = this.getActiveCarouselItem().collectiblePrices;
-        let showLoader = !shopPriceRate ? true : false;
+        let showLoader = (shopPriceRate && !item.data.collectible) || (collectiblePrices && item.data.collectible && collectiblePrices[item.data.code + item.data.issuer + item.data.id]) ? false : true;
         let convertedPrice;
         if(shopPriceRate && shopPriceRate.sourceAmount){
             convertedPrice = Number(item.data.price) * Number(shopPriceRate.sourceAmount) / Number(shopPriceRate.amount);
         }
 
         let collectiblePrice;
-        if(collectiblePrices && collectiblePrices[item.data.code + item.data.issuer]) {
-            collectiblePrice = Number(collectiblePrices[item.data.code + item.data.issuer]);
+        if(collectiblePrices && collectiblePrices[item.data.code + item.data.issuer + item.data.id]) {
+            collectiblePrice = Number(collectiblePrices[item.data.code + item.data.issuer + item.data.id]);
         }
 
         if(!item.image){

@@ -406,14 +406,14 @@
     };
 
     // Find payment paths.
-    namespace.Core.StellarNetwork.prototype.findPaymentPaths = function (account, code, issuer, amount, cb) {
+    namespace.Core.StellarNetwork.prototype.findPaymentPaths = function (account, code, issuer, amount, id, cb) {
         const asset = (issuer === "native") 
             ? StellarSdk.Asset.native() 
             : new StellarSdk.Asset(code, issuer);
         stellarServer.paths(namespace.Core.currentAccount.keys.publicKey(), account, asset, amount)
             .call()
             .then(function (pathResult) {
-                cb(true, pathResult.records, code, issuer);
+                cb(true, pathResult.records, code, issuer, id);
             })
             .catch(function (error) {
                 cb(false, error);

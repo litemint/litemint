@@ -76,6 +76,16 @@
         },
 
         /**
+         * ExploreType
+         * @member ExploreType
+         * @memberof Litemint.Pepper
+        */
+       "ExploreType": {
+            "Game": "game",
+            "App": "app"
+        },
+
+        /**
          * FilterType
          * @member FilterType
          * @memberof Litemint.Pepper

@@ -827,22 +827,33 @@
                     item.overPlayBtn = false;
                     item.overScoreBtn = false;
                     item.overShopBtn = false;
+
                     if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
                         item.selected = true;
                         item.hasClick = true;
+                        if (item.spot) {
+                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.store.offset, item.x + item.width * 0.3, y + item.height - view.store.offset)) {
+                                item.overGamesBtn = true;
+                            }
 
-                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.2, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
-                            item.overPlayBtn = true;
+                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width * 0.3, y - view.store.offset, item.x + item.width * 0.6, y + item.height - view.store.offset)) {
+                                item.overAppsBtn = true;
+                            }
                         }
-
-                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.9, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)
-                            && item.data && item.data.data && item.data.data.leaderboard) {
-                            item.overScoreBtn = true;
-                        }
-
-                        if (namespace.Core.currentAccount.data && namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)
-                            && item.data && item.data.data && item.data.data.shop && namespace.Core.currentAccount.friendlyAddress) {
-                            item.overShopBtn = true;
+                        else {
+                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.2, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
+                                item.overPlayBtn = true;
+                            }
+    
+                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.9, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)
+                                && item.data && item.data.data && item.data.data.leaderboard) {
+                                item.overScoreBtn = true;
+                            }
+    
+                            if (namespace.Core.currentAccount.data && namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)
+                                && item.data && item.data.data && item.data.data.shop && namespace.Core.currentAccount.friendlyAddress) {
+                                item.overShopBtn = true;
+                            }
                         }
                     }
                     break;
@@ -853,17 +864,27 @@
                             if (item.hasClick) {
                                 item.selected = true;
                                 item.hover = true;
-
-                                if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.2, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
-                                    item.overPlayBtn = false;
+                                if (item.spot) {
+                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.store.offset, item.x + item.width * 0.3, y + item.height - view.store.offset)) {
+                                        item.overGamesBtn = false;
+                                    }
+        
+                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width * 0.3, y - view.store.offset, item.x + item.width * 0.6, y + item.height - view.store.offset)) {
+                                        item.overAppsBtn = false;
+                                    }
                                 }
+                                else {
+                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.2, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
+                                        item.overPlayBtn = false;
+                                    }
 
-                                if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.9, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)) {
-                                    item.overScoreBtn = false;
-                                }
+                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.9, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)) {
+                                        item.overScoreBtn = false;
+                                    }
 
-                                if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)) {
-                                    item.overShopBtn = false;
+                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)) {
+                                        item.overShopBtn = false;
+                                    }
                                 }
                             }
                         }
@@ -1061,7 +1082,7 @@
         }
     }
 
-    function loadStore () {
+    function loadStore (swap) {
         if (view) {        
             view.resetStore();
             view.store.items = [];
@@ -1071,9 +1092,18 @@
                     view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
                 }
                 else {
-                    view.store.items.push({ "spot": (i == 1 ? true : false), "data": namespace.Pepper.storeData[i] });
+                    if (i == 1) {
+                        view.store.items.push({ "spot": true, "data": namespace.Pepper.storeData[i] });
+                    }
+                    else {
+                        if((!namespace.Pepper.storeData[i].data.type && view.exploreType === namespace.Pepper.ExploreType.Game)
+                            || namespace.Pepper.storeData[i].data.type === view.exploreType) {
+                            view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
+                        }
+                    }
                 }     
             }
+            view.shopTabTime = swap ? 0.5 : 0;
         }
     }
 
@@ -1083,6 +1113,7 @@
             
             for (let i = 0; i < view.carousel.items.length; i += 1) {
                 delete view.carousel.items[i].shopPriceRate;
+                delete view.carousel.items[i].collectiblePrices;
             }
 
             const stellarNet = new namespace.Core.StellarNetwork();
@@ -1107,7 +1138,8 @@
                                 view.selectedGameShop.data.shop.items[i].code,
                                 view.selectedGameShop.data.shop.items[i].issuer,
                                 namespace.Pepper.Tools.formatPrice(view.selectedGameShop.data.shop.items[i].priceScale || 1),
-                                (success, result, code, issuer) => {
+                                view.selectedGameShop.data.shop.items[i].id,
+                                (success, result, code, issuer, id) => {
                                     console.log(result);
                                     for (let i = 0; i < view.carousel.items.length; i += 1) {
                                         let item = view.carousel.items[i];
@@ -1130,7 +1162,7 @@
                                             if (!item.collectiblePrices) {
                                                 item.collectiblePrices = {};
                                             }    
-                                            item.collectiblePrices[code + issuer] = namespace.Pepper.Tools.formatPrice(sourceAmount);
+                                            item.collectiblePrices[code + issuer + id] = namespace.Pepper.Tools.formatPrice(sourceAmount);
                                         }
                                     }
                                 });
@@ -1144,6 +1176,7 @@
                         view.selectedGameShop.data.shop.code,
                         view.selectedGameShop.data.shop.issuer,
                         namespace.Pepper.Tools.formatPrice(amount),
+                        null,
                         (success, result) => {
                             console.log(result);
                             for (let i = 0; i < view.carousel.items.length; i += 1) {
@@ -3467,8 +3500,8 @@
                                                     const collectiblePrices = view.getActiveCarouselItem().collectiblePrices;
                                                     let base = view.getActiveCarouselItem().asset;
                                                     let convertedPrice;
-                                                    let collectiblePrice = collectiblePrices && collectiblePrices[item.data.code + item.data.issuer]
-                                                                            ? Number(collectiblePrices[item.data.code + item.data.issuer]) : 0;
+                                                    let collectiblePrice = collectiblePrices && collectiblePrices[item.data.code + item.data.issuer + item.data.id]
+                                                                            ? Number(collectiblePrices[item.data.code + item.data.issuer + item.data.id]) : 0;
                                                     if(shopPriceRate && shopPriceRate.sourceAmount){
                                                         convertedPrice = Number(item.data.price) * Number(shopPriceRate.sourceAmount) / Number(shopPriceRate.amount);
                                                     }
@@ -3487,6 +3520,7 @@
                                                                 view.selectedGameShop.data.shop.code,
                                                                 view.selectedGameShop.data.shop.issuer,
                                                                 namespace.Pepper.Tools.formatPrice(view.selectedBuyItem.data.price),
+                                                                null,
                                                                 (success, result) => {                                 
                                                                     if (success) {
                                                                         // Extract the best price from results.
@@ -3534,6 +3568,7 @@
                                                                 view.selectedBuyItem.data.code,
                                                                 view.selectedBuyItem.data.issuer,
                                                                 namespace.Pepper.Tools.formatPrice(view.selectedBuyItem.data.priceScale || 1),
+                                                                null,
                                                                 (success, result) => {                                 
                                                                     if (success) {
                                                                         // Extract the best price from results.
@@ -3703,6 +3738,23 @@
                                                             loadShop();
                                                         }                                                    
                                                     }
+                                                }
+                                                else {
+                                                    if (item.overAppsBtn && view.exploreType !== namespace.Pepper.ExploreType.App) {
+                                                        view.exploreType = namespace.Pepper.ExploreType.App;
+                                                        loadStore(true);
+                                                    }
+                                                    else if (item.overGamesBtn && view.exploreType !== namespace.Pepper.ExploreType.Game) {
+                                                        view.exploreType = namespace.Pepper.ExploreType.Game;
+                                                        loadStore(true);
+                                                    }
+                                                }
+
+                                                if (item.overAppsBtn) {
+                                                    item.overAppsBtn = false;
+                                                }
+                                                if (item.overGamesBtn) {
+                                                    item.overGamesBtn = false;
                                                 }
 
                                                 if (item.overPlayBtn) {
@@ -3969,7 +4021,6 @@
             })
             .done(function (response) {
                 if (response) {
-                    console.log(response);
                     view.scroller.items = [];
                     for(let i= 0; i <response.top.length; i += 1){
                         view.scroller.items.push({
@@ -4181,10 +4232,9 @@
 
         view.resetCarousel();
         view.page = namespace.Pepper.PageType.Dashboard;
+        view.exploreType = namespace.Pepper.ExploreType.Game;
 
         view.resetBook();
-
-        loadStore();
 
         namespace.Pepper.orderBooks = { "skipCount": 0, "oldBook": "" };
 
@@ -4261,6 +4311,8 @@
     }
 
     function showMarketplace() {
+
+        loadStore();
 
         if (!namespace.Core.currentAccount.friendlyAddress) {
             namespace.Core.Account.ResolveAccount(namespace.Core.currentAccount.keys.publicKey(), "litemint.com", (addr) => {
