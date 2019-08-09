@@ -203,7 +203,7 @@
         "Playing as 'Guest'. Get your Gamer ID!",
         "Players Today:",
         "Refreshing prices...",
-        "Not available for this currency.",
+        "Price Not available",
         "Terms", // 190
         "Privacy",
         "Refresh Prices",
@@ -229,7 +229,8 @@
         "More...",
         "You receive:",
         "CONTINUE",
-        "Quick Deposit"
+        "Quick Deposit",
+        "Fund Your Account to Buy"
     ];
 
     /**

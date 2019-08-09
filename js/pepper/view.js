@@ -1398,7 +1398,7 @@
             item.x = x;
             item.y = y;
             item.width = this.store.width;
-            item.height = this.store.rowHeight;
+            item.height = this.store.rowHeight; //+ (i < 2 ? 0 : this.store.rowHeight * 1);
             this.store.maxOffset += item.height;
             y += item.height;
 
@@ -4877,9 +4877,6 @@
 
     // Draw a store item.
     namespace.Pepper.View.prototype.drawStoreItem = function (context, item, index) {
-        if(index === 1){
-            return;
-        }
         context.save();
 
         let y = item.spot ? item.y - this.store.offset + this.unit * 0.2 < this.store.y ? this.store.y + this.store.offset - this.unit * 0.2 : item.y : item.y;
@@ -4928,10 +4925,10 @@
         else {
             if(index === 0) {
                 if (item.data.valid) {
-                    if (item.selected || item.hover || this.store.items[index + 1].selected || this.store.items[index + 1].hover) {
+                    if (item.selected || item.hover) {
                         context.globalAlpha = 0.7 * context.globalAlpha;
                     }
-                    context.drawImage(item.data.image, item.x, y - this.unit * 0.2, item.width, item.height * 2 + this.unit * 0.2);
+                    context.drawImage(item.data.image, item.x, y - this.unit * 0.2, item.width, item.height + this.unit * 0.2);
                 }
             }
             else{
@@ -4977,11 +4974,11 @@
 
                     if (item.data.data.shop) {
                         context.save();
-                        if ((item.selected && item.overShopBtn) || !item.data.data.gameid || !item.data.data.shop || !namespace.Core.currentAccount.friendlyAddress || !namespace.Core.currentAccount.data) {
+                        if ((item.selected && item.overShopBtn) || !item.data.data.gameid || !item.data.data.shop) {
                             context.globalAlpha = 0.5;
                         }
                         context.font = this.getFont("Roboto-Regular");
-                        context.drawImage(namespace.Core.currentAccount.data && item.data.data.gameid && item.data.data.shop && namespace.Core.currentAccount.friendlyAddress ? namespace.Pepper.Resources.shopImage : namespace.Pepper.Resources.shopDisabledImage, item.x + item.width - item.height * 2.7, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        context.drawImage(item.data.data.gameid && item.data.data.shop ? namespace.Pepper.Resources.shopImage : namespace.Pepper.Resources.shopDisabledImage, item.x + item.width - item.height * 2.7, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
                         context.restore();  
                     }
                 }
@@ -5046,10 +5043,17 @@
         context.fillRect(item.x, y + item.height - this.unit * 0.03, item.width, this.unit * 0.03);
 
         if (showLoader) {
-            context.textAlign = "right";
-            context.font = this.getFont("Roboto-Medium");
-            this.drawText(context, item.x + item.width - this.unit * 1.4, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[188], "rgba(36, 41, 46, 0.5)" , 0.65);
-            this.drawLoader(context, item.x + item.width - this.unit * 1, item.y + item.height - this.unit * 0.58, this.unit * 0.6, true);
+            if (namespace.Core.currentAccount.data) {
+                context.textAlign = "right";
+                context.font = this.getFont("Roboto-Medium");
+                this.drawText(context, item.x + item.width - this.unit * 1.4, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[188], "rgba(36, 41, 46, 0.5)" , 0.65);
+                this.drawLoader(context, item.x + item.width - this.unit * 1, item.y + item.height - this.unit * 0.58, this.unit * 0.6, true);
+            }
+            else {
+                context.textAlign = "right";
+                context.font = this.getFont("Roboto-Medium");
+                this.drawText(context, item.x + item.width - this.unit * 0.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[216], "rgba(36, 41, 46, 0.5)" , 0.65);
+            }
         }
         else if(convertedPrice) {
             let hasEnough = convertedPrice <= namespace.Core.currentAccount.getMaxSend(base.balance, base) ? true : false;

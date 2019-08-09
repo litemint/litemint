@@ -850,8 +850,8 @@
                                 item.overScoreBtn = true;
                             }
     
-                            if (namespace.Core.currentAccount.data && namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)
-                                && item.data && item.data.data && item.data.data.shop && namespace.Core.currentAccount.friendlyAddress) {
+                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)
+                                && item.data && item.data.data && item.data.data.shop) {
                                 item.overShopBtn = true;
                             }
                         }
@@ -1089,7 +1089,6 @@
             for (let i = 0; i < namespace.Pepper.storeData.length; i += 1) {
                 if (i === 0) { // Featured item takes 2 rows.
                     view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
-                    view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
                 }
                 else {
                     if (i == 1) {
@@ -1170,7 +1169,7 @@
                     }
                 }
 
-                if (amount) {                   
+                if (amount && namespace.Core.currentAccount.data) {                   
                     stellarNet.findPaymentPaths(
                         view.selectedGameShop.data.shop.account,
                         view.selectedGameShop.data.shop.code,
@@ -3657,7 +3656,7 @@
 
                                         testElement(2, point, view.promoBtn, isPointerDown, function () {
                                             if (namespace.Pepper.storeData.length > 1 && namespace.Pepper.storeData[1].valid) {
-                                                if (namespace.Pepper.storeData[1].data.action === "open_shop_activity" && namespace.Core.currentAccount.friendlyAddress) {
+                                                if (namespace.Pepper.storeData[1].data.action === "open_shop_activity") {
                                                     let itemData;
                                                     for (let v = 0; v < namespace.Pepper.storeData.length; v += 1) {
                                                         if (namespace.Pepper.storeData[v].data.gameid === namespace.Pepper.storeData[1].data.gameid
