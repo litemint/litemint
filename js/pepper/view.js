@@ -1398,13 +1398,15 @@
             item.x = x;
             item.y = y;
             item.width = this.store.width;
-            item.height = this.store.rowHeight; //+ (i < 2 ? 0 : this.store.rowHeight * 1);
+            item.height = this.store.rowHeight + (i < 2 || !item.lastSelected ? this.store.rowHeight * 0.9 * (item.lastSelectedTime ? item.lastSelectedTime : 0) * 3 : this.store.rowHeight * 0.9 * (0.3 - item.lastSelectedTime) * 3);
             this.store.maxOffset += item.height;
             y += item.height;
 
             if (item.spot && !this.store.isDown) {
                 this.store.spotOffset = Math.max(0, this.store.maxOffset - item.height * 0.5 - this.store.height * 0.5);
             }
+
+            item.lastSelectedTime = updateTimer(elapsed, item.lastSelectedTime, 1.5);
         }
 
         if (this.store.adjustOffset) {
@@ -4886,8 +4888,11 @@
 
         context.fillStyle = item.spot ? "rgb(36, 41, 46)" : "rgb(255, 255, 255)";
         context.fillRect(item.x, y, item.width, item.height);
-        context.fillStyle = item.selected || item.hover ? "rgba(36, 41, 46, 0.07)" : "rgba(255, 255, 255, 0)";
+
+        context.save();
+        context.fillStyle = item.lastSelected || item.selected || item.hover ? "rgba(36, 41, 46, 0.07)" : "rgba(255, 255, 255, 0)";
         context.fillRect(item.x, y, item.width, item.height);
+        context.restore();
 
         context.font = this.getFont("Roboto-Regular");
 
@@ -4932,24 +4937,43 @@
                 }
             }
             else{
+                let height = this.store.rowHeight * 0.8 + item.height * 0.2;
                 context.translate((this.exploreType === namespace.Pepper.ExploreType.App ? 1 : -1) * this.shopTabTime * this.unit * 10, 0);
                 context.globalAlpha = 1 - this.shopTabTime * 2;
+
+                if (item.lastSelected) {
+                    context.save();
+                    context.fillStyle = "rgb(255, 255, 255)";
+                    context.shadowColor = "rgba(0, 0, 0, 0.15)";
+                    context.shadowBlur = this.unit * 0.1;
+                    context.fillRect(item.x + this.unit * 0.1, y, item.width - this.unit * 0.2, item.height - this.unit * 0.1);
+                    context.textAlign = "left";
+                    context.font = this.getFont("Roboto-Regular");
+                    context.globalAlpha = (0.3 - item.lastSelectedTime) * 3.333;
+
+                    context.beginPath();
+                    context.rect(item.x + this.unit * 0.1, y, item.width - this.unit * 0.2, item.height - this.unit * 0.1);
+                    context.clip();
+                    this.drawText(context, item.x + this.unit * 0.37, y + height * 1.25, item.data.data.description, "rgba(36, 41, 46, 0.7)", 0.58);
+                    context.restore();
+                }
+
                 if (item.data.valid) {
-                    context.drawImage(item.data.image, item.x + this.unit * 0.3, y + this.unit * 0.1, item.height - this.unit * 0.2, item.height - this.unit * 0.2);
+                    context.drawImage(item.data.image, item.x + this.unit * 0.3, y + this.unit * 0.1, height - this.unit * 0.2, height - this.unit * 0.2);
                 }
                 else{
                     context.save();
                     context.globalAlpha = 0.5;
-                    context.drawImage(namespace.Pepper.Resources.gamepadIconImage, item.x + this.unit * 0.3, y + this.unit * 0.1, item.height - this.unit * 0.2, item.height - this.unit * 0.2);
+                    context.drawImage(namespace.Pepper.Resources.gamepadIconImage, item.x + this.unit * 0.3, y + this.unit * 0.1, height - this.unit * 0.2, height - this.unit * 0.2);
                     context.restore();
                 }
 
                 context.textAlign = "left";
                 context.font = this.getFont("Roboto-Medium");
                 if(item.data.data.name) {
-                    this.drawText(context, item.x + this.unit * 2, y + item.height * 0.5, item.data.data.name, item.data.data.gameid ? "rgb(36, 41, 46)" : "rgba(36, 41, 46, 0.3)", 0.7);
+                    this.drawText(context, item.x + height * 1.15, y + height* 0.5, item.data.data.name, item.data.data.gameid ? "rgb(36, 41, 46)" : "rgba(36, 41, 46, 0.3)", 0.65);
                     if (!item.data.data.gameid) {
-                        this.drawText(context, item.x + this.unit * 2, y + item.height * 0.75, namespace.Pepper.Resources.localeText[184], "rgba(36, 41, 46, 0.3)", 0.55);
+                        this.drawText(context, item.x + height * 1.15, y + height * 0.75, namespace.Pepper.Resources.localeText[184], "rgba(36, 41, 46, 0.3)", 0.55);
                     }
                     context.save();
                     if ((item.selected && item.overPlayBtn) || !item.data.data.gameid) {
@@ -4957,20 +4981,22 @@
                     }
                     context.font = this.getFont("Roboto-Regular");
                     if (this.appId !== item.data.data.gameid) {
-                        context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.playImage : namespace.Pepper.Resources.playDisabledImage, item.x + item.width - item.height * 1.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        context.drawImage(item.data.data.gameid ? namespace.Pepper.Resources.playImage : namespace.Pepper.Resources.playDisabledImage, item.x + item.width - height * 1.1, y + height * 0.1, height * 0.8, height * 0.8);
                     }
                     else {
-                        context.drawImage(namespace.Pepper.Resources.closeCircleImage, item.x + item.width - item.height * 1.1, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        context.drawImage(namespace.Pepper.Resources.closeCircleImage, item.x + item.width - height * 1.1, y + height * 0.1, height * 0.8, height * 0.8);
                     }
                     context.restore();   
                     
-                    context.save();
-                    if ((item.selected && item.overScoreBtn) || !item.data.data.gameid || !item.data.data.leaderboard) {
-                        context.globalAlpha = 0.5;
+                    if (item.data.data.type !== "app") {
+                        context.save();
+                        if ((item.selected && item.overScoreBtn) || !item.data.data.gameid || !item.data.data.leaderboard) {
+                            context.globalAlpha = 0.5;
+                        }
+                        context.font = this.getFont("Roboto-Regular");
+                        context.drawImage(item.data.data.gameid && item.data.data.leaderboard ? namespace.Pepper.Resources.scoreImage : namespace.Pepper.Resources.scoreDisabledImage, item.x + item.width - height * 1.9, y + height * 0.1, height * 0.8, height * 0.8);
+                        context.restore();
                     }
-                    context.font = this.getFont("Roboto-Regular");
-                    context.drawImage(item.data.data.gameid && item.data.data.leaderboard ? namespace.Pepper.Resources.scoreImage : namespace.Pepper.Resources.scoreDisabledImage, item.x + item.width - item.height * 1.9, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
-                    context.restore();  
 
                     if (item.data.data.shop) {
                         context.save();
@@ -4978,7 +5004,7 @@
                             context.globalAlpha = 0.5;
                         }
                         context.font = this.getFont("Roboto-Regular");
-                        context.drawImage(item.data.data.gameid && item.data.data.shop ? namespace.Pepper.Resources.shopImage : namespace.Pepper.Resources.shopDisabledImage, item.x + item.width - item.height * 2.7, y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        context.drawImage(item.data.data.gameid && item.data.data.shop ? namespace.Pepper.Resources.shopImage : namespace.Pepper.Resources.shopDisabledImage, item.x + item.width - ((item.data.data.type !== "app") ? height * 2.7 : height * 1.9 ), y + height * 0.1, height * 0.8, height * 0.8);
                         context.restore();  
                     }
                 }

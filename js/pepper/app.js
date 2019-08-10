@@ -815,7 +815,7 @@
     function testStore(testType, point, list, isDown, callback) {
         for (let i = 0; i < list.items.length; i += 1) {
             const item = list.items[i];
-
+            let height = view.store.rowHeight * 0.8 + item.height * 0.2;
             let y = item.spot ? item.y - view.store.offset + view.unit * 0.2 < view.store.y ? view.store.y + view.store.offset - view.unit * 0.2 : item.y : item.y;
             y = item.spot ? item.y + item.height - view.store.offset + view.unit * 0.2 > view.store.y + view.store.height ? view.store.y + view.store.height + view.store.offset - item.height : y : y;
 
@@ -827,9 +827,9 @@
                     item.overPlayBtn = false;
                     item.overScoreBtn = false;
                     item.overShopBtn = false;
-
+                    
                     if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
-                        item.selected = true;
+                        item.selected = true;                        
                         item.hasClick = true;
                         if (item.spot) {
                             if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, y - view.store.offset, item.x + item.width * 0.3, y + item.height - view.store.offset)) {
@@ -841,18 +841,26 @@
                             }
                         }
                         else {
-                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.2, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
+                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - height * 1.2, y - view.store.offset, item.x + item.width, y + height - view.store.offset)) {
                                 item.overPlayBtn = true;
                             }
     
-                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.9, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)
+                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - height * 1.9, y - view.store.offset, item.x + item.width - height * 1.2, y + height - view.store.offset)
                                 && item.data && item.data.data && item.data.data.leaderboard) {
                                 item.overScoreBtn = true;
                             }
     
-                            if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)
-                                && item.data && item.data.data && item.data.data.shop) {
-                                item.overShopBtn = true;
+                            if (item.data.data.type === "app") {
+                                if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - height * 1.9, y - view.store.offset, item.x + item.width - height * 1.2, y + height - view.store.offset)
+                                    && item.data && item.data.data && item.data.data.shop) {
+                                    item.overShopBtn = true;
+                                }
+                            }
+                            else {
+                                if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - height * 2.7, y - view.store.offset, item.x + item.width - height * 1.9, y + height - view.store.offset)
+                                    && item.data && item.data.data && item.data.data.shop) {
+                                    item.overShopBtn = true;
+                                }
                             }
                         }
                     }
@@ -874,16 +882,23 @@
                                     }
                                 }
                                 else {
-                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.2, y - view.store.offset, item.x + item.width, y + item.height - view.store.offset)) {
+                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - height * 1.2, y - view.store.offset, item.x + item.width, y + height - view.store.offset)) {
                                         item.overPlayBtn = false;
                                     }
 
-                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 1.9, y - view.store.offset, item.x + item.width - item.height * 1.2, y + item.height - view.store.offset)) {
+                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - height * 1.9, y - view.store.offset, item.x + item.width - height * 1.2, y + height - view.store.offset)) {
                                         item.overScoreBtn = false;
                                     }
 
-                                    if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - item.height * 2.7, y - view.store.offset, item.x + item.width - item.height * 1.9, y + item.height - view.store.offset)) {
-                                        item.overShopBtn = false;
+                                    if (item.data.data.type === "app") {
+                                        if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - height * 1.9, y - view.store.offset, item.x + item.width - height * 1.2, y + height - view.store.offset)) {
+                                            item.overShopBtn = false;
+                                        }  
+                                    }
+                                    else  {
+                                        if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + item.width - height * 2.7, y - view.store.offset, item.x + item.width - height * 1.9, y + height - view.store.offset)) {
+                                            item.overShopBtn = false;
+                                        }
                                     }
                                 }
                             }
@@ -1086,6 +1101,7 @@
         if (view) {        
             view.resetStore();
             view.store.items = [];
+            let selectIt = true;
             for (let i = 0; i < namespace.Pepper.storeData.length; i += 1) {
                 if (i === 0) { // Featured item takes 2 rows.
                     view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
@@ -1098,6 +1114,11 @@
                         if((!namespace.Pepper.storeData[i].data.type && view.exploreType === namespace.Pepper.ExploreType.Game)
                             || namespace.Pepper.storeData[i].data.type === view.exploreType) {
                             view.store.items.push({ "spot": false, "data": namespace.Pepper.storeData[i] });
+                            if (selectIt) {
+                                selectIt = false;
+                                view.store.items[view.store.items.length - 1].lastSelected = true;
+                                view.store.items[view.store.items.length - 1].lastSelectedTime = 0;
+                            }
                         }
                     }
                 }     
@@ -3704,12 +3725,14 @@
                                         });
 
                                         testStore(2, point, view.store, isPointerDown, function (item, index) {
-                                            if (view.store.canClick) {                             
+                                            if (view.store.canClick) {                                              
                                                 if (!item.spot) {
+                                                    let canCollapse = true;
                                                     if((index === 0 || index === 1) && item.data.data.gameid){
                                                         loadGame(item.data.data.gameid, item.data.data.link);
                                                     }
                                                     else if (item.overPlayBtn && item.data.data.gameid) {
+                                                        canCollapse = false;
                                                         if (view.appId !== item.data.data.gameid) {
                                                             loadGame(item.data.data.gameid, item.data.data.link);
                                                         }
@@ -3719,6 +3742,7 @@
                                                     }
                                                     else if (item.overScoreBtn && item.data.data.gameid) {
                                                         view.selectedGame = item.data;
+                                                        canCollapse = false;
                                                         if(view.selectedGame.data.leaderboard){
                                                             view.loadScroller(namespace.Pepper.ScrollerType.Leaderboard); 
                                                             if(namespace.leaderBoardRequestId){
@@ -3731,11 +3755,29 @@
                                                         }                                                    
                                                     }
                                                     else if (item.overShopBtn && item.data.data.gameid) {
+                                                        canCollapse = false;
                                                         if(item.data.data.shop){
                                                             view.selectedGameShop = item.data;
                                                             view.shopTime = 0.3;
                                                             loadShop();
                                                         }                                                    
+                                                    }
+
+                                                    if (!item.lastSelected && index) {
+                                                        item.lastSelectedTime = 0.3;
+                                                        item.lastSelected = true;
+
+                                                        for (let c = 2; c < view.store.items.length; c += 1) {
+                                                            const otherItem = view.store.items[c];
+                                                            if(item !== otherItem && otherItem.lastSelected){
+                                                                otherItem.lastSelected = false;
+                                                                otherItem.lastSelectedTime = otherItem.lastSelectedTime ? otherItem.lastSelectedTime : 0.3;
+                                                            }
+                                                        }
+                                                    }
+                                                    else if (canCollapse && index) {
+                                                        item.lastSelected = false;
+                                                        item.lastSelectedTime = item.lastSelectedTime ? item.lastSelectedTime : 0.3;
                                                     }
                                                 }
                                                 else {
