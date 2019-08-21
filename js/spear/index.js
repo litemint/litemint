@@ -11,6 +11,22 @@
 (function (namespace) {
     namespace.Pepper.isDesktop = true;
     namespace.Pepper.showWallet = true;
+
+    namespace.Pepper.copyToClipboard = function (text, message) {
+        const el = document.createElement("textarea");
+        el.value = text;
+        el.setAttribute("readonly", "");
+        el.style.position = "absolute";
+        el.style.left = "-9999px";
+        document.body.appendChild(el);
+        el.select();
+        const res = document.execCommand("copy");
+        document.body.removeChild(el);
+
+        if (res && parent) {
+            parent.postMessage("litemint_toast:" + message, "*");
+        }
+    }
 })(window.Litemint = window.Litemint || {});
 
 // Spear.

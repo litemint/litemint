@@ -2283,9 +2283,8 @@
                                             else if (namespace.Pepper.isWebkitHost()) {
                                                 webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": namespace.Core.currentAccount.friendlyAddress, "message": namespace.Pepper.Resources.localeText[122] });
                                             }
-                                            else if (parent) {
-                                                parent.postMessage("litemint_copy:" + namespace.Core.currentAccount.friendlyAddress, "*");
-                                                parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                            else {
+                                                namespace.Pepper.copyToClipboard(namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
                                             }
                                         }
                                     }
@@ -2499,12 +2498,12 @@
                                                         "title": namespace.Pepper.Resources.localeText[135]
                                                     });
                                                 }
-                                                else if (parent) {
-                                                    parent.postMessage("litemint_copy:" +
+                                                else {
+                                                    namespace.Pepper.copyToClipboard(
                                                         namespace.Pepper.Resources.localeText[126] + " " + carouselitem.asset.code + "\n" +
                                                         namespace.Pepper.Resources.localeText[133] + " " + carouselitem.asset.issuer + "\n" +
-                                                        namespace.Pepper.Resources.localeText[134] + " " + (carouselitem.asset.deposit || namespace.Core.currentAccount.keys.publicKey()), "*");
-                                                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                        namespace.Pepper.Resources.localeText[134] + " " + (carouselitem.asset.deposit || namespace.Core.currentAccount.keys.publicKey()), 
+                                                    namespace.Pepper.Resources.localeText[122]);
                                                 }
                                             }
                                             break;
@@ -3373,9 +3372,8 @@
                                         else if (namespace.Pepper.isWebkitHost()) {
                                             webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": key, "message": namespace.Pepper.Resources.localeText[122] });
                                         }
-                                        else if (parent) {
-                                            parent.postMessage("litemint_copy:" + key, "*");
-                                            parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                        else {
+                                            namespace.Pepper.copyToClipboard(key, namespace.Pepper.Resources.localeText[122]);
                                         }
                                         console.info(key);
                                     }
@@ -3717,9 +3715,8 @@
                                                 else if (namespace.Pepper.isWebkitHost()) {
                                                     webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": namespace.Core.currentAccount.friendlyAddress, "message": namespace.Pepper.Resources.localeText[122] });
                                                 }
-                                                else if (parent) {
-                                                    parent.postMessage("litemint_copy:" + namespace.Core.currentAccount.friendlyAddress, "*");
-                                                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                else {
+                                                    namespace.Pepper.copyToClipboard(namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
                                                 }
                                             }
                                         });
@@ -3851,9 +3848,8 @@
                                                     else if (namespace.Pepper.isWebkitHost()) {
                                                         webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "memo", "data": item.data.memo, "message": namespace.Pepper.Resources.localeText[123] + item.data.memo });
                                                     }
-                                                    else if (parent) {
-                                                        parent.postMessage("litemint_copy:" + item.data.memo, "*");
-                                                        parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[123] + item.data.memo, "*");
+                                                    else {
+                                                        namespace.Pepper.copyToClipboard(item.data.memo, namespace.Pepper.Resources.localeText[123] + item.data.memo);
                                                     }
                                                 }
                                                 else if (item.overCopyBtn) {
@@ -3876,14 +3872,12 @@
                                                                     webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": item.data.to, "message": namespace.Pepper.Resources.localeText[122] });
                                                                 }
                                                             }
-                                                            else if (parent) {
+                                                            else {
                                                                 if (item.data.to === namespace.Core.currentAccount.keys.publicKey()) {
-                                                                    parent.postMessage("litemint_copy:" + item.data.from, "*");
-                                                                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                                    namespace.Pepper.copyToClipboard(item.data.from, namespace.Pepper.Resources.localeText[122]);
                                                                 }
                                                                 else {
-                                                                    parent.postMessage("litemint_copy:" + item.data.to, "*");
-                                                                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                                    namespace.Pepper.copyToClipboard(item.data.to, namespace.Pepper.Resources.localeText[122]);
                                                                 }
                                                             }
                                                             break;
@@ -3894,9 +3888,8 @@
                                                             else if (namespace.Pepper.isWebkitHost()) {
                                                                 webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": item.data.source_account, "message": namespace.Pepper.Resources.localeText[122] });
                                                             }
-                                                            else if (parent) {
-                                                                parent.postMessage("litemint_copy:" + item.data.source_account, "*");
-                                                                parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                            else {
+                                                                namespace.Pepper.copyToClipboard(item.data.source_account, namespace.Pepper.Resources.localeText[122]);
                                                             }
                                                             break;
                                                         case "change_trust":
@@ -3907,9 +3900,8 @@
                                                             else if (namespace.Pepper.isWebkitHost()) {
                                                                 webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": item.data.asset_issuer, "message": namespace.Pepper.Resources.localeText[122] });
                                                             }
-                                                            else if (parent) {
-                                                                parent.postMessage("litemint_copy:" + item.data.asset_issuer, "*");
-                                                                parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+                                                            else {
+                                                                namespace.Pepper.copyToClipboard(item.data.asset_issuer, namespace.Pepper.Resources.localeText[122]);
                                                             }
                                                             break;
                                                     }
@@ -5136,9 +5128,8 @@
                 else if (namespace.Pepper.isWebkitHost()) {
                     webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "qrcode", "data": code, "message": namespace.Pepper.Resources.localeText[121] });
                 }
-                else if (parent) {
-                    parent.postMessage("litemint_copy:" + code, "*");
-                    parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[121], "*");
+                else {
+                    namespace.Pepper.copyToClipboard(code, namespace.Pepper.Resources.localeText[121]);
                 }
             }
         }
@@ -5152,9 +5143,8 @@
         else if (namespace.Pepper.isWebkitHost()) {
             webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "issuer", "data": issuer, "message": namespace.Pepper.Resources.localeText[122] });
         }
-        else if (parent) {
-            parent.postMessage("litemint_copy:" + issuer, "*");
-            parent.postMessage("litemint_toast:" + namespace.Pepper.Resources.localeText[122], "*");
+        else {
+            namespace.Pepper.copyToClipboard(issuer, namespace.Pepper.Resources.localeText[122]);
         }
     };
 
