@@ -1139,18 +1139,21 @@
             const stellarNet = new namespace.Core.StellarNetwork();
             if (view.selectedGameShop && view.selectedGameShop.data && view.selectedGameShop.data.shop) { 
                 view.shop.data = view.selectedGameShop;
-                let amount = 0;
+                let amount;
                 if (view.selectedGameShop.data.shop.items) {
                     for (let i = 0; i < view.selectedGameShop.data.shop.items.length; i += 1) {
                         view.shop.items.push({ "data": view.selectedGameShop.data.shop.items[i] });
 
-                        // NOTE: Paths resolution will be executed on max amount needed across all shop items.
-                        // Actual price will be recalculated prior to buy order resulting in either 
-                        // better or equal price for buyer.
-                        // Only issue is when the supply is inferior to max amount in which case we would
-                        // fail payment path finding and fall back to display the shop original currency.
+                        // NOTE: To limit the number of queries for now on endpoints,
+                        // path resolution will be executed on min amount needed to buy at least 1 item.
+                        // Two side effects:
+                        //      1 - Actual price recalculation may likely result in either 
+                        //          equal or worse price for buyer (stack depth).
+                        //      2 - Inability to display price approx. if user balance is below
+                        //          the lowest price.
                         if (view.selectedGameShop.data.shop.items[i].price) {
-                            amount = Math.max(amount, Number(view.selectedGameShop.data.shop.items[i].price));
+                            amount = amount ? Math.min(amount, Number(view.selectedGameShop.data.shop.items[i].price)) 
+                                        : Number(view.selectedGameShop.data.shop.items[i].price);
                         }
                         else if(view.selectedGameShop.data.shop.items[i].collectible) {
                             stellarNet.findPaymentPaths(
@@ -1189,7 +1192,7 @@
                         }
                     }
                 }
-
+                
                 if (amount && namespace.Core.currentAccount.data) {                   
                     stellarNet.findPaymentPaths(
                         view.selectedGameShop.data.shop.account,
