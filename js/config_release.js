@@ -17,6 +17,7 @@
         "maxOperations": 100,
         "memoryStorageFallback": false,
         "marketDataInterval": 2,
+        "disableAds": true,
         "defaultAssets": [
             { "code": "MAG", "issuer": "GAACROE4I6LRXKDKAJ4PKGQHRAU43ZDKRBBSNCVYW5TXBP4RAWO62JAH" },
             { "code": "BTC", "issuer": "GDT3ZKQZXXHDPJUKNHUMANMNIT4JWSUYXUGN7EQZDVXBO7NPNFVFPBAK" },

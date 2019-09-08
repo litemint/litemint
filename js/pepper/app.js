@@ -307,12 +307,14 @@
 
         view.needRedraw = true;
         
-        if(view.appId){
+        if (view.appId) {
             domShowApp(false);
             // Request and ad from native layer.
-            if (window.Android) {
-                if(window.Android.showAd){
-                    window.Android.showAd();
+            if (!namespace.config.disableAds) {
+                if (window.Android) {
+                    if (window.Android.showAd) {
+                        window.Android.showAd();
+                    }
                 }
             }
             return "stay";
@@ -5154,13 +5156,15 @@
     window.addEventListener("message", function (event) {
         if (typeof event.data === "string") {
             if (event.data === "litemint_app_requestad") {
-                if (window.Android) {
-                    if(window.Android.showAd){
-                        window.Android.showAd();
+                if (!namespace.config.disableAds) {
+                    if (window.Android) {
+                        if(window.Android.showAd){
+                            window.Android.showAd();
+                        }
                     }
-                }
-                else if(namespace.Pepper.isDesktop) {
-                    this.setTimeout(() => {requestOutstreamAds(true);}, 100);  
+                    else if(namespace.Pepper.isDesktop) {
+                        this.setTimeout(() => {requestOutstreamAds(true);}, 100);  
+                    }
                 }
             }
             else if (event.data === "litemint_app_close") {
