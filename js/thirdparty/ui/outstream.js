@@ -15,13 +15,7 @@ var errorCount = 0;
  * Initialize the Outstream SDK.
  */
 var initOutstream = function () {
-    var outstreamContainer = document.getElementById('outstreamContainer');
-    if (typeof google !== "undefined") {
-        adsController = new google.outstream.AdsController(outstreamContainer, onOutstreamAdLoaded, onOutstreamAdDone);
-    }
-    else {
-        Litemint.Spear.adsDisabled = true;
-    }
+    Litemint.Spear.adsDisabled = true;
     $("#outstreamContainer").hide();
 };
 
