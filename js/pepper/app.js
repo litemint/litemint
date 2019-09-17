@@ -119,6 +119,7 @@
 
         // Download the store data.
         namespace.Pepper.storeData = [];
+        namespace.Pepper.storeDataCache = [];
         const getStoreData = function () {
             const loadStoreItem = function (item) {
                 const storeItem = {};
@@ -143,11 +144,12 @@
                 }
 
                 storeItem.data = item;
-                namespace.Pepper.storeData.push(storeItem);
+                namespace.Pepper.storeDataCache.push(storeItem);
             };
 
             $.ajax(namespace.config.apiUrl + "/.store/getdata").then(
                 function success(response) {
+                    namespace.Pepper.storeDataCache = [];
                     for (let i = 0; i < response.length; i += 1) {
                         loadStoreItem(response[i]);
                     }
@@ -156,7 +158,12 @@
                 }
             );
         };
+
         getStoreData();
+        setInterval(() => {
+            // Re-query the store data every 10 minutes.            
+            getStoreData();
+        }, 1000 * 60 * 10);
 
         // Download the network message.
         namespace.Pepper.networkMessage = namespace.config.version;
@@ -1100,7 +1107,13 @@
     }
 
     function loadStore (swap) {
-        if (view) {        
+        if (view) {
+            
+            // Copy the cached store data.
+            if (namespace.Pepper.storeDataCache.length) {
+                namespace.Pepper.storeData = namespace.Pepper.storeDataCache.slice();
+            }
+            
             view.resetStore();
             view.store.items = [];
             let selectIt = true;
