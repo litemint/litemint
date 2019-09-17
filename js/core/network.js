@@ -35,6 +35,32 @@
         if (!stellarServer) {
             stellarServer = new StellarSdk.Server(namespace.config.serverUrl);
             StellarSdk.Network.usePublicNetwork();
+
+            // Retrieve the base fee and reserve.
+            $.ajax(namespace.config.serverUrl + "/fee_stats").then(
+                function success(response) {
+                    if (response && response.last_ledger) {
+                        stellarServer.ledgers()
+                            .ledger(response.last_ledger)
+                            .call()
+                            .then(function(ledgerResult) {
+                                if(ledgerResult 
+                                    && ledgerResult.base_fee_in_stroops 
+                                    && ledgerResult.base_reserve_in_stroops) {
+                                        const stroop = 0.0000001;
+                                        namespace.Core.stellarBaseFee = ledgerResult.base_fee_in_stroops * stroop;
+                                        namespace.Core.stellarBaseReserve = ledgerResult.base_reserve_in_stroops * stroop;
+                                    }
+                            })
+                            .catch(function(err) {
+                                console.log(err)
+                            })
+                    }
+                },
+                function fail(data, status) {
+                    console.error("Failed to get fee stats: " + status);
+                }
+            );
         }
     };
 

@@ -186,11 +186,11 @@
     // Get the account reserve.
     namespace.Core.Account.prototype.getReserve = function (asset) {
         if (this.data) {
-            let reserve = asset.issuer === "native" ? (2 + this.data.subentry_count) * baseReserve : 0;
+            let reserve = asset.issuer === "native" ? (2 + this.data.subentry_count) * this.getBaseReserve() : 0;
             this.offers.forEach(function (x) {
                 reserve += x.baseAsset.code === asset.code && (x.baseAsset.issuer === asset.issuer || asset.issuer === "native" && !x.baseAsset.issuer) ? Number(x.baseAmount) : 0;
             });
-            return asset.issuer === "native" ? reserve + this.data.subentry_count * baseFee : reserve;
+            return asset.issuer === "native" ? reserve + this.data.subentry_count * this.getBaseFee() : reserve;
         }
         else {
             return 0;
@@ -200,7 +200,7 @@
     // Get the maximum amount available.
     namespace.Core.Account.prototype.getMaxSend = function (balance, asset) {
         if (this.data) {
-            return asset.issuer === "native" ? Math.max(0, balance - this.getReserve(asset) - baseFee) : Math.max(0, balance - this.getReserve(asset));
+            return asset.issuer === "native" ? Math.max(0, balance - this.getReserve(asset) - this.getBaseFee()) : Math.max(0, balance - this.getReserve(asset));
         }
         else {
             return balance;
@@ -209,12 +209,17 @@
 
     // Get the base fee.
     namespace.Core.Account.prototype.getBaseFee = function () {
-        return baseFee;
+        return namespace.Core.stellarBaseFee || baseFee;
+    };
+
+    // Get the base reserve.
+    namespace.Core.Account.prototype.getBaseReserve = function () {
+        return namespace.Core.stellarBaseReserve || baseReserve;
     };
 
     // Get the trust base fee.
     namespace.Core.Account.prototype.getTrustBaseFee = function () {
-        return baseFee + baseReserve;
+        return this.getBaseFee() + this.getBaseReserve();
     };
 
     // Is the account loaded.
