@@ -323,6 +323,185 @@
         }
     };
 
+    // Verify NFT contract.
+    namespace.Core.StellarNetwork.prototype.verifyNFTContract = function (code, issuer, account, cb) {
+        let contract = { code, issuer };
+
+        // An NFT contract is valid IFF:
+        //
+        //      • The issuer has ONNE zero-weighted signer.
+        //      • The issuer has ONNE transaction.
+        //      • The transaction created ONNE account.
+        //      • The transaction created the issuer account.
+        //      • The transaction has ONNE set_options operation.
+        //      • The transaction has ONNE payment operation from issuer.
+        //      • The issuer payment operation amount is equal to 0.0000001 XLM (one stroop).
+        //
+        // IFF = If and only if.
+        // ONNE = One and only one.
+
+        // First check for performance reasons so we can quickly
+        // bail out on most non NFT assets.
+        if (account.signers.length === 1 && account.signers[0].weight === 0) {
+            contract.domain = account.home_domain;
+            stellarServer.transactions()
+                .forAccount(issuer)
+                .call()
+                .then(function (results) {
+                    if (results.records.length === 1 && results.records[0].successful) {
+                        contract.memo = results.records[0].memo;
+                        contract.id = results.records[0].id;
+                        contract.source = results.records[0].source_account;
+                        contract.data = [];
+                        contract.traits = [];
+                        stellarServer.operations()
+                            .forTransaction(contract.id)
+                            .call()
+                            .then(function (opResults) {
+                                let atomicCreation = 0;
+                                let atomicIssuer = 0;
+                                let atomicIssuance = 0;
+                                let atomicUnit = 0;
+                                let atomicOptions = 0;
+                                let atomicFreeze = 0;
+
+                                for (let i=0; i< opResults.records.length; i += 1) {
+                                    if (opResults.records[i].type === "create_account") {
+                                        atomicCreation += 1;
+                                        if (opResults.records[i].account === issuer) {
+                                            atomicIssuer += 1;
+                                        }
+                                    }
+                                    else if (opResults.records[i].type === "payment"
+                                    && opResults.records[i].asset_code === code
+                                    && opResults.records[i].asset_issuer === issuer) {
+                                        atomicIssuance += 1;
+                                        if (opResults.records[i].amount === "0.0000001") {
+                                            atomicUnit += 1;
+                                        }
+                                    }
+                                    else if (opResults.records[i].type === "set_options") {
+                                        atomicOptions += 1;
+                                        if(atomicOptions === 1 && opResults.records[i].master_key_weight === 0) {
+                                            atomicFreeze += 1;
+                                        }
+                                    }
+                                    else if (opResults.records[i].type === "payment") {
+                                        contract.traits.push({
+                                            "code": opResults.records[i].asset_code,
+                                            "issuer": opResults.records[i].asset_issuer
+                                            })
+                                    }
+                                    else if (opResults.records[i].type === "manage_data") {
+                                        contract.data.push( {
+                                            "name": opResults.records[i].name,
+                                            "value": opResults.records[i].value } );
+                                    }
+                                }
+                                
+                                if (atomicCreation === 1
+                                    && atomicIssuer === 1
+                                    && atomicIssuance === 1
+                                    && atomicUnit === 1
+                                    && atomicOptions === 1
+                                    && atomicFreeze === 1) {
+                                        contract.valid = true;
+                                }
+                                cb(contract);
+                            })
+                            .catch(function (err) {
+                                cb(contract, err);
+                            });
+                    }
+                })
+                .catch(function (err) {
+                    cb(contract, err);
+                });
+        }
+        else {
+            cb(contract);
+        }
+    };
+
+    // Reference implementation for the NFT contract.
+    namespace.Core.StellarNetwork.prototype.createNFTContract = function (code, memo, domain, traits, metadata, cb) {
+        const stroop = 0.0000001;
+        const issuer = StellarSdk.Keypair.random();
+        const reserveIssuer = (1 + namespace.Core.currentAccount.getBaseReserve() * metadata.length).toFixed(7);
+        const asset = new StellarSdk.Asset(code, issuer.publicKey());
+
+        stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
+            .then(function (sourceAccount) {
+
+            // Issuer account creation and trustline operations.
+            let builder = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE })
+                    .addOperation(StellarSdk.Operation.createAccount({
+                        destination: issuer.publicKey(),
+                        startingBalance: reserveIssuer.toString()
+                    }))
+                    .addOperation(StellarSdk.Operation.changeTrust({
+                        asset: asset
+                    }))
+                    .setTimeout(60);
+
+            // Add a memo if specified.
+            if (memo) {
+                builder.addMemo(memo);
+            }
+
+            // Add the traits.
+            for (let i = 0; i < traits.length; i += 1) {
+                builder = builder.addOperation(StellarSdk.Operation.payment({
+                    destination: namespace.Core.currentAccount.keys.publicKey(),
+                    asset: traits[i],
+                    amount: stroop.toString()
+                }));
+            }
+
+            // Add meta data.
+            for (let i = 0; i < metadata.length; i += 1) {
+                builder = builder.addOperation(StellarSdk.Operation.manageData({
+                    name: metadata[i].key,
+                    value: metadata[i].value,
+                    source: issuer.publicKey()
+                }));
+            }
+
+            // Issue to owner.
+            builder = builder.addOperation(StellarSdk.Operation.payment({
+                destination: namespace.Core.currentAccount.keys.publicKey(),
+                asset: asset,
+                source: issuer.publicKey(),
+                amount: stroop.toString()
+            }));
+
+            // Freeze the issuer account forever.
+            let options = {
+                masterWeight: 0,
+                source: issuer.publicKey()
+            }
+            if (domain) {
+                options.homeDomain = domain;
+            }
+            builder = builder.addOperation(StellarSdk.Operation.setOptions(options));
+
+            // Build and sign (issuer and owner).
+            let transaction = builder.build();
+            transaction.sign(StellarSdk.Keypair.fromSecret(namespace.Core.currentAccount.keys.secret()));
+            transaction.sign(StellarSdk.Keypair.fromSecret(issuer.secret()));
+
+            return stellarServer.submitTransaction(transaction);
+        })
+        .then(function (result) {
+            cb(true, result, {
+                "issuer": issuer,
+            });
+        })
+        .catch(function (error) {
+            cb(false, error);
+        });
+    };
+
     // Send a payment.
     namespace.Core.StellarNetwork.prototype.sendPayment = function (destinationKey, asset, amount, memo, cb) {
         let seamlessAsset = namespace.config.seamlessAssets
@@ -766,6 +945,7 @@
             this.domain = "stellar.org";
             this.verified = true;
             this.loaded = true;
+            this.nftVerified = true;
             if (loadedCb) {
                 loadedCb();
             }
@@ -773,6 +953,19 @@
         else {
             const stellarNet = new namespace.Core.StellarNetwork();
             stellarNet.loadIssuerAccount(this.issuer).then((result) => {
+
+                // Verify that the issuer fulfills the terms of an NFT contract.
+                stellarNet.verifyNFTContract(
+                    this.code, 
+                    this.issuer,
+                    result,
+                    (contract, error) => {
+                        if (contract && contract.valid) {
+                            this.nftContract = contract;
+                        }
+                        this.nftVerified = true;
+                    });
+
                 if (result.home_domain) {
                     StellarSdk.StellarTomlResolver.resolve(result.home_domain)
                         // Query the toml.

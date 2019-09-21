@@ -230,7 +230,10 @@
         "You receive:",
         "CONTINUE",
         "Quick Deposit",
-        "Fund Your Account to Buy"
+        "Fund Your Account to Buy",
+        "Verifying NFT contract...",
+        "Owner",
+        "Not Owner"
     ];
 
     /**

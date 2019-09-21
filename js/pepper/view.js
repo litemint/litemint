@@ -3614,25 +3614,44 @@
 
                         context.globalAlpha = 1 - this.sendFormEndTime * 2 * context.globalAlpha;
 
-                        context.textAlign = "center";
-                        context.font = this.getFont("Roboto-Regular");
-                        this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.8, namespace.Pepper.Resources.localeText[40], "rgba(255, 255, 255, 0.7)", 0.8);
+                        if (item.asset.nftContract && item.asset.nftContract.valid) {
+                            if (item.asset.validImage) {
+                                context.drawImage(item.asset.image, item.x + item.width * 0.5 - this.unit * 1.35, item.y + this.unit * 0.2, this.unit * 2.7, this.unit * 2.7);
+                            }
 
-                        context.font = this.getFont("Roboto-Light");
-                        this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 1.7, item.asset.code, "rgb(255, 255, 255)", 1);
+                            context.textAlign = "center";
+                            context.font = this.getFont("Roboto-Light");
+                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 3.5, item.asset.code, "rgb(255, 255, 255)", 1);
+                        }
+                        else if (item.asset.nftVerified) {
+                            context.textAlign = "center";
+                            context.font = this.getFont("Roboto-Regular");
+                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.8, namespace.Pepper.Resources.localeText[40], "rgba(255, 255, 255, 0.7)", 0.8);
 
-                        if (this.error !== namespace.Pepper.ViewErrorType.AccountNotAvailable) {
-                            context.font = this.getFont("Roboto-Black");
-                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 2.5, namespace.Pepper.Tools.formatPrice(item.asset.balance), "rgb(255, 255, 255)", 1.5);
+                            context.font = this.getFont("Roboto-Light");
+                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 1.7, item.asset.code, "rgb(255, 255, 255)", 1);
+                        }
 
-                            let currencyrate = namespace.Pepper.MarketData.rates[item.asset.code];
-                            let accountCurrencyRate = namespace.Pepper.MarketData.rates[this.account.currency];
-                            if (currencyrate && currencyrate.rate && !isNaN(currencyrate.rate) && Number(currencyrate.rate) > 0 && accountCurrencyRate) {
-                                let currencyPrice = 1 / currencyrate.rate * accountCurrencyRate.rate;
-                                context.font = this.getFont("Roboto-Regular");
-                                this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 3.3,
-                                    "(" + this.account.currency + " "
-                                    + namespace.Pepper.Tools.formatPrice(item.asset.balance * currencyPrice, accountCurrencyRate.precision) + ")", "rgb(255, 255, 255)", 0.8);
+                        if(!item.asset.nftVerified) {
+                            context.textAlign = "center";
+                            context.font = this.getFont("Roboto-Regular");
+                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 1.7, namespace.Pepper.Resources.localeText[217], "rgb(255, 255, 255)", 0.7);
+                            this.drawLoader(context, item.x + item.width * 0.5, item.y + item.height * 0.55, this.unit);
+                        }
+                        else if (this.error !== namespace.Pepper.ViewErrorType.AccountNotAvailable) {
+                            if (!(item.asset.nftContract && item.asset.nftContract.valid)) {
+                                context.font = this.getFont("Roboto-Black");
+                                this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 2.5, namespace.Pepper.Tools.formatPrice(item.asset.balance), "rgb(255, 255, 255)", 1.5);
+
+                                let currencyrate = namespace.Pepper.MarketData.rates[item.asset.code];
+                                let accountCurrencyRate = namespace.Pepper.MarketData.rates[this.account.currency];
+                                if (currencyrate && currencyrate.rate && !isNaN(currencyrate.rate) && Number(currencyrate.rate) > 0 && accountCurrencyRate) {
+                                    let currencyPrice = 1 / currencyrate.rate * accountCurrencyRate.rate;
+                                    context.font = this.getFont("Roboto-Regular");
+                                    this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 3.3,
+                                        "(" + this.account.currency + " "
+                                        + namespace.Pepper.Tools.formatPrice(item.asset.balance * currencyPrice, accountCurrencyRate.precision) + ")", "rgb(255, 255, 255)", 0.8);
+                                }
                             }
                         }
                         else {
@@ -3735,13 +3754,13 @@
                         this.drawText(context, item.x + this.unit * 1.8 + this.sendFormOffset * 0.5, item.y + this.unit * 0.15 + this.sendFormOffset * 0.05 + this.unit * 0.3, namespace.Pepper.Resources.localeText[56], "rgba(255, 255, 255, 0.7)", 0.75);
 
                         if (this.error !== namespace.Pepper.ViewErrorType.AccountNotAvailable) {
-                            this.drawText(context, item.x + this.unit * 0.5 + this.sendFormOffset * 0.5, item.y + this.unit * 2.1, namespace.Pepper.Resources.localeText[49], "rgba(255, 255, 255, 0.7)", 0.65);
+                            this.drawText(context, item.x + this.unit * 0.4 + this.sendFormOffset * 0.5, item.y + this.unit * 2.1, namespace.Pepper.Resources.localeText[49], "rgba(255, 255, 255, 0.7)", 0.62);
                             context.font = this.getFont("Roboto-Medium");
                             this.drawText(context, item.x + this.unit * 1.8 + this.sendFormOffset * 0.5, item.y + this.unit * 0.5 + this.unit * 0.48, item.asset.code + " " + namespace.Pepper.Tools.formatPrice(namespace.Core.currentAccount.getMaxSend(item.asset.balance, item.asset)), "rgb(255, 255, 255)", 0.95 * scale);
                             context.textAlign = "left";
                             context.font = this.getFont("Roboto-Regular");
-                            extent = context.measureText(namespace.Pepper.Resources.localeText[49]).width * 0.65;
-                            this.drawText(context, item.x + extent + this.unit * 0.7, item.y + this.unit * 2.1, item.asset.code + " " + namespace.Pepper.Tools.formatPrice(namespace.Core.currentAccount.getReserve(item.asset)), "rgb(255, 255, 255)", 0.65 * scale);
+                            extent = context.measureText(namespace.Pepper.Resources.localeText[49]).width * 0.62;
+                            this.drawText(context, item.x + extent + this.unit * 0.5, item.y + this.unit * 2.1, item.asset.code + " " + namespace.Pepper.Tools.formatPrice(namespace.Core.currentAccount.getReserve(item.asset)), "rgb(255, 255, 255)", 0.62 * scale);
                         }
                         else {
                             this.drawLoader(context, item.x + item.width * 0.5, item.y + item.height * 0.5, this.unit);
@@ -3783,7 +3802,28 @@
                             context.drawImage(namespace.Pepper.Resources.warningImage, item.x + item.width - this.unit, item.y + item.height - this.unit * 0.95, this.unit * 0.7, this.unit * 0.7);
                         }
 
-                        if (item.asset.validImage) {
+                        if (item.asset.nftContract && item.asset.nftContract.valid && !this.isActivityMode) {
+                            if (item.asset.balance > 0) {
+                                context.drawImage(namespace.Pepper.Resources.nftLightImage, item.x + this.unit * 0.3, item.y + this.unit * 0.2, this.unit * 1.25, this.unit * 1.25);
+
+                                context.textAlign = "left";
+                                context.font = this.getFont("Roboto-Regular");
+                                this.drawText(context, item.x + item.width * 0.5 + this.unit * 1.7, item.y + this.unit * 2, namespace.Pepper.Resources.localeText[218], "rgb(255, 255, 255)", 0.65);
+                                context.drawImage(namespace.Pepper.Resources.keyGreenImage, item.x + item.width * 0.5 + this.unit * 1.7, item.y + item.height * 0.5 - this.unit * 0.5, this.unit * 1, this.unit * 1);
+                            }
+                            else {
+                                context.drawImage(namespace.Pepper.Resources.nftZeroLightImage, item.x + this.unit * 0.3, item.y + this.unit * 0.2, this.unit * 1.25, this.unit * 1.25);
+
+                                context.textAlign = "left";
+                                context.font = this.getFont("Roboto-Regular");
+                                this.drawText(context, item.x + item.width * 0.5 + this.unit * 1.7, item.y + this.unit * 2, namespace.Pepper.Resources.localeText[219], "rgb(255, 255, 255)", 0.65);
+                                context.save();
+                                context.globalAlpha = 0.3 * context.globalAlpha;
+                                context.drawImage(namespace.Pepper.Resources.keyLightImage, item.x + item.width * 0.5 + this.unit * 1.7, item.y + item.height * 0.5 - this.unit * 0.5, this.unit * 1, this.unit * 1);
+                                context.restore();
+                            }
+                        }
+                        else if (item.asset.validImage) {
                             context.drawImage(item.asset.image, item.x + this.unit * 0.3, item.y + this.unit * 0.2, this.unit * 1.25, this.unit * 1.25);
                         }
                         else if (item.asset.code === "XLM") {

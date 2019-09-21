@@ -123,7 +123,13 @@
         "ethImage": "eth.png",
         "xrpImage": "xrp.png",
         "ltcImage": "ltc.png",
-        "usdImage": "usd.png"
+        "usdImage": "usd.png",
+        "nftZeroLightImage": "nftzerolight.png",
+        "nftZeroDarkImage": "nftzerodark.png",
+        "nftLightImage": "nftlight.png",
+        "nftDarkImage": "nftdark.png",
+        "keyLightImage": "keylight.png",
+        "keyGreenImage": "keygreen.png"
     };
 
 })(window.Litemint = window.Litemint || {});
