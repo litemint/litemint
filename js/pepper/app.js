@@ -3864,7 +3864,7 @@
                                                         window.Android.copyToClipboard("memo", item.data.memo, namespace.Pepper.Resources.localeText[123] + item.data.memo);
                                                     }
                                                     else if (namespace.Pepper.isWebkitHost()) {
-                                                        webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "memo", "data": item.data.memo, "message": namespace.Pepper.Resources.localeText[123] + item.data.memo });
+                                                        webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "memo", "data": item.data.memo.toString(), "message": namespace.Pepper.Resources.localeText[123] + item.data.memo.toString() });
                                                     }
                                                     else {
                                                         namespace.Pepper.copyToClipboard(item.data.memo, namespace.Pepper.Resources.localeText[123] + item.data.memo);
