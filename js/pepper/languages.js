@@ -646,7 +646,18 @@
         "Choisissez un code PIN.",
         "Confirmez-le.",
         "Prêt.",
-        "Peut être échangé (DEX)"
+        "Peut être échangé (DEX)",
+        "Dépôt Rapide avec CoinSwitch",
+        "Sélectionner un montant", // 210
+        "Sélectionner un token",
+        "Plus...",
+        "Vous recevez:",
+        "CONTINUER",
+        "Dépôt Rapide",
+        "Ajoutez des fonds pour achetez",
+        "Vérification du contrat NFT...",
+        "Propriétaire",
+        "Non Propriétaire"
     ];
 
     /**
