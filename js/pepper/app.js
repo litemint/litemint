@@ -1511,6 +1511,12 @@
         else if (view.showScroller) {
             if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
                 view.scroller.x, view.scroller.y - view.scroller.headerHeight - namespace.Pepper.barHeight, view.scroller.x + view.scroller.width, view.scroller.y)) {
+                
+                let btnClicked;
+                if (view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard) {
+                    btnClicked = testElement(0, point, view.leaderboardModeBtn, false);
+                }
+
                 if (view.scroller.type === namespace.Pepper.ScrollerType.AccountSettings) {
                     if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
                         view.scroller.x, view.scroller.y - view.unit * 1.4, view.scroller.x + view.scroller.width, view.scroller.y)) {
@@ -1523,13 +1529,15 @@
                     }
                 }
                 else if (view.scroller.type !== namespace.Pepper.ScrollerType.AddAsset) {
-                    domShowRenameForm(false);
-                    view.scrollerEndTime = 0.3;
-                    view.discardedPanel = true;
+                    if (!btnClicked) {
+                        domShowRenameForm(false);
+                        view.scrollerEndTime = 0.3;
+                        view.discardedPanel = true;
 
-                    if (view.isActivityMode) {
-                        if (view.activityType === namespace.Pepper.ActivityType.Trade) {
-                            domShowTradeForm(true);
+                        if (view.isActivityMode) {
+                            if (view.activityType === namespace.Pepper.ActivityType.Trade) {
+                                domShowTradeForm(true);
+                            }
                         }
                     }
                 }
@@ -1795,6 +1803,7 @@
         }
         else if (view.showScroller && !view.discardedPanel) {
 
+            testElement(1, point, view.leaderboardModeBtn, isPointerDown);
             testElement(1, point, view.closeScrollerBtn, isPointerDown);
             testScroller(1, point, view.scroller, isPointerDown);
 
@@ -2175,6 +2184,13 @@
                 domShowDomainForm(false);
                 domShowRenameForm(false);
                 view.scrollerEndTime = 0.3;
+            });
+
+            testElement(2, point, view.leaderboardModeBtn, isPointerDown, function () {
+                if(!view.isLoadingLeaderboard) {
+                    view.showAllTime = view.showAllTime ? false : true;
+                    retrieveLeaderboard(true);
+                }
             });
 
             if (!view.scrollerEndTime) {
@@ -4057,33 +4073,52 @@
         }
     }
 
-    function retrieveLeaderboard() {
+    function retrieveLeaderboard(userTriggered) {
         if(view && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Exchange 
             && view.showScroller
             && view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard
-            && view.selectedGame && view.selectedGame.data && view.selectedGame.data.leaderboard) {
+            && view.selectedGame && view.selectedGame.data && view.selectedGame.data.leaderboard
+            && !view.isLoadingLeaderboard) {
+            view.isLoadingLeaderboard = true;
             let playerName = "";
             if(namespace.Core.currentAccount.friendlyAddress){
                 playerName = namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "");
             }
+            if (userTriggered) {
+                view.scroller.items = [];
+            }
+
             $.get(view.selectedGame.data.leaderboard,
             {
                 "playername": playerName
             })
             .done(function (response) {
+                view.isLoadingLeaderboard = false;
                 if (response) {
                     view.scroller.items = [];
-                    for(let i= 0; i <response.top.length; i += 1){
-                        view.scroller.items.push({
-                            "id": i,
-                            "data": response.top[i],
-                            "count": response.count
-                        });
+                    if (view.showAllTime && response.ath && response.countall) {
+                        for(let i= 0; i <response.ath.length; i += 1){
+                            view.scroller.items.push({
+                                "id": i,
+                                "data": response.ath[i],
+                                "count": response.countall
+                            });
+                        }
+                    }
+                    else {
+                        for(let i= 0; i <response.top.length; i += 1){
+                            view.scroller.items.push({
+                                "id": i,
+                                "data": response.top[i],
+                                "count": response.count
+                            });
+                        }      
                     }
                     view.needRedraw = true;
                 }
             })
             .fail(function (xhr, status, error) {
+                view.isLoadingLeaderboard = false;
             });
         }
     }

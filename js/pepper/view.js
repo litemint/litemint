@@ -141,6 +141,7 @@
         this.promoBtn = new namespace.Pepper.HudElement();
         this.gamerIdBtn = new namespace.Pepper.HudElement();
         this.shopMenuBtn = new namespace.Pepper.HudElement();
+        this.leaderboardModeBtn = new namespace.Pepper.HudElement();
         this.scroller = namespace.Pepper.createScrollElement();
         this.carousel = namespace.Pepper.createScrollElement();
         this.carousel.oldActive = 0;
@@ -654,6 +655,7 @@
         this.needRedraw |= this.marketBtn.update(elapsed);
         this.needRedraw |= this.dashboardMenuPanel.update(elapsed);
         this.needRedraw |= this.closeScrollerBtn.update(elapsed);
+        this.needRedraw |= this.leaderboardModeBtn.update(elapsed);
         this.needRedraw |= this.activityLabel.update(elapsed);
 
         this.closeScrollerBtn.width = this.unit * 1.2;
@@ -672,6 +674,13 @@
             this.closeScrollerBtn.y = this.closeScrollerBtn.ty;
             this.closeScrollerBtn.spawned = false;
         }
+
+        this.leaderboardModeBtn.width = this.unit * 3;
+        this.leaderboardModeBtn.height = this.unit * 1.6;
+        this.leaderboardModeBtn.speed = 7;
+        this.leaderboardModeBtn.tx = this.viewport.x + this.viewport.width - this.leaderboardModeBtn.width - this.unit * 0.3;
+        this.leaderboardModeBtn.ty = this.viewport.y + this.unit * 1.6;
+        this.leaderboardModeBtn.spawned = true;
 
         if (this.isActivityMode) {
             this.updateNumPad(elapsed);
@@ -2204,9 +2213,10 @@
                     context.font = this.getFont("Roboto-Regular");
                     this.drawText(context, this.scroller.x + this.unit * 1.8, this.scroller.y - this.unit * 0.4, namespace.Pepper.Resources.localeText[187] + " " + count, "rgba(255, 255, 255, 0.7)", 0.7);
 
-                    context.textAlign = "right";
+                    context.textAlign = "center";
                     context.font = this.getFont("Roboto-Regular");
-                    this.drawText(context, this.scroller.x + this.scroller.width - this.unit * 0.3, this.scroller.y - this.unit * 0.6, namespace.Pepper.Resources.localeText[185], "rgba(255, 255, 255, 0.6)", 0.8);
+                    this.roundRect(context, this.scroller.x + this.scroller.width * 0.5 - this.unit * 3.5, this.scroller.y - this.unit * 2.4, this.unit * 7, this.unit * 1.1, this.unit * 0.2, "rgb(41, 162, 159)");
+                    this.drawText(context, this.scroller.x + this.scroller.width * 0.5, this.scroller.y - this.unit * 1.9, namespace.Pepper.Resources.localeText[185] + " — " + (this.showAllTime ? namespace.Pepper.Resources.localeText[221] : namespace.Pepper.Resources.localeText[220]), "rgb(255, 255, 255)", 0.8);
                 }
                 break;
             case namespace.Pepper.ScrollerType.CoinSwap:
@@ -2886,6 +2896,22 @@
                 }
             }
         }
+
+        if (this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard) {
+            if (!this.scroller.loading) {
+                context.save();
+
+                this.roundRect(context, this.leaderboardModeBtn.x + this.leaderboardModeBtn.width - this.unit * 0.75, this.leaderboardModeBtn.y + this.unit * 0.6, this.unit * 0.4, this.unit * 0.45, this.unit * 0.4, "rgb(255, 255, 255)");
+                context.drawImage(this.showAllTime ? namespace.Pepper.Resources.toggleonImage : namespace.Pepper.Resources.toggleoffImage, this.leaderboardModeBtn.x + this.leaderboardModeBtn.width - this.leaderboardModeBtn.height + this.unit * 0.1, this.leaderboardModeBtn.y + this.unit * 0.2, this.leaderboardModeBtn.height * 0.8, this.leaderboardModeBtn.height * 0.8);
+                if (!this.showAllTime) {
+                    context.globalAlpha = 0.3 * context.globalAlpha;
+                }
+                context.textAlign = "right";
+                context.font = this.getFont("Roboto-Regular");
+                this.drawText(context, this.leaderboardModeBtn.x + this.leaderboardModeBtn.width - this.unit * 1.7, this.leaderboardModeBtn.y + this.unit * 0.9, namespace.Pepper.Resources.localeText[222], "rgb(255, 255, 255)", 0.75);
+                context.restore();
+            }
+        }        
 
         context.restore();
 

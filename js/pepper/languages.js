@@ -201,7 +201,7 @@
         "Coming Soon",
         "Leaderboard",
         "Playing as 'Guest'. Get your Gamer ID!",
-        "Players Today:",
+        "Players:",
         "Refreshing prices...",
         "Price Not available",
         "Terms", // 190
@@ -233,7 +233,10 @@
         "Fund Your Account to Buy",
         "Verifying NFT contract...",
         "Owner",
-        "Not Owner"
+        "Not Owner",
+        "Daily", // 220
+        "All Time",
+        "ATH"
     ];
 
     /**
@@ -429,7 +432,7 @@
         "Demnächst",
         "Bestenliste",
         "Als Gast spielen. Hol dir deine Gamer ID!",
-        "Spieler heute:"        
+        "Spieler:"        
     ];
 
     /**
@@ -625,7 +628,7 @@
         "Bientôt disponible",
         "Classement",
         "Vous jouez en 'Invité'. Obtenez un Gamer ID!",
-        "Joueurs Aujourd'hui:",
+        "Joueurs:",
         "Mise à jour des prix...",
         "Non disponible dans cette devise.",
         "Termes", // 190
@@ -853,7 +856,7 @@
         "Скоро будет",
         "Лидеры",
         "Вы играете как 'Гость'. Получите свой Gamer ID!",
-        "Игроков сегодня:"
+        "Игроков:"
     ];
 
     /**
@@ -1386,7 +1389,7 @@
         "Ερχεται συντομα",
         "Οί Νικητές",
         "Παίζετε ως 'Guest'. Πάρτε το Gamer ID! σας",
-        "Οι παίκτες σήμερα:"
+        "Παίκτες:"
     ];
 
 	
