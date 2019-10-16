@@ -8,6 +8,8 @@
 
 Built on Stellar, Litemint is a multifaceted crypto wallet that provides a platform for distributing and running apps and games while removing the middleman from the monetization process hence facilitating frictionless, trustless and instant micro-transactions and collectible trades—preserving the direct link between creators and users.
 
+Check out the [litemint-api](https://github.com/litemint/litemint-api) to integrate your app to Litemint.
+
 ## Discover Litemint:
 
 - Send, receive and trade any digital asset. Litemint is decentralized, secure and friendly.
