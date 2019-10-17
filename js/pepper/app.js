@@ -122,29 +122,31 @@
         namespace.Pepper.storeDataCache = [];
         const getStoreData = function () {
             const loadStoreItem = function (item) {
-                const storeItem = {};
-                storeItem.image = new Image();
-                storeItem.image.onload = () => {
-                    storeItem.valid = true;
-                };
-                storeItem.image.onerror = () => {
-                    storeItem.valid = false;
-                };
-                storeItem.image.src = item.imageLink;
+                if (!item.desktopOnly || item.desktopOnly && namespace.Pepper.isDesktop) {
+                    const storeItem = {};
+                    storeItem.image = new Image();
+                    storeItem.image.onload = () => {
+                        storeItem.valid = true;
+                    };
+                    storeItem.image.onerror = () => {
+                        storeItem.valid = false;
+                    };
+                    storeItem.image.src = item.imageLink;
 
-                if (item.headerLink) {
-                    storeItem.headerImage = new Image();
-                    storeItem.headerImage.onload = () => {
-                        storeItem.validHeader = true;
-                    };
-                    storeItem.headerImage.onerror = () => {
-                        storeItem.validHeader = false;
-                    };
-                    storeItem.headerImage.src = item.headerLink;
+                    if (item.headerLink) {
+                        storeItem.headerImage = new Image();
+                        storeItem.headerImage.onload = () => {
+                            storeItem.validHeader = true;
+                        };
+                        storeItem.headerImage.onerror = () => {
+                            storeItem.validHeader = false;
+                        };
+                        storeItem.headerImage.src = item.headerLink;
+                    }
+
+                    storeItem.data = item;
+                    namespace.Pepper.storeDataCache.push(storeItem);
                 }
-
-                storeItem.data = item;
-                namespace.Pepper.storeDataCache.push(storeItem);
             };
 
             $.ajax(namespace.config.apiUrl + "/.store/getdata").then(
