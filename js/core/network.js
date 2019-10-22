@@ -21,6 +21,9 @@
     // Instance of stellar SDK server.
     let stellarServer;
 
+    // Network passphrase.
+    let networkPassphrase = StellarSdk.Networks.PUBLIC;
+ 
     /**
      * Handles connection to the stellar network allowing interacting
      * with accounts, operations and assets.
@@ -34,7 +37,6 @@
 
         if (!stellarServer) {
             stellarServer = new StellarSdk.Server(namespace.config.serverUrl);
-            StellarSdk.Network.usePublicNetwork();
 
             // Retrieve the base fee and reserve.
             $.ajax(namespace.config.serverUrl + "/fee_stats").then(
@@ -434,7 +436,7 @@
             .then(function (sourceAccount) {
 
             // Issuer account creation and trustline operations.
-            let builder = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE })
+            let builder = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE, "networkPassphrase": networkPassphrase })
                     .addOperation(StellarSdk.Operation.createAccount({
                         destination: issuer.publicKey(),
                         startingBalance: reserveIssuer.toString()
@@ -552,7 +554,7 @@
                         if (this.hasTrustline(destAccount, asset)) {
                             stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
                                 .then(function (sourceAccount) {
-                                    let transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE })
+                                    let transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE, "networkPassphrase": networkPassphrase })
                                         .addOperation(StellarSdk.Operation.payment({
                                             destination: destinationKey,
                                             asset: asset,
@@ -591,7 +593,7 @@
     namespace.Core.StellarNetwork.prototype.createAccount = function (destinationKey, amount, memo, cb) {
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then((sourceAccount) => {
-                const transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE })
+                const transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE, "networkPassphrase": networkPassphrase })
                     .addOperation(StellarSdk.Operation.createAccount({
                         destination: destinationKey,
                         startingBalance: amount
@@ -644,7 +646,7 @@
 
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then((sourceAccount) => {
-                const transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE })
+                const transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE, "networkPassphrase": networkPassphrase })
                     .addOperation(StellarSdk.Operation.pathPayment({
                         sendAsset: srcasset,
                         sendMax: srcamount,
@@ -682,7 +684,7 @@
     namespace.Core.StellarNetwork.prototype.setTrust = function (asset, cb) {
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
-                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE })
+                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE, "networkPassphrase": networkPassphrase })
                     .addOperation(StellarSdk.Operation.changeTrust({
                         asset: asset
                     }))
@@ -703,7 +705,7 @@
     namespace.Core.StellarNetwork.prototype.removeTrust = function (asset, cb) {
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
-                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE })
+                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE, "networkPassphrase": networkPassphrase })
                     .addOperation(StellarSdk.Operation.changeTrust({
                         asset: asset,
                         limit: "0" // Remove trustline.
@@ -780,7 +782,7 @@
 
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
-                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE })
+                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE, "networkPassphrase": networkPassphrase })
                     .addOperation(StellarSdk.Operation.manageSellOffer(offer))
                     .setTimeout(60)
                     .build();
@@ -801,7 +803,7 @@
 
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
-                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE })
+                const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": StellarSdk.BASE_FEE, "networkPassphrase": networkPassphrase })
                     .addOperation(StellarSdk.Operation.manageSellOffer({
                         selling: offer.baseAsset,
                         buying: offer.quoteAsset,
