@@ -432,7 +432,42 @@
         "Demnächst",
         "Bestenliste",
         "Als Gast spielen. Hol dir deine Gamer ID!",
-        "Spieler:"        
+        "Spieler:",
+        "Aktualisiere Preis...",
+        "Preis nicht verfügbar",
+        "AGB", // 190
+        "Datenschutz",
+        "Aktualisiere Preis",
+        "Preis wird über Stellar DEX bestes Angebot berechnet.",
+        "Verkäufer Website",
+        "Suche den besten Preis...",
+        "Bitte warten...",
+        "Kaufen",
+        "Preis",
+        "Kasse",
+        "Einkaufen", // 200
+        "Danke für Ihre Zahlung!",
+        "In Bearbeitung...",
+        "Erkunden",
+        "APPS",
+        "Wähle deinen PIN.",
+        "Bestätigen.",
+        "Fertig.",
+        "Kann gehandelt werden (DEX)",
+        "Einzahlen mit CoinSwitch",
+        "Wähle Einzahlungsbetrag", // 210
+        "Wähle Einzahlungswährung",
+        "Mehr...",
+        "Du erhälst:",
+        "WEITER",
+        "Einzahlen",
+        "Aufs Konto einzahlen um einzukaufen",
+        "Verifiziere NFT Vetrag...",
+        "Inhaber",
+        "Nicht Inhaber",
+        "Täglich", // 220
+        "Allzeit",
+        "ATH"                
     ];
 
     /**
