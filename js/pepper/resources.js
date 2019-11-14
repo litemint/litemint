@@ -132,4 +132,11 @@
         "keyGreenImage": "keygreen.png"
     };
 
+    /**
+     * Identicon file references.
+     * @member identIconFiles
+     * @memberof Litemint.Pepper.Resources
+    */
+   namespace.Pepper.Resources.identIconFiles = {};
+
 })(window.Litemint = window.Litemint || {});

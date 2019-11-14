@@ -84,6 +84,7 @@
         this.retryTime = 0;
         this.deleteStep = 0;
         this.shopTime = 0;
+        this.showAllTime = true;
     };
 
     // Load the view.
@@ -2610,14 +2611,24 @@
                         context.font =  isMe ? this.getFont("Roboto-Bold") : this.getFont("Roboto-Medium");
                         context.textAlign = "left";
 
-                        if(item.data.image && !item.data.loadedImage){
-                            item.data.img = new Image();
-                            item.data.img.src = item.data.image;
+                        if (item.data.image) {
+                            if (!namespace.Pepper.Resources.identIconFiles[item.data.name]) {
+                                const identIcon = {
+                                    "img" : new Image(),
+                                    "loaded": false
+                                };
+                                identIcon.img.onload = () => {
+                                    identIcon.loaded = true;
+                                };
+                                namespace.Pepper.Resources.identIconFiles[item.data.name] = identIcon;
+                                identIcon.img.src = item.data.image;
+                            }                                        
                         }
 
                         context.drawImage(isMe ? namespace.Pepper.Resources.lmtAccountLightImage : namespace.Pepper.Resources.lmtAccountImage, item.x + this.unit * 0.8, item.y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
-                        if(item.data.img){
-                            context.drawImage(item.data.img, item.x + this.unit * 0.8, item.y + item.height * 0.1, item.height * 0.8, item.height * 0.8);
+                        const cachedIcon = namespace.Pepper.Resources.identIconFiles[item.data.name];
+                        if (cachedIcon && cachedIcon.loaded) {
+                            context.drawImage(cachedIcon.img, item.x + this.unit * 0.85, item.y + item.height * 0.15, item.height * 0.7, item.height * 0.7);
                         }
 
                         context.save();
@@ -2895,23 +2906,7 @@
                     context.drawImage(namespace.Pepper.Resources.currentSponsor.image, this.numPadSendBtn.x + this.numPadSendBtn.width * 0.5 - size * 0.5, middleY, size, size);
                 }
             }
-        }
-
-        if (this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard) {
-            if (!this.scroller.loading) {
-                context.save();
-
-                this.roundRect(context, this.leaderboardModeBtn.x + this.leaderboardModeBtn.width - this.unit * 0.75, this.leaderboardModeBtn.y + this.unit * 0.6, this.unit * 0.4, this.unit * 0.45, this.unit * 0.4, "rgb(255, 255, 255)");
-                context.drawImage(this.showAllTime ? namespace.Pepper.Resources.toggleonImage : namespace.Pepper.Resources.toggleoffImage, this.leaderboardModeBtn.x + this.leaderboardModeBtn.width - this.leaderboardModeBtn.height + this.unit * 0.1, this.leaderboardModeBtn.y + this.unit * 0.2, this.leaderboardModeBtn.height * 0.8, this.leaderboardModeBtn.height * 0.8);
-                if (!this.showAllTime) {
-                    context.globalAlpha = 0.3 * context.globalAlpha;
-                }
-                context.textAlign = "right";
-                context.font = this.getFont("Roboto-Regular");
-                this.drawText(context, this.leaderboardModeBtn.x + this.leaderboardModeBtn.width - this.unit * 1.7, this.leaderboardModeBtn.y + this.unit * 0.9, namespace.Pepper.Resources.localeText[222], "rgb(255, 255, 255)", 0.75);
-                context.restore();
-            }
-        }        
+        }    
 
         context.restore();
 

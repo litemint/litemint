@@ -1515,9 +1515,6 @@
                 view.scroller.x, view.scroller.y - view.scroller.headerHeight - namespace.Pepper.barHeight, view.scroller.x + view.scroller.width, view.scroller.y)) {
                 
                 let btnClicked;
-                if (view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard) {
-                    btnClicked = testElement(0, point, view.leaderboardModeBtn, false);
-                }
 
                 if (view.scroller.type === namespace.Pepper.ScrollerType.AccountSettings) {
                     if (namespace.Pepper.Tools.pointInRect(point.x, point.y,
@@ -1805,7 +1802,6 @@
         }
         else if (view.showScroller && !view.discardedPanel) {
 
-            testElement(1, point, view.leaderboardModeBtn, isPointerDown);
             testElement(1, point, view.closeScrollerBtn, isPointerDown);
             testScroller(1, point, view.scroller, isPointerDown);
 
@@ -2186,13 +2182,6 @@
                 domShowDomainForm(false);
                 domShowRenameForm(false);
                 view.scrollerEndTime = 0.3;
-            });
-
-            testElement(2, point, view.leaderboardModeBtn, isPointerDown, function () {
-                if(!view.isLoadingLeaderboard) {
-                    view.showAllTime = view.showAllTime ? false : true;
-                    retrieveLeaderboard(true);
-                }
             });
 
             if (!view.scrollerEndTime) {
