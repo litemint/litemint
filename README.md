@@ -265,3 +265,20 @@ Build on the shoulders of giants!
     <td>None</td>
   </tr>
 </table>
+
+### identicons
+
+<table>
+  <tr>
+    <td>URL</td>
+    <td>https://github.com/Lobstrco/stellar-identicon-js</td>
+  </tr>
+  <tr>
+    <td>License</td>
+    <td>Apache License 2.0</td>
+  </tr>
+  <tr>
+    <td>Local Modifications</td>
+    <td>None</td>
+  </tr>
+</table>
