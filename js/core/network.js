@@ -617,7 +617,7 @@
         const asset = (issuer === "native") 
             ? StellarSdk.Asset.native() 
             : new StellarSdk.Asset(code, issuer);
-        stellarServer.paths(namespace.Core.currentAccount.keys.publicKey(), account, asset, amount)
+        stellarServer.strictReceivePaths(namespace.Core.currentAccount.keys.publicKey(), asset, amount)
             .call()
             .then(function (pathResult) {
                 cb(true, pathResult.records, code, issuer, id);
