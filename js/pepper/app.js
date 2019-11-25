@@ -3715,6 +3715,14 @@
                                                         loadShop();
                                                     }
                                                 }
+                                                else if (namespace.Pepper.storeData[1].data.action === "open_link_activity") {
+                                                    if (namespace.Pepper.isDesktop) {
+                                                        window.open(namespace.Pepper.storeData[1].data.link, "_blank");
+                                                    }
+                                                    else {
+                                                        window.location = namespace.Pepper.storeData[1].data.link;
+                                                    }
+                                                }                                                
                                                 else {
                                                     loadGame(namespace.Pepper.storeData[1].data.gameid, namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true);
                                                 }
@@ -3750,8 +3758,18 @@
                                             if (view.store.canClick) {                                              
                                                 if (!item.spot) {
                                                     let canCollapse = true;
-                                                    if((index === 0 || index === 1) && item.data.data.gameid){
-                                                        loadGame(item.data.data.gameid, item.data.data.link);
+                                                    if((index === 0 || index === 1) && (item.data.data.gameid || item.data.data.action)) {
+                                                        if (item.data.data.action === "open_link_activity") {
+                                                            if (namespace.Pepper.isDesktop) {
+                                                                window.open(item.data.data.link, "_blank");
+                                                            }
+                                                            else {
+                                                                window.location = item.data.data.link;
+                                                            }
+                                                        }
+                                                        else {
+                                                            loadGame(item.data.data.gameid, item.data.data.link);
+                                                        }
                                                     }
                                                     else if (item.overPlayBtn && item.data.data.gameid) {
                                                         canCollapse = false;
