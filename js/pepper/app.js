@@ -3876,11 +3876,13 @@
                                                 if (item.data.type !== "asset" && item.overLaunchBtn) {
                                                     item.overLaunchBtn = false;
 
+                                                    let endpoint = namespace.Pepper.Tools.removeTrailingSlash(namespace.config.opsEndPoint);
+                                                    console.log(endpoint);
                                                     if (namespace.Pepper.isDesktop) {
-                                                        window.open(namespace.config.opsEndPoint + "/" + item.data.id, "_blank");
+                                                        window.open(endpoint + item.data.id, "_blank");
                                                     }
                                                     else {
-                                                        window.location = namespace.config.opsEndPoint + "/" + item.data.id;
+                                                        window.location = endpoint + item.data.id;
                                                     }
                                                 }
                                                 else if (item.data.memo && item.overMemoBtn) {

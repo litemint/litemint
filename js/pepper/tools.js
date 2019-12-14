@@ -142,6 +142,17 @@
         return key;
     };
 
+    /**
+     * Remove trailing slash if any.
+     * @function removeTrailingSlash
+     * @memberof Litemint.Pepper.Tools
+     * @param {String} url url to remove slash from.
+     * @return {String} Url without trailing slash.
+     */
+    namespace.Pepper.Tools.removeTrailingSlash = function (url) {
+        return url.replace(/\/+$/, '');
+    };
+
     // requestAnimationFrame polyfill. @author paulirish / http://paulirish.com/
     if (!window.requestAnimationFrame) {
         window.requestAnimationFrame = (function () {
