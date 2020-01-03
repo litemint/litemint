@@ -145,7 +145,7 @@
         "Description:",
         "Conditions:",
         "Lumens are the native asset of the Stellar network. One lumen (XLM) is a unit of digital currency, like a bitcoin.", // 130
-        "Lumen supply is determined by fixed, protocol-level rules. The number of lumens created at genesis was 100 billion. Every year, there is a 1% inflation rate. New lumens cannot be generated arbitrarily by anyone.",
+        "Lumen supply is determined by fixed, protocol-level rules. Currently, the total supply of lumens is 50 billion. New lumens cannot be generated arbitrarily by anyone.",
         "Adding disabled. Not enough XLM reserve.",
         "Issuer:",
         "My Address:",
@@ -376,7 +376,7 @@
         "Beschreibung:",
         "Konditionen:",
         "Lumen sind die eigentliche Währung des Stellar Netzwerkes. Ein Lumen (XML) ist eine Einheit dieser digitalen Währung, so wie Bitcoin.", // 130
-        "Anzahl der Lumen ist durch feste Regeln auf Protokollebene bestimmt. Die Anzahl bei der Entstehung erzeugten Lumen betrug 100 Milliarden. Jedes Jahr beträgt die Inflationsrate 1%. Neue Lumen können von niemandem beliebig generiert werden.",
+        "Anzahl der Lumen ist durch feste Regeln auf Protokollebene bestimmt. Die Anzahl bei der Entstehung erzeugten Lumen betrug 100 Milliarden. Neue Lumen können von niemandem beliebig generiert werden.",
         "Hinzufügen deaktiviert. Nicht genügend XML.",
         "Aussteller:",
         "Ihre Adresse:",
@@ -607,7 +607,7 @@
         "Description:",
         "Conditions:",
         "Les lumens sont le token natif du réseau Stellar. Un lumen (XLM) est une unité de monnaie numérique, similaire au bitcoin.",
-        "Le nombre de lumens créés lors de la genèse était de 100 milliards. Chaque année, il y a un taux d'inflation de 1%. Les nouveaux lumens ne peuvent être générés arbitrairement.",
+        "Le nombre de lumens créés lors de la genèse était de 100 milliards. Les nouveaux lumens ne peuvent être générés arbitrairement.",
         "Ajout désactivé. Pas assez de réserve XLM.",
         "Emetteur:",
         "Mon adresse:",
@@ -835,7 +835,7 @@
         "Описание:",
         "Условия:",
         "Люмены это собственный актив сети Stellar. Один люмен (XLM) это единица цифровой валюты, как и биткоин.", // 130
-        "Количество люменов определяется фиксированными правилами на уровне протокола. Изначально созданное количество люменов было 100 миллиардов. Каждый год добавляет 1% инфляции. Новые люмены не могут генерироваться произвольно кем-либо.",
+        "Количество люменов определяется фиксированными правилами на уровне протокола. Изначально созданное количество люменов было 100 миллиардов. Новые люмены не могут генерироваться произвольно кем-либо.",
         "Добавление отключено. Недостаточный XLM резерв.",
         "Эмитент:",
         "Мой адрес:",
@@ -1297,7 +1297,7 @@
         "描述:",
         "条件:",
         "Lumens 是基于 Stellar 网络的数字资产. lumen (XLM) 是其数字货币单位, 类似于比特币(bitcoin).", // 130
-        "Lumen 供应量是稳定的, 协议级别的规定。初始量为1000亿(100 billion)，年增长率为1%。除此之外不为任何其他方式或人变更或产生发行量。.",
+        "Lumen 供应量是稳定的, 协议级别的规定。初始量为1000亿(100 billion)。除此之外不为任何其他方式或人变更或产生发行量。.",
         "禁止增加。没有足够的 XLM。",
         "发行人:",
         "我的地址:",
@@ -1465,7 +1465,7 @@
         "Περιγραφή:",
         "Συνθήκες:",
         "Τα Lumens είναι το εγγενές στοιχείο του δικτύου Stellar. Ένα lumen (XLM) είναι μια μονάδα ψηφιακού νομίσματος, όπως ένα bitcoin.", // 130
-        "Ο εφοδιασμός των Lumen καθορίζεται από σταθερούς κανόνες σε επίπεδο πρωτοκόλλου. Ο αριθμός των Lumen που δημιουργήθηκαν στη γένεση ήταν 100 δισεκατομμύρια. Κάθε χρόνο, υπάρχει πληθωρισμός 1% .Τα νέα Lumens δεν μπορούν να δημιουργηθούν αυθαίρετα από κανέναν.",
+        "Ο εφοδιασμός των Lumen καθορίζεται από σταθερούς κανόνες σε επίπεδο πρωτοκόλλου. Ο αριθμός των Lumen που δημιουργήθηκαν στη γένεση ήταν 100 δισεκατομμύρια.Τα νέα Lumens δεν μπορούν να δημιουργηθούν αυθαίρετα από κανέναν.",
         "Η προσθήκη είναι απενεργοποιημένη. Δεν υπάρχει αρκετό απόθεμα των XLM.",
         "Εκδότης:",
         "Η διεύθυνσή μου:",
