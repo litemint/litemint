@@ -1,7 +1,7 @@
 MIT License
 
-Copyright (c) 2018-2019 Frederic Rezeau
-Copyright (c) 2018-2019 Litemint LLC
+Copyright (c) 2018-2020 Frederic Rezeau, aka 오경진
+Copyright (c) 2018-2020 Litemint LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

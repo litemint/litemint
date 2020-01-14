@@ -70,8 +70,8 @@ Trying to report a possible security vulnerability in Litemint? For the safe dis
 
 Litemint source code is released under the [MIT License](https://github.com/litemint/litemint/blob/master/LICENSE).
 
-Copyright (c) 2019 Frederic (경진) Rezeau<br />
-Copyright (c) 2019 Litemint LLC
+Copyright (c) 2020 Frederic Rezeau, aka 오경진<br />
+Copyright (c) 2020 Litemint LLC
 
 > LITEMINT LLC owns all Litemint-related trademarks, service marks, and graphic logos and the names of all Litemint projects are trademarks of LITEMINT LLC.
 
