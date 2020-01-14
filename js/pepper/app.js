@@ -294,6 +294,11 @@
                 view.resize(canvas.width, canvas.height);
                 Chart.defaults.global.defaultFontSize = view.baseFontSize * 0.85 / pixelRatio;
                 draw();
+
+                if(view && view.appId){
+                    const heightInPercent = ($(document).height() - namespace.Pepper.barHeight / pixelRatio) * 100 / $(document).height();
+                    $("#activity-view").css("height", heightInPercent + "%");
+                }
             }
             // Minimum supported ratio for mobile = 0.87 * 4 / 3
             rotateScreen = canvas.width * 1.16 > canvas.height ? true : false;
@@ -308,7 +313,7 @@
      */
     namespace.Pepper.onBackButtonPressed = function () {
         // Don't quit the app just yet.
-        if (rotateScreen || !view || showLoader ||
+        if (!view || (rotateScreen && !view.appId) || showLoader ||
             view.scrollerTime || view.scrollerEndTime || view.showPinLoader
             || view.modalPageEndTime) {
             return "stay";
@@ -4668,6 +4673,10 @@
                 }, 350, "swing", function () {
                     $("#activity-frame").attr("src",url);
                 });
+
+                if (window.Android && window.Android.unlockOrientation) {
+                    window.Android.unlockOrientation();
+                }
             }
             else {
                 $("#activity-frame").attr("src",url);
@@ -4683,7 +4692,11 @@
                 $("#activity-view").animate({
                     width: "0%"
                 }, 350, "swing", function () {
-                });  
+                }); 
+                
+                if (window.Android && window.Android.lockOrientation) {
+                    window.Android.lockOrientation();
+                }
             }
             else {
                 $("#activity-frame").attr("src","https://dashboard.litemint.com");
