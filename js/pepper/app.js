@@ -4677,6 +4677,9 @@
                 if (window.Android && window.Android.unlockOrientation) {
                     window.Android.unlockOrientation();
                 }
+                else if (namespace.Pepper.isWebkitHost()) {
+                    webkit.messageHandlers.callbackHandler.postMessage({ "name": "unlockOrientation" });
+                }
             }
             else {
                 $("#activity-frame").attr("src",url);
@@ -4696,6 +4699,9 @@
                 
                 if (window.Android && window.Android.lockOrientation) {
                     window.Android.lockOrientation();
+                }
+                else if (namespace.Pepper.isWebkitHost()) {
+                    webkit.messageHandlers.callbackHandler.postMessage({ "name": "lockOrientation" });
                 }
             }
             else {
