@@ -4660,10 +4660,7 @@
                 view.needRedraw = true;
             }
             if(!noloader){
-                // Temporary fix for iOS till new host is available on App Store.
-                if (!namespace.Pepper.isWebkitHost()) {
-                    $("#activity-loader").show();
-                }
+                $("#activity-loader").show();
             }
             if(!namespace.Pepper.isDesktop) {
                 $("#activity-view").css("top", namespace.Pepper.barHeight / pixelRatio + "px");
@@ -4672,6 +4669,11 @@
                     width: "100%"
                 }, 350, "swing", function () {
                     $("#activity-frame").attr("src",url);
+
+                    if ((namespace.Pepper.isWebkitHost() && !webkit.messageHandlers.supportStorePolicy)
+                        || (namespace.Pepper.isWebkitHost() && !url.includes("litemint.store"))) {
+                        $("#activity-view").css("width", "0%");
+                    }
                 });
 
                 if (window.Android && window.Android.unlockOrientation) {
@@ -4691,7 +4693,12 @@
                 view.needRedraw = true;
             }
             if(!namespace.Pepper.isDesktop) {
-                $("#activity-frame").attr("src","");
+                let dest = ""
+                if (namespace.Pepper.isWebkitHost() && webkit.messageHandlers.supportStorePolicy
+                    || !namespace.Pepper.isWebkitHost()) {
+                        dest = "https://litemint.store/blank.html";
+                }
+                $("#activity-frame").attr("src", dest);
                 $("#activity-view").animate({
                     width: "0%"
                 }, 350, "swing", function () {
