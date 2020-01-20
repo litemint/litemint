@@ -136,6 +136,16 @@ chart-container {
     height:720px;
 }
 
+#handleBtn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 120px;
+    width: 10px;
+    z-index: 10000;
+    display: none;
+}
+
 #activity-view {
     position: absolute;
     width:0;

@@ -4663,6 +4663,7 @@
                 $("#activity-loader").show();
             }
             if(!namespace.Pepper.isDesktop) {
+                $("#handleBtn").fadeIn();
                 $("#activity-view").css("top", namespace.Pepper.barHeight / pixelRatio + "px");
                 $("#activity-view").css("height", ($(document).height() - namespace.Pepper.barHeight / pixelRatio)  + "px");
                 $("#activity-view").animate({
@@ -4673,6 +4674,7 @@
                     if ((namespace.Pepper.isWebkitHost() && !webkit.messageHandlers.supportStorePolicy)
                         || (namespace.Pepper.isWebkitHost() && !url.includes("litemint.store"))) {
                         $("#activity-view").css("width", "0%");
+                        $("#handleBtn").hide();
                     }
                 });
 
@@ -4698,6 +4700,7 @@
                     || !namespace.Pepper.isWebkitHost()) {
                         dest = "https://litemint.store/blank.html";
                 }
+                $("#handleBtn").fadeOut();
                 $("#activity-frame").attr("src", dest);
                 $("#activity-view").animate({
                     width: "0%"
@@ -5184,6 +5187,10 @@
 
     $("#quote-amount, #base-amount, #trade-price").on("focus", function () {
         namespace.Core.currentAccount.queuedOrder = null;
+    });
+
+    $("#handleBtn").click(function () {
+        domShowApp(false);
     });
 
     // Native callback: back button pressed.
