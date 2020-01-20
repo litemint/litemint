@@ -236,7 +236,10 @@
         "Not Owner",
         "Daily", // 220
         "All Time",
-        "ATH"
+        "ATH",
+        "Donate",
+        "Donate",
+        "Donate Now"
     ];
 
     /**

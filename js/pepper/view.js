@@ -2754,7 +2754,14 @@
                     if (item.id === 3) {
                         if (!this.selectedBuyItem.success && !this.selectedBuyItem.error) {
                             if (this.selectedBuyItem.ready) {
-                                this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, namespace.Pepper.Resources.localeText[197], textColor, 0.79);
+                                if(this.selectedGameShop.data && 
+                                    this.selectedGameShop.data.shop && 
+                                    this.selectedGameShop.data.shop.type === "charity") {
+                                    this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, namespace.Pepper.Resources.localeText[225], textColor, 0.79);
+                                }
+                                else {
+                                    this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, namespace.Pepper.Resources.localeText[197], textColor, 0.79);
+                                }                                
                             }
                             else {
                                 this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, namespace.Pepper.Resources.localeText[196], textColor, 0.79);
@@ -3261,7 +3268,14 @@
                 break;
             case namespace.Pepper.ActivityType.Exchange:
                 if (this.selectedGameShop) {
-                    labelText = namespace.Pepper.Resources.localeText[200];
+                    if(this.selectedGameShop.data && 
+                        this.selectedGameShop.data.shop && 
+                        this.selectedGameShop.data.shop.type === "charity") {
+                            labelText = namespace.Pepper.Resources.localeText[223];
+                    }
+                    else {
+                        labelText = namespace.Pepper.Resources.localeText[200];
+                    }
                 }
                 else {
                     labelText = namespace.Pepper.Resources.localeText[203];
@@ -5151,7 +5165,17 @@
             if (item.selected && item.overBuyBtn && hasEnough) {
                 context.globalAlpha *= 0.5;
             }
-            this.drawText(context, item.x + item.width - this.unit * 1.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[161], "rgba(255, 255, 255)", 0.65);
+            
+            if(this.selectedGameShop &&
+                this.selectedGameShop.data && 
+                this.selectedGameShop.data.shop && 
+                this.selectedGameShop.data.shop.type === "charity") {
+                this.drawText(context, item.x + item.width - this.unit * 1.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[224], "rgba(255, 255, 255)", 0.65);
+            }
+            else {
+                this.drawText(context, item.x + item.width - this.unit * 1.2, item.y + item.height - this.unit * 0.58, namespace.Pepper.Resources.localeText[161], "rgba(255, 255, 255)", 0.65);
+            }
+                     
             context.restore();
 
             context.textAlign = "right";
