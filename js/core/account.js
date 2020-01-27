@@ -94,10 +94,11 @@
 
     // Retrieve the public key from mnemonic.
     namespace.Core.Account.prototype.getPublicFromMnemonic = function (mnemonic) {
+        const cleanMnemonic = namespace.Core.Utils.cleanMnemonic(mnemonic);
         const keyTool = new namespace.Core.KeyTool(language);
-        const split = keyTool.splitWords(mnemonic);
+        const split = keyTool.splitWords(cleanMnemonic);
         if (split.length === 24) {
-            const seed = keyTool.mnemonicToSeed(mnemonic);
+            const seed = keyTool.mnemonicToSeed(cleanMnemonic);
             const derivation = keyTool.deriveChildKey(masterKeyPath, keyTool.generateMasterKey(seed));
             return keyTool.generateKey(derivation).publicKey();
         }

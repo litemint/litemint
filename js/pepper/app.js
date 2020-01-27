@@ -2060,7 +2060,8 @@
                         view.modalPageTransitionTime = 0.3;
 
                         view.mnemonicSuccess = true;
-                        const memonic = $("#words").val().split(" ");
+                        const words = namespace.Core.Utils.cleanMnemonic($("#words").val());
+                        const memonic = words.split(" ");
                         if (memonic.length === 24) {
                             for (let i = 0; i < 24; i += 1) {
                                 if (namespace.Core.currentAccount.mnemonic[i] !== memonic[i]) {

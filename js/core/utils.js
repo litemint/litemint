@@ -320,6 +320,20 @@
     };
 
     /**
+     * Clean mnemonic if needed.
+     * @function cleanMnemonic
+     * @memberof Litemint.Core.Utils
+     * @param {String} string Mnemonic to clean.
+     * @return {String} Cleaned mnemonic.
+     */
+    namespace.Core.Utils.cleanMnemonic = function (mnemonic) {
+        return mnemonic.toLowerCase().trim()
+            .split(" ").filter(function (e) {
+                return e != "";
+            }).join(" ");
+    };
+
+    /**
      * Create a keystore file compatible with stellarport.io.
      * reference: https://github.com/stellarport/stellar-keystore/blob/master/src/index.js
      * @function createKeystore
