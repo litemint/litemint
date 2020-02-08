@@ -2199,10 +2199,10 @@
                 break;
             case namespace.Pepper.ScrollerType.Leaderboard:
                 if(this.selectedGame){
-                    this.roundRect(context, this.scroller.x, this.scroller.y - this.unit * 1.5, this.scroller.width, this.unit * 2, this.unit * 0.2, namespace.Pepper.Resources.primaryColor);
-                    this.roundRect(context, this.scroller.x, this.scroller.y - this.unit * 1.5, this.scroller.width, this.unit * 2, this.unit * 0.2, "rgba(36, 41, 46, 0.2)");
-                    context.drawImage(this.selectedGame.image, this.scroller.x + this.unit * 0.3, this.scroller.y - this.unit * 1.4, this.unit * 1.3, this.unit * 1.3);
-
+                    this.roundRect(context, this.scroller.x, this.scroller.y - this.unit * 1.5, this.scroller.width, this.unit * 2, this.unit * 0.2, this.selectedGame.data && this.selectedGame.data.challenge ? "rgb(36, 41, 46)" : namespace.Pepper.Resources.primaryColor);
+                    if(!(this.selectedGame.data && this.selectedGame.data.challenge)) {
+                        this.roundRect(context, this.scroller.x, this.scroller.y - this.unit * 1.5, this.scroller.width, this.unit * 2, this.unit * 0.2, "rgba(36, 41, 46, 0.2)");
+                    }
                     context.textAlign = "left";
                     context.font = this.getFont("Roboto-Bold");
                     this.drawText(context, this.scroller.x + this.unit * 1.8, this.scroller.y - this.unit * 0.92, this.selectedGame.data.name, "rgb(255, 255, 255)", 0.9);
@@ -2216,8 +2216,13 @@
 
                     context.textAlign = "center";
                     context.font = this.getFont("Roboto-Regular");
-                    this.roundRect(context, this.scroller.x + this.scroller.width * 0.5 - this.unit * 3.5, this.scroller.y - this.unit * 2.4, this.unit * 7, this.unit * 1.1, this.unit * 0.2, "rgb(41, 162, 159)");
-                    this.drawText(context, this.scroller.x + this.scroller.width * 0.5, this.scroller.y - this.unit * 1.9, namespace.Pepper.Resources.localeText[185] + " — " + (this.showAllTime ? namespace.Pepper.Resources.localeText[221] : namespace.Pepper.Resources.localeText[220]), "rgb(255, 255, 255)", 0.8);
+                    this.roundRect(context, this.scroller.x + this.scroller.width * 0.5 - this.unit * 3.5, this.scroller.y - this.unit * 2.4, this.unit * 7, this.unit * 1.1, this.unit * 0.2, this.selectedGame.data && this.selectedGame.data.challenge ? "rgb(36, 41, 46)" : "rgb(41, 162, 159)");
+                    this.drawText(context, this.scroller.x + this.scroller.width * 0.5, this.scroller.y - this.unit * 1.9, namespace.Pepper.Resources.localeText[185], "rgb(255, 255, 255)", 0.8);
+
+                    context.drawImage(this.selectedGame.image, this.scroller.x + this.unit * 0.3, this.scroller.y - this.unit * 1.4, this.unit * 1.3, this.unit * 1.3);
+                    if (this.selectedGame.data && this.selectedGame.data.challenge) {
+                        context.drawImage(namespace.Pepper.Resources.trophyImage, this.scroller.x + this.unit * 1.4, this.scroller.y - this.unit * 2.4, this.unit * 1, this.unit * 1);
+                    }
                 }
                 break;
             case namespace.Pepper.ScrollerType.CoinSwap:
@@ -2264,8 +2269,10 @@
         context.save();
         context.beginPath();
         switch (this.scroller.type) {
-            case namespace.Pepper.ScrollerType.CoinSwap:
             case namespace.Pepper.ScrollerType.Leaderboard:
+                this.roundRect(context, this.scroller.x - this.unit * 0.2, this.scroller.y, this.scroller.width + this.unit * 0.21, this.scroller.height, this.unit * 0.2, "rgb(255, 255, 255)");
+                break;
+                case namespace.Pepper.ScrollerType.CoinSwap:
             case namespace.Pepper.ScrollerType.LiveOrders:
             case namespace.Pepper.ScrollerType.LastTrades:
                 this.roundRect(context, this.scroller.x - this.unit * 0.2, this.scroller.y, this.scroller.width + this.unit * 0.2, this.scroller.height, this.unit * 0.2, "rgb(255, 255, 255)");
@@ -2306,6 +2313,7 @@
                 break;
         }
 
+        let hasChallenge = (this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard && this.selectedGame && this.selectedGame.data && this.selectedGame.data.challenge) ? true : false;
         for (let i = 0; i < this.scroller.items.length; i += 1) {
             let item = this.scroller.items[i];
 
@@ -2601,10 +2609,38 @@
                     }
                 }
                 else if (this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard) {
-                    if (item.data) {
+                    if (item.data && i === 3 && hasChallenge) {
+                        context.save();
+                        context.fillStyle = "#d5d7de";
+                        context.fillRect(item.x, item.y, item.width, item.height - this.unit * 0.05);
+                        context.restore();
+                        if (this.selectedGame && this.selectedGame.data && this.selectedGame.data.challenge && this.selectedGame.data.challenge.banner) {
+                            let banner = namespace.Pepper.Resources[this.selectedGame.data.challenge.id + "banner"];
+                            if (!banner) {
+                                banner = {};
+                                banner.img = new Image();
+                                banner.img.onload = () => {
+                                    banner.valid = true;
+                                };
+                                banner.img.onerror = () => {
+                                    banner.valid = false;
+                                };
+                                banner.img.src = this.selectedGame.data.challenge.banner; 
+                                namespace.Pepper.Resources[this.selectedGame.data.challenge.id + "banner"] = banner;
+                            }
+
+                            if(banner.valid) {
+                                context.drawImage(banner.img, item.x, item.y, item.width, item.height);
+                            }
+                            else {
+                                this.drawLoader(context, item.x + item.width * 0.5, item.y + item.height * 0.5, this.unit, false);
+                            }
+                        }
+                    }
+                    else if (item.data && (!hasChallenge || i >= 3)) {
                         let hasDisplayName = item.data.displayname && item.data.displayname !== "" ? true : false;
                         let isMe = (namespace.Core.currentAccount.friendlyAddress && item.data.name === namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "")) ? true : false;
-                        if(isMe){
+                        if (isMe) {
                             context.fillStyle = "rgb(36, 41, 46)";
                             context.fillRect(item.x, item.y, item.width, item.height);
                         }
@@ -2640,7 +2676,7 @@
 
                         context.font =  this.getFont("Roboto-Bold");
                         context.textAlign = "center";
-                        this.drawText(context, item.x + this.unit * 0.41, item.y + item.height * 0.5, (i + 1).toString(), isMe ? "rgb(23, 156, 75)" : "rgba(36, 41, 46, 0.5)", 0.75);
+                        this.drawText(context, item.x + this.unit * 0.41, item.y + item.height * 0.5, (i + 1 + (hasChallenge ? -4 : 0)).toString(), isMe ? "rgb(23, 156, 75)" : "rgba(36, 41, 46, 0.5)", 0.75);
                         
                         context.textAlign = "right";
                         context.font = this.getFont("Roboto-Bold");
@@ -2828,7 +2864,91 @@
                 }
             }
         }
+
         context.restore();
+
+        let challengeBackgroundColor = "#4267b2";
+        if (hasChallenge) {
+            context.save();
+            for (let i = 0; i < Math.min(this.scroller.items.length, 3); i += 1) {
+                let item = this.scroller.items[i];
+                if (item.data) {
+                    let hasDisplayName = item.data.displayname && item.data.displayname !== "" ? true : false;
+                    let isMe = (namespace.Core.currentAccount.friendlyAddress && item.data.name === namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "")) ? true : false;
+                    if(i === 0) {
+                        context.save();
+                        context.shadowColor = "rgba(0, 0, 0, 0.3)";
+                        context.fillStyle = "rgba(255, 255, 255, 1)";
+                        context.shadowBlur = this.unit * 0.1;
+                        context.shadowOffsetX = 0;
+                        context.shadowOffsetY = this.unit * 0.1;
+                        context.fillRect(item.x, item.y, item.width, item.height * 3 + this.unit * 0.05);
+                        context.restore();
+
+                        context.fillStyle = challengeBackgroundColor;
+                        context.fillRect(item.x, item.y - this.unit * 0.05, item.width + this.unit * 0.1, item.height * 3 + this.unit * 0.1);
+                    }
+
+                    if(i < 2) {
+                        context.fillStyle = "rgba(255, 255, 255, 0.5)";
+                        context.fillRect(item.x + this.unit, item.y + item.height - this.unit * 0.01, item.width + this.unit * 0.1- this.unit * 2, this.unit * 0.02);
+                    }
+
+                    context.font =  this.getFont("Roboto-Regular");
+                    context.textAlign = "left";
+
+                    if (item.data.image) {
+                        if (!namespace.Pepper.Resources.identIconFiles[item.data.name]) {
+                            const identIcon = {
+                                "img" : new Image(),
+                                "loaded": false
+                            };
+                            identIcon.img.onload = () => {
+                                identIcon.loaded = true;
+                            };
+                            namespace.Pepper.Resources.identIconFiles[item.data.name] = identIcon;
+                            identIcon.img.src = item.data.image;
+                        }                                        
+                    }
+
+                    if (this.selectedGame.data.challenge.rewards && this.selectedGame.data.challenge.rewards.length > 2) {
+                        context.save();
+                        context.beginPath();
+                        context.rect(item.x + item.height * 0.7, item.y, item.width * 0.5 - item.height * 0.7, item.height);
+                        context.clip();
+                        this.drawText(context, item.x + item.height * 0.71, item.y + item.height * 0.5, this.selectedGame.data.challenge.rewards[i], "#ffdd57", 0.7);
+                        context.restore();
+                    }
+                    context.save();
+                    context.textAlign = "right";
+                    if (item.data.score) {
+                        this.drawText(context, item.x + item.width - item.height * 0.5, item.y + item.height * 0.5, item.data.score + " (" + (hasDisplayName ? item.data.displayname : item.data.name) + ")", "rgb(255, 255, 255)", 0.7);
+                    }
+                    else {
+                        this.drawText(context, item.x + item.width - item.height * 0.5, item.y + item.height * 0.5, (hasDisplayName ? item.data.displayname : item.data.name), "rgba(255, 255, 255, 0.7)", 0.7);
+                    }
+                    context.restore();
+
+                    switch (i) {
+                        case 0:
+                            context.drawImage(namespace.Pepper.Resources.goldMedalImage, item.x, item.y + item.height * 0.15, item.height * 0.7, item.height * 0.7);
+                            break;
+                        case 1:
+                            context.drawImage(namespace.Pepper.Resources.silverMedalImage, item.x, item.y + item.height * 0.15, item.height * 0.7, item.height * 0.7);
+                            break;
+                        case 2:
+                            context.drawImage(namespace.Pepper.Resources.bronzeMedalImage, item.x, item.y + item.height * 0.15, item.height * 0.7, item.height * 0.7);
+                            break;
+
+                    }
+
+                    context.textAlign = "right";
+                    context.font = this.getFont("Roboto-Bold");
+                  //  this.drawText(context, item.x + item.width - item.height * 0.5, item.y + item.height * 0.5, item.data.score, "rgb(255, 255, 255)", 0.7);
+                }                
+            }
+            context.restore();
+        }
 
         if (this.scroller.hasBar && (this.scroller.isDown || this.scroller.scrollTime)) {
             const barwidth = this.unit * 0.1;
@@ -2841,6 +2961,22 @@
             context.globalAlpha = alpha;
         }
         context.restore();
+
+        if (hasChallenge && this.scroller.items.length) {
+            context.save();
+            context.fillStyle = challengeBackgroundColor;
+            context.fillRect(this.scroller.x, this.scroller.y - this.unit * 0.01, this.scroller.width + this.unit * 0.01, this.unit * 0.16);
+            this.roundRect(context, this.scroller.x + this.scroller.width * 0.72, this.scroller.y - this.unit * 0.65, this.scroller.width * 0.271, this.unit * 1, this.unit * 0.2, challengeBackgroundColor);
+            this.roundRect(context, this.scroller.x + this.scroller.width * 0.8, this.scroller.y - this.unit * 0.55, this.scroller.width * 0.18, this.unit * 0.6, this.unit * 0.15, "#fa3e3e");
+            context.textAlign = "right";
+            context.font = this.getFont("Roboto-Regular");
+            let secsRemaining = Math.max(0, this.selectedGame.data.challenge.expire - Math.floor(Date.now() / 1000));
+            let hoursRemaining = Math.floor(secsRemaining / 3600);
+            let minutesRemaining = Math.floor(secsRemaining / 60) % 60;
+            this.drawText(context, this.scroller.x + this.scroller.width - this.unit * 0.33, this.scroller.y - this.unit * 0.22, ("0" + hoursRemaining).slice(-2) + "h " + ("0" + minutesRemaining).slice(-2) + "m", "#fff", 0.70);
+            context.drawImage(namespace.Pepper.Resources.timerImage, this.scroller.x + this.scroller.width * 0.73, this.scroller.y - this.unit * 0.57, this.unit * 0.6, this.unit * 0.6);
+            context.restore();
+        }
 
         if (this.scroller.type !== namespace.Pepper.ScrollerType.AddAsset
             && this.scroller.type !== namespace.Pepper.ScrollerType.ShopConfirm
@@ -5069,7 +5205,8 @@
                             context.globalAlpha = 0.5;
                         }
                         context.font = this.getFont("Roboto-Regular");
-                        context.drawImage(item.data.data.gameid && item.data.data.leaderboard ? namespace.Pepper.Resources.scoreImage : namespace.Pepper.Resources.scoreDisabledImage, item.x + item.width - height * 1.9, y + height * 0.1, height * 0.8, height * 0.8);
+                        const enabledImage = item.data.data.challenge ? namespace.Pepper.Resources.trophyImage : namespace.Pepper.Resources.scoreImage;
+                        context.drawImage(item.data.data.gameid && item.data.data.leaderboard ? enabledImage : namespace.Pepper.Resources.scoreDisabledImage, item.x + item.width - height * 1.9, y + height * 0.1, height * 0.8, height * 0.8);
                         context.restore();
                     }
 

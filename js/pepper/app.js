@@ -609,18 +609,25 @@
         let selected = false;
         for (let i = 0; i < scroller.items.length; i += 1) {
             const item = scroller.items[i];
+            let hasChallenge = (view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard && view.selectedGame && view.selectedGame.data && view.selectedGame.data.challenge) ? true : false;
+            let canSelect = true;
+            let offset = hasChallenge && i <= 2 ? 0 : view.scroller.offset;
+            if (hasChallenge && i > 2 && point.y < view.scroller.y + item.height * 3) {
+                canSelect = false;
+            }
+
             switch (testType) {
                 case 0:
                     item.selected = false;
                     item.hover = false;
                     item.overAddBtn = false;
-                    if (point.y < view.scroller.y + view.scroller.height) {
-                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, item.y - view.scroller.offset, item.x + item.width, item.y + item.height - view.scroller.offset)) {
+                    if (canSelect && point.y < view.scroller.y + view.scroller.height) {
+                        if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, item.y - offset, item.x + item.width, item.y + item.height - offset)) {
                             item.selected = true;
                             selected = true;
 
                             if (view.scroller.type === namespace.Pepper.ScrollerType.AddAsset && !namespace.Pepper.queryAsset) {
-                                if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 1.7, item.y + view.unit * 0.25 - view.scroller.offset, item.x + view.unit * 1.7 + view.unit * 2.4, item.y + view.unit * 0.25 - view.scroller.offset + view.unit * 0.7)) {
+                                if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 1.7, item.y + view.unit * 0.25 - offset, item.x + view.unit * 1.7 + view.unit * 2.4, item.y + view.unit * 0.25 - offset + view.unit * 0.7)) {
                                     item.overAddBtn = true;
                                 }
                             }
@@ -637,11 +644,11 @@
                     break;
                 case 1:
                     item.hover = false;
-                    if (namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, item.y - view.scroller.offset, item.x + item.width, item.y + item.height - view.scroller.offset)) {
+                    if (canSelect && namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x, item.y - offset, item.x + item.width, item.y + item.height - offset)) {
                         item.hover = true;
 
                         if (view.scroller.type === namespace.Pepper.ScrollerType.AddAsset) {
-                            if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 1.7, item.y + view.unit * 0.25 - view.scroller.offset, item.x + view.unit * 1.7 + view.unit * 2.4, item.y + view.unit * 0.25 - view.scroller.offset + view.unit * 0.7)) {
+                            if (!namespace.Pepper.Tools.pointInRect(point.x, point.y, item.x + view.unit * 1.7, item.y + view.unit * 0.25 - offset, item.x + view.unit * 1.7 + view.unit * 2.4, item.y + view.unit * 0.25 - offset + view.unit * 0.7)) {
                                 item.overAddBtn = false;
                             }
                         }
@@ -2582,7 +2589,18 @@
                                 }
                                 break;
                             case namespace.Pepper.ScrollerType.Leaderboard:
-                                // TODO
+                                if (item.id === 3 && 
+                                    view.selectedGame && 
+                                    view.selectedGame.data && 
+                                    view.selectedGame.data.challenge && 
+                                    view.selectedGame.data.challenge.link) {
+                                    if (namespace.Pepper.isDesktop) {
+                                        window.open(view.selectedGame.data.challenge.link, "_blank");
+                                    }
+                                    else {
+                                        window.location = view.selectedGame.data.challenge.link;
+                                    }
+                                }
                                 break;
                             case namespace.Pepper.ScrollerType.CoinSwap:
                                 if (item.id === 5 && namespace.Pepper.coinSwitch.coinBtnId && !namespace.Pepper.coinSwitch.loading) {
@@ -4114,9 +4132,30 @@
                 if (response) {
                     view.scroller.items = [];
                     if (view.showAllTime && response.ath && response.countall) {
+
+                        if (view.selectedGame.data.challenge) {
+                            for(let i= 0; i < Math.min(3, response.top.length); i += 1){
+                                view.scroller.items.push({
+                                    "id": view.scroller.items.length,
+                                    "data": response.top[i],
+                                    "count": response.countall
+                                });
+                            }
+
+                            while (view.scroller.items.length < 4) {
+                                view.scroller.items.push({
+                                    "id": view.scroller.items.length,
+                                    "data": {
+                                        "name": namespace.Pepper.Resources.localeText[226],
+                                        "score":""},
+                                    "count": response.countall
+                                });
+                            }
+                        }
+
                         for(let i= 0; i <response.ath.length; i += 1){
                             view.scroller.items.push({
-                                "id": i,
+                                "id": view.scroller.items.length,
                                 "data": response.ath[i],
                                 "count": response.countall
                             });

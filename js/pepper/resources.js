@@ -129,7 +129,12 @@
         "nftLightImage": "nftlight.png",
         "nftDarkImage": "nftdark.png",
         "keyLightImage": "keylight.png",
-        "keyGreenImage": "keygreen.png"
+        "keyGreenImage": "keygreen.png",
+        "goldMedalImage": "goldmedal.png",
+        "silverMedalImage": "silvermedal.png",
+        "bronzeMedalImage": "bronzemedal.png",
+        "timerImage": "timer.png",
+        "trophyImage": "trophy.png"
     };
 
     /**
