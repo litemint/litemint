@@ -2061,7 +2061,7 @@
                     context.drawImage(namespace.Pepper.Resources.warningImage, item.x + item.width - this.unit, item.y + item.height - this.unit * 1.55, this.unit * 0.7, this.unit * 0.7);
                 }
 
-                if (item.data.balance) {
+                if (item.data.balance || item.data.code === "XLM") {
                     context.textAlign = "left";
                     context.font = this.getFont("Roboto-Regular");
                     this.drawText(context, item.x + this.unit * 2.5, item.y + this.unit * 0.4, namespace.Pepper.Resources.localeText[40], "rgba(50, 47, 66, 0.5)", 0.75);

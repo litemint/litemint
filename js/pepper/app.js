@@ -2589,16 +2589,45 @@
                                 }
                                 break;
                             case namespace.Pepper.ScrollerType.Leaderboard:
-                                if (item.id === 3 && 
-                                    view.selectedGame && 
-                                    view.selectedGame.data && 
-                                    view.selectedGame.data.challenge && 
-                                    view.selectedGame.data.challenge.link) {
-                                    if (namespace.Pepper.isDesktop) {
-                                        window.open(view.selectedGame.data.challenge.link, "_blank");
-                                    }
-                                    else {
-                                        window.location = view.selectedGame.data.challenge.link;
+                                const hasChallenge = view.selectedGame && view.selectedGame.data && view.selectedGame.data.challenge;
+                                if (hasChallenge) {
+                                    switch (item.id) {
+                                        case 0:
+                                        case 1:
+                                        case 2:
+                                            let selectedAsset = view.selectedGame.data.challenge.assets[item.id];
+                                            if (selectedAsset) {
+                                                let issuer = selectedAsset.issuer || "native";
+                                                let asset = {
+                                                    "data": namespace.Core.currentAccount.assets.find(x => x.code === selectedAsset.code && x.issuer === issuer)
+                                                };
+                                                if (!asset.data) {
+                                                    let nativeAsset = namespace.Core.currentAccount.assets.find(x => x.code === "XLM" && x.issuer === "native");
+                                                    let canAdd = nativeAsset && namespace.Core.currentAccount.assets.length
+                                                        && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee()
+                                                        ? true : false;
+                                                    asset = {
+                                                        "data": new namespace.Core.Asset(issuer, selectedAsset.code, 0, () => {
+                                                            domUpdateAssetPage();
+                                                        }),
+                                                        "hasAdd": canAdd
+                                                    };
+                                                }
+                                                view.selectedAsset = asset;
+                                                domShowModalPage(true, namespace.Pepper.WizardType.ViewAsset);
+                                                domShowAssetPage(true);
+                                            }
+                                            break;
+                                        case 3:
+                                            if (view.selectedGame.data.challenge.link) {
+                                                if (namespace.Pepper.isDesktop) {
+                                                    window.open(view.selectedGame.data.challenge.link, "_blank");
+                                                }
+                                                else {
+                                                    window.location = view.selectedGame.data.challenge.link;
+                                                }
+                                            }
+                                            break;
                                     }
                                 }
                                 break;
