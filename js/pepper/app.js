@@ -3812,7 +3812,22 @@
                                                 if (!item.spot) {
                                                     let canCollapse = true;
                                                     if((index === 0 || index === 1) && (item.data.data.gameid || item.data.data.action)) {
-                                                        if (item.data.data.action === "open_link_activity") {
+                                                        if (item.data.data.action === "open_shop_activity") {
+                                                            let itemData;
+                                                            for (let v = 0; v < namespace.Pepper.storeData.length; v += 1) {
+                                                                if (namespace.Pepper.storeData[v].data.gameid === item.data.data.gameid
+                                                                    && namespace.Pepper.storeData[v].data.shop) {
+                                                                        itemData = namespace.Pepper.storeData[v];
+                                                                        break;
+                                                                    }
+                                                            }
+                                                            if (itemData) {
+                                                                view.selectedGameShop = itemData;
+                                                                view.shopTime = 0.3;
+                                                                loadShop();
+                                                            }
+                                                        }
+                                                        else if (item.data.data.action === "open_link_activity") {
                                                             if (namespace.Pepper.isDesktop) {
                                                                 window.open(item.data.data.link, "_blank");
                                                             }
