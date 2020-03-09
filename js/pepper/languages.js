@@ -130,7 +130,7 @@
         "Sequence Bumped",
         "Account Merged",
         "Sell Order",
-        "Cancel Sell Order",
+        "Cancel Order",
         "Path Payment",
         "Watch Only Account",
         "No Data Available.",
@@ -240,7 +240,8 @@
         "Donate",
         "Donate",
         "Donate Now",
-        "No Winner"
+        "No Winner",
+        "Buy Order"
     ];
 
     /**

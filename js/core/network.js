@@ -134,7 +134,12 @@
                                                 }
                                             }
 
-                                            if (record.type === "payment" || record.type === "manage_offer" || record.type === "create_passive_offer") {
+                                            if (record.type === "payment" || 
+                                                record.type === "manage_offer" || 
+                                                record.type === "manage_sell_offer" || 
+                                                record.type === "manage_buy_offer" || 
+                                                record.type === "create_passive_offer" ||
+                                                record.type === "create_passive_sell_offer") {
                                                 stellarServer.transactions()
                                                     .transaction(record.transaction_hash)
                                                     .call()
@@ -157,13 +162,14 @@
                                         streamCb(full, indexes);
                                     }
 
-                                    stellarServer.offers("accounts", namespace.Core.currentAccount.keys.publicKey())
+                                    stellarServer.offers()
+                                        .forAccount(namespace.Core.currentAccount.keys.publicKey())
                                         .limit(namespace.config.maxOrders)
                                         .call()
                                         .then((offerResult) => {
                                             let updateOffers = false, offers = [];
                                             for (let i = 0; i < offerResult.records.length; i += 1) {
-                                                let record = offerResult.records[i];
+                                                let record = offerResult.records[i];                                                
                                                 if (record.selling && record.buying) {
                                                     if (!updateOffers) {
                                                         if (!namespace.Core.currentAccount.offers.find((offer) => {
@@ -647,7 +653,7 @@
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then((sourceAccount) => {
                 const transaction = new StellarSdk.TransactionBuilder(sourceAccount, { "fee": StellarSdk.BASE_FEE, "networkPassphrase": networkPassphrase })
-                    .addOperation(StellarSdk.Operation.pathPayment({
+                    .addOperation(StellarSdk.Operation.pathPaymentStrictReceive({
                         sendAsset: srcasset,
                         sendMax: srcamount,
                         destination: destaccount,

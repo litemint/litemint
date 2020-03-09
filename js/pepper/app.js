@@ -530,7 +530,7 @@
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(namespace.Pepper.Resources.logoImage, x - w * 0.5, y - w * 0.5, w, w);
                 if (!loaded) {
-                    loaderText = loadingstate ? loadingstate.current.toString() + "%" : "0%";
+                    loaderText = loadingstate ? Math.min(100, loadingstate.current).toString() + "%" : "0%";
                 }
                 context.restore();
                 if (loaderText) {
@@ -1192,7 +1192,6 @@
                                 namespace.Pepper.Tools.formatPrice(view.selectedGameShop.data.shop.items[i].priceScale || 1),
                                 view.selectedGameShop.data.shop.items[i].id,
                                 (success, result, code, issuer, id) => {
-                                    console.log(result);
                                     for (let i = 0; i < view.carousel.items.length; i += 1) {
                                         let item = view.carousel.items[i];
         
@@ -1229,8 +1228,7 @@
                         view.selectedGameShop.data.shop.issuer,
                         namespace.Pepper.Tools.formatPrice(amount),
                         null,
-                        (success, result) => {
-                            console.log(result);
+                        (success, result) => {                      
                             for (let i = 0; i < view.carousel.items.length; i += 1) {
                                 let item = view.carousel.items[i];
                                 item.shopPriceRate = {
@@ -4252,8 +4250,12 @@
                     (item.type === "payment" && item.to !== namespace.Core.currentAccount.keys.publicKey())
                 || view.account.filters[namespace.Pepper.FilterType.Trades] &&
                     (item.type === "create_passive_offer"
+                    || item.type === "create_passive_sell_offer"
                     || item.type === "manage_offer"
-                    || item.type === "path_payment")
+                    || item.type === "manage_sell_offer"
+                    || item.type === "manage_buy_offer"
+                    || item.type === "path_payment"
+                    || item.type === "path_payment_strict_receive")
                 || view.account.filters[namespace.Pepper.FilterType.Other] &&
                     (item.type === "set_options"
                     || item.type === "bump_sequence"
@@ -4983,7 +4985,6 @@
 
     function domUpdateAssetPage() {
         view.needRedraw = true;
-        console.log("called")
         if (view.selectedAsset && view.selectedAsset.data) {
             if (view.selectedAsset.data.issuer !== "native") {
                 if (view.selectedAsset.data.issuer) {

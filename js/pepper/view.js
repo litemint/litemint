@@ -4586,6 +4586,7 @@
 
         switch (item.data.type) {
             case "path_payment":
+            case "path_payment_strict_receive":
                 context.font = this.getFont("Roboto-Regular");
                 context.drawImage(namespace.Pepper.Resources.tradeImage, item.x + this.unit * 0.2, item.y + this.unit * 0.1, this.unit, this.unit);
 
@@ -4628,6 +4629,9 @@
                 }
                 break;
             case "create_passive_offer":
+            case "create_passive_sell_offer":
+            case "manage_sell_offer":
+            case "manage_buy_offer":
             case "manage_offer":
                 context.font = this.getFont("Roboto-Regular");
                 context.drawImage(namespace.Pepper.Resources.tradeImage, item.x + this.unit * 0.2, item.y + this.unit * 0.1, this.unit, this.unit);
@@ -4644,7 +4648,8 @@
                     price = item.data.price;
                 }
 
-                text = (Number(amount) > 0 ? namespace.Pepper.Resources.localeText[115] : namespace.Pepper.Resources.localeText[116]) + " " + baseCurrency + "/" + quoteCurrency + " ";
+                text = (Number(amount) > 0 ? (item.data.type === "manage_buy_offer" ? namespace.Pepper.Resources.localeText[227] : namespace.Pepper.Resources.localeText[115])
+                : namespace.Pepper.Resources.localeText[116]) + " " + baseCurrency + "/" + quoteCurrency + " ";
                 context.font = this.getFont("Roboto-Regular");
                 extent = context.measureText(text).width * 0.8;
                 this.drawText(context, item.x + this.unit * 1.25, item.y + this.unit * 0.5, text, Number(amount) > 0 ? "rgba(36, 41, 46, 0.75)" : "rgb(219, 83, 101)" , 0.8);
