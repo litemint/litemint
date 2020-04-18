@@ -3775,7 +3775,7 @@
                                                     }
                                                 }                                                
                                                 else {
-                                                    loadGame(namespace.Pepper.storeData[1].data.gameid, namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true);
+                                                    loadGame(namespace.Pepper.storeData[1].data.gameid, namespace.Pepper.storeData[1].data.link, namespace.Pepper.storeData[1].data.gameid ? false : true, namespace.Pepper.storeData[1].data.external);
                                                 }
                                             }
                                         });
@@ -3834,13 +3834,13 @@
                                                             }
                                                         }
                                                         else {
-                                                            loadGame(item.data.data.gameid, item.data.data.link);
+                                                            loadGame(item.data.data.gameid, item.data.data.link, false, item.data.data.external);
                                                         }
                                                     }
                                                     else if (item.overPlayBtn && item.data.data.gameid) {
                                                         canCollapse = false;
                                                         if (view.appId !== item.data.data.gameid) {
-                                                            loadGame(item.data.data.gameid, item.data.data.link);
+                                                            loadGame(item.data.data.gameid, item.data.data.link, false, item.data.data.external);
                                                         }
                                                         else {
                                                             domShowApp(false);
@@ -4136,7 +4136,7 @@
         namespace.Core.currentAccount.queuedOrder = null;
     }
 
-    function loadGame(id, url, noloader) {
+    function loadGame(id, url, noloader, external) {
         if(id && id !== "") {
             generateToken(id, (token) => {
                 if (token) {
@@ -4144,7 +4144,7 @@
                         url += "/";
                     }
                     url += "?token=" + token;
-                    domShowApp(true, id, url, noloader);
+                    domShowApp(true, id, url, noloader, external);
                 }
             });
         }
@@ -4739,40 +4739,50 @@
         }
     }
 
-    function domShowApp(show, id, url, noloader) {
-        if(show) {
-            if (view) {
-                view.appId = id;
-                view.needRedraw = true;
-            }
-            if(!noloader){
-                $("#activity-loader").show();
-            }
-            if(!namespace.Pepper.isDesktop) {
-                $("#handleBtn").fadeIn();
-                $("#activity-view").css("top", namespace.Pepper.barHeight / pixelRatio + "px");
-                $("#activity-view").css("height", ($(document).height() - namespace.Pepper.barHeight / pixelRatio)  + "px");
-                $("#activity-view").animate({
-                    width: "100%"
-                }, 350, "swing", function () {
-                    $("#activity-frame").attr("src",url);
-
-                    if ((namespace.Pepper.isWebkitHost() && !webkit.messageHandlers.supportStorePolicy)
-                        || (namespace.Pepper.isWebkitHost() && !url.includes("litemint.store"))) {
-                        $("#activity-view").css("width", "0%");
-                        $("#handleBtn").hide();
-                    }
-                });
-
-                if (window.Android && window.Android.unlockOrientation) {
-                    window.Android.unlockOrientation();
+    function domShowApp(show, id, url, noloader, external) {
+        if (show) {
+            if (external && !namespace.Pepper.isDesktop) {
+                if (namespace.Pepper.isDesktop) {
+                    window.open(url, "_blank");
                 }
-                else if (namespace.Pepper.isWebkitHost()) {
-                    webkit.messageHandlers.callbackHandler.postMessage({ "name": "unlockOrientation" });
+                else {
+                    window.location = url;
                 }
             }
             else {
-                $("#activity-frame").attr("src",url);
+                if (view) {
+                    view.appId = id;
+                    view.needRedraw = true;
+                }
+                if(!noloader){
+                    $("#activity-loader").show();
+                }
+                if(!namespace.Pepper.isDesktop) {
+                    $("#handleBtn").fadeIn();
+                    $("#activity-view").css("top", namespace.Pepper.barHeight / pixelRatio + "px");
+                    $("#activity-view").css("height", ($(document).height() - namespace.Pepper.barHeight / pixelRatio)  + "px");
+                    $("#activity-view").animate({
+                        width: "100%"
+                    }, 350, "swing", function () {
+                        $("#activity-frame").attr("src",url);
+
+                        if ((namespace.Pepper.isWebkitHost() && !webkit.messageHandlers.supportStorePolicy)
+                            || (namespace.Pepper.isWebkitHost() && !url.includes("litemint.store"))) {
+                            $("#activity-view").css("width", "0%");
+                            $("#handleBtn").hide();
+                        }
+                    });
+
+                    if (window.Android && window.Android.unlockOrientation) {
+                        window.Android.unlockOrientation();
+                    }
+                    else if (namespace.Pepper.isWebkitHost()) {
+                        webkit.messageHandlers.callbackHandler.postMessage({ "name": "unlockOrientation" });
+                    }
+                }
+                else {
+                    $("#activity-frame").attr("src",url);
+                }
             }
         }
         else {
