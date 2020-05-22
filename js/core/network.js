@@ -146,8 +146,8 @@
                                                     .then(function (opResult) {
                                                         let op = namespace.Core.currentAccount.operations.find(item => item.transaction_hash === opResult.hash);
                                                         if (op) {
-                                                            let txDetails = StellarSdk.xdr.TransactionEnvelope.fromXDR(opResult.envelope_xdr, "base64");
-                                                            op.memo = txDetails.tx().memo().value();
+                                                            let txDetails = StellarSdk.TransactionBuilder.fromXDR(opResult.envelope_xdr, networkPassphrase);
+                                                            op.memo = txDetails.tx.memo().value();
                                                         }
                                                     })
                                                     .catch(function (error) {
