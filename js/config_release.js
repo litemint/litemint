@@ -19,7 +19,7 @@
         "marketDataInterval": 2,
         "disableAds": true,
         "defaultAssets": [
-            { "code": "MAG", "issuer": "GAACROE4I6LRXKDKAJ4PKGQHRAU43ZDKRBBSNCVYW5TXBP4RAWO62JAH" },
+            { "code": "CREDIT", "issuer": "GBAKUWF2HTJ325PH6VATZQ3UNTK2AGTATR43U52WQCYJ25JNSCF5OFUN" },
             { "code": "BTC", "issuer": "GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5" },
             { "code": "ETH", "issuer": "GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5" },
             { "code": "LTC", "issuer": "GBVOL67TMUQBGL4TZYNMY3ZQ5WGQYFPFD5VJRWXR72VA33VFNL225PL5" },
@@ -27,16 +27,7 @@
             { "code": "GRIN", "issuer": "GCNR3JUD6XFNFZOPDK63EI57QYIOEJDLZMG24IR5KYSORCWRTPUBRWOM" },
             { "code": "USD", "issuer": "GDUKMGUGDZQK6YHYA5Z6AY2G4XDSZPSZ3SW5UN3ARVMO6QSRDWP5YLEX" }
         ],
-        "seamlessAssets": [
-            {
-                "code": "MAG",
-                "issuer": "GAACROE4I6LRXKDKAJ4PKGQHRAU43ZDKRBBSNCVYW5TXBP4RAWO62JAH",
-                "account": "GAIY5XSWTSVFBIOECL5D4QS3LXFFH2QLKOLSICGB4ETRH5L6QKHRTEHR",
-                "deposit": "https://api.litemint.com/.magnet/deposit",
-                "widthdraw": "https://api.litemint.com/.magnet/withdraw",
-                "networkPrefix": 0x26
-            }
-        ]
+        "seamlessAssets": []
     };
 
 })(window.Litemint = window.Litemint || {});
