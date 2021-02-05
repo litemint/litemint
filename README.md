@@ -18,7 +18,7 @@ Check out the [litemint-api](https://github.com/litemint/litemint-api) to integr
 
 - Litemint allows third-party apps and games to run seamlessly from within the wallet while also delivering monetizable content such as tradable collectibles and items through dedicated shopping services. Litemint boasts of the first real-world implementation of decentralized cross-currency in-app purchases using path payments.
 
-- Fast growing. See [Google Analytics Report for Q3](https://datastudio.google.com/s/oCISrGU9RnY) and latest report [latest report](https://datastudio.google.com/s/mSCu0Ccx4Qs).
+- Fast growing. See [latest report](https://datastudio.google.com/s/mSCu0Ccx4Qs).
 
 ## Building it Yourself
 
