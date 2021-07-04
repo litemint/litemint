@@ -50,3 +50,5 @@ package-lock.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+ngrok.exe
+test.php
