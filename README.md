@@ -6,19 +6,30 @@
 
 [https://litemint.com](https://litemint.com)
 
-Litemint is an open source, noncustodial, bespoke Stellar wallet for gamers. By leveraging the Stellar blockchain, Litemint enhances the user experience with asset ownership (NFT and collectibles) and decentralized micro-transactions.
+Litemint is an open source, noncustodial, bespoke Stellar wallet for gamers and collectors. By leveraging the Stellar blockchain, Litemint enhances the user experience with asset ownership (NFT and collectibles) and decentralized micro-transactions.
 
 Check out the [litemint-api](https://github.com/litemint/litemint-api) to integrate your app to Litemint.
 
 ## Discover Litemint:
 
-- Send, receive and trade any digital asset. Litemint is decentralized, secure and friendly.
+- Send, receive and trade (SDEX) any digital asset. Litemint is peer-to-peer, secure and friendly.
 
 - Your account keys always stay with you! Litemint accounts are standard, secure and compatible with all mainstream stellar services and hardware wallets. They implement mnemonic with [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), universal private key derivation with [SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md) and [SEP-0005](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md) and can be recovered and imported independently.
 
 - Litemint allows third-party apps and games to run seamlessly from within the wallet while also delivering monetizable content such as tradable collectibles and items through dedicated shopping services. Litemint boasts of the first real-world implementation of decentralized cross-currency in-app purchases using path payments.
 
-- Fast growing. See [Google Analytics Report for Q3](https://datastudio.google.com/s/oCISrGU9RnY) and latest report [latest report](https://datastudio.google.com/s/mSCu0Ccx4Qs).
+### Links
+
+- Wallet Website: https://litemint.com/
+- Discord: https://litemint.gg
+- Twitter: https://twitter.com/LitemintHQ
+- Facebook: https://www.facebook.com/litemint
+- Youtube: https://www.youtube.com/litemint
+- Web App: https://litemint.app/
+- Google Play: https://play.google.com/store/apps/details?id=com.litemint.app
+- Blog: https://blog.litemint.com/
+- Reddit: https://www.reddit.com/user/blockonomy
+- Interactive Analytics report: [latest report](https://datastudio.google.com/s/mSCu0Ccx4Qs).
 
 ## Building it Yourself
 
