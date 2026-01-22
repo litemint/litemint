@@ -81,7 +81,6 @@ java -jar $COMPILER \
 --js js/thirdparty/crypto/nacl-fast.min.js \
 --js js/thirdparty/crypto/nacl-util.min.js \
 --js js/thirdparty/crypto/fraction.min.js \
---js js/thirdparty/stellar/stellar-sdk.min.js \
 --js js/core/decl.js \
 --js js/core/utils.js \
 --js js/core/keytool.js \
@@ -89,6 +88,10 @@ java -jar $COMPILER \
 --js js/core/account.js \
 --js js/core/network.js \
 --js_output_file=${OUT}core.min.js
+
+# Closure Compiler breaks when bundling stellar-sdk - keep external.
+echo "Copying stellar-sdk..."
+cp js/thirdparty/stellar/stellar-sdk.min.js ${OUT}stellar-sdk.min.js
 
 # Compile litemint flavors.
 
