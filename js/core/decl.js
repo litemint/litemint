@@ -41,7 +41,7 @@
     namespace.config.maxOrders = namespace.config.maxOrders || 50;
     namespace.config.marketDataInterval = namespace.config.marketDataInterval ? namespace.config.marketDataInterval : 2;
     namespace.config.memoryStorageFallback = typeof namespace.config.memoryStorageFallback === "undefined" ? false : namespace.config.memoryStorageFallback;
-    namespace.config.defaultAssets = namespace.config.defaultAssets || [{ "code": "MAG", "issuer": "GDXP3TDM2D3VRRMGVFI6OFZDJQRP63MJ6C4PNJJBZR7GKGZE7ZGQIRKF" }];
+    namespace.config.defaultAssets = namespace.config.defaultAssets || [];
     namespace.config.seamlessAssets = namespace.config.seamlessAssets || [];
     if (!namespace.config.debug) {
         console.log = function () { };

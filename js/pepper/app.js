@@ -56,15 +56,15 @@
 
         // Download and refresh market data rates periodically.
         namespace.Pepper.MarketData.rates = {};
-        const getRates = function () {
-            $.ajax(namespace.config.apiUrl + "/.market/getrates").then(
-                function success(response) {
-                    namespace.Pepper.MarketData.rates = response;
-                },
-                function fail(data, status) {
-                    console.error("Failed to get market rates: " + status);
-                }
-            );
+        const getRates = () => {
+            fetch(namespace.config.apiUrl + "/.market/getrates")
+                .then(response => response.json())
+                .then(data => {
+                    namespace.Pepper.MarketData.rates = data;
+                })
+                .catch(error => {
+                    console.error(`Failed to get market rates: ${error.message}`);
+                });
         };
         getRates();
         setInterval(() => {
@@ -144,16 +144,16 @@
                 }
             };
 
-            $.ajax(namespace.config.apiUrl + "/.store/getdata").then(
-                function success(response) {
+            fetch(namespace.config.apiUrl + "/.store/getdata")
+                .then(response => response.json())
+                .then(data => {
                     namespace.Pepper.storeDataCache = [];
-                    for (let i = 0; i < response.length; i += 1) {
-                        loadStoreItem(response[i]);
+                    for (let i = 0; i < data.length; i += 1) {
+                        loadStoreItem(data[i]);
                     }
-                },
-                function fail(data, status) {
-                }
-            );
+                })
+                .catch(() => {
+                });
         };
 
         getStoreData();
@@ -164,24 +164,24 @@
 
         // Download the network message.
         namespace.Pepper.networkMessage = namespace.config.version;
-        const getmessage = function () {
-            $.ajax(namespace.config.apiUrl + "/.tools/getmessage").then(
-                function success(response) {
-                    if (response !== "") {
-                        namespace.Pepper.networkMessage = response;
+        const getmessage = () => {
+            fetch(namespace.config.apiUrl + "/.tools/getmessage")
+                .then(response => response.json())
+                .then(data => {
+                    if (data !== "") {
+                        namespace.Pepper.networkMessage = data;
                     }
-                },
-                function fail(data, status) {
-                    console.error("Failed to get the network message: " + status);
-                }
-            );
+                })
+                .catch(error => {
+                    console.error(`Failed to get the network message: ${error.message}`);
+                });
         };
         getmessage();
 
         // Download the sponsors data.
         namespace.Pepper.Resources.sponsors = [];
-        const getSponsors = function () {
-            const loadImage = function (index) {
+        const getSponsors = () => {
+            const loadImage = (index) => {
                 const sponsor = namespace.Pepper.Resources.sponsors[index];
                 sponsor.image = new Image();
                 sponsor.image.onload = () => {
@@ -193,20 +193,20 @@
                 sponsor.image.src = sponsor.imageLink;
             };
 
-            $.ajax(namespace.config.apiUrl + "/.tools/getsponsors").then(
-                function success(response) {
-                    namespace.Pepper.Resources.sponsors = response;
+            fetch(namespace.config.apiUrl + "/.tools/getsponsors")
+                .then(response => response.json())
+                .then(data => {
+                    namespace.Pepper.Resources.sponsors = data;
                     for (let i = 0; i < namespace.Pepper.Resources.sponsors.length; i += 1) {
                         loadImage(i);
                     }
                     if (namespace.Pepper.Resources.sponsors.length) {
                         namespace.Pepper.Resources.currentSponsor = namespace.Pepper.Resources.sponsors[0];
                     }
-                },
-                function fail(data, status) {
-                    console.error("Failed to get sponsors: " + status);
-                }
-            );
+                })
+                .catch(error => {
+                    console.error(`Failed to get sponsors: ${error.message}`);
+                });
         };
         getSponsors();
 
@@ -221,7 +221,7 @@
             if (namespace.Core.currentAccount.notifications.length) {
                 let notification = namespace.Core.currentAccount.notifications[0];
                 namespace.Core.currentAccount.notifications.splice(0, 1);
-                let message = namespace.Pepper.Resources.localeText[153] + notification.amount + " " + notification.code;
+                let message = `${namespace.Pepper.Resources.localeText[153]}${notification.amount} ${notification.code}`;
                 if (window.Android) {
                     if (view.account) {
                         if (!view.account.notoast) {
@@ -296,7 +296,7 @@
                 }
             }
             // Minimum supported ratio for mobile = 0.87 * 4 / 3
-            rotateScreen = canvas.width * 1.16 > canvas.height ? true : false;
+            rotateScreen = canvas.width * 1.16 > canvas.height;
         }
     };
 
@@ -436,7 +436,7 @@
     };
 
     namespace.Pepper.isWebkitHost = function () {
-        return typeof window.webkit !== "undefined" && webkit.messageHandlers && webkit.messageHandlers.callbackHandler;
+        return window.webkit?.messageHandlers?.callbackHandler !== undefined;
     };
 
     function onLoad(current, total) {
@@ -457,13 +457,13 @@
 
     function onLoaded(images) {
         for (let image in images) {
-            if (images.hasOwnProperty(image)) {
+            if (Object.hasOwn(images, image)) {
                 namespace.Pepper.Resources[image] = images[image];
             }
         }
 
         const data = namespace.Pepper.loadWalletData();
-        view = new namespace.Pepper.View(data.lastaccount === -1 ? true : false);
+        view = new namespace.Pepper.View(data.lastaccount === -1);
         view.load(canvas.width, canvas.height,
             data.languageId,
             () => {
@@ -481,7 +481,7 @@
     function onStart() {
         let manifest = [];
         for (let imageId in namespace.Pepper.Resources.imageFiles) {
-            if (namespace.Pepper.Resources.imageFiles.hasOwnProperty(imageId)) {
+            if (Object.hasOwn(namespace.Pepper.Resources.imageFiles, imageId)) {
                 manifest.push({ "id": imageId, "src": "res/img/" + namespace.Pepper.Resources.imageFiles[imageId] });
             }
         }
@@ -604,7 +604,7 @@
         let selected = false;
         for (let i = 0; i < scroller.items.length; i += 1) {
             const item = scroller.items[i];
-            let hasChallenge = (view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard && view.selectedGame && view.selectedGame.data && view.selectedGame.data.challenge) ? true : false;
+            const hasChallenge = view.scroller.type === namespace.Pepper.ScrollerType.Leaderboard && view.selectedGame?.data?.challenge;
             let canSelect = true;
             let offset = hasChallenge && i <= 2 ? 0 : view.scroller.offset;
             if (hasChallenge && i > 2 && point.y < view.scroller.y + item.height * 3) {
@@ -1388,9 +1388,9 @@
                                     callback: function (value, index, values) {
                                         function abbrNum(number, decPlaces) {
                                             decPlaces = Math.pow(10, decPlaces);
-                                            var abbrev = ["k", "m", "b", "t"];
+                                            const abbrev = ["k", "m", "b", "t"];
                                             for (let i = abbrev.length - 1; i >= 0; i--) {
-                                                var size = Math.pow(10, (i + 1) * 3);
+                                                const size = Math.pow(10, (i + 1) * 3);
                                                 if (size <= number) {
                                                     number = Math.round(number * decPlaces / size) / decPlaces;
                                                     if (number === 1000 && i < abbrev.length - 1) {
@@ -1431,15 +1431,21 @@
             }
             else {
                 view.getActiveCarouselItem().loadingChart = true;
-                $.post(namespace.config.apiUrl + "/.market/gethistory", { "currency": view.getActiveCarouselItem().asset.code }, function (response) {
+                fetch(namespace.config.apiUrl + "/.market/gethistory", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ "currency": view.getActiveCarouselItem().asset.code })
+                })
+                .then(response => response.json())
+                .then(data => {
                     view.getActiveCarouselItem().loadingChart = false;
-                    if (response) {
-                        if (response.length) {
-                            var priceArray = [];
-                            var volumeArray = [];
-                            for (let i = 0; i < Math.min(response.length, 13); i += 1) {
-                                priceArray.push(response[i].price);
-                                volumeArray.push(response[i].volume);
+                    if (data) {
+                        if (data.length) {
+                            const priceArray = [];
+                            const volumeArray = [];
+                            for (let i = 0; i < Math.min(data.length, 13); i += 1) {
+                                priceArray.push(data[i].price);
+                                volumeArray.push(data[i].volume);
                             }
 
                             if (!namespace.Pepper.cachedMarketData) {
@@ -1453,7 +1459,7 @@
                                 newCacheData.priceArray = priceArray.slice();
                                 newCacheData.volumeArray = volumeArray.slice();
                                 namespace.Pepper.cachedMarketData[view.getActiveCarouselItem().asset.code] = newCacheData;
-                                createChart(priceArray, volumeArray, response[0].time);
+                                createChart(priceArray, volumeArray, data[0].time);
                                 view.getActiveCarouselItem().hasChart = true;
                             }
                             else {
@@ -2122,7 +2128,7 @@
                 testElement(2, point, view.modalAddAssetBtn, isPointerDown, function () {
                     if (view.selectedAsset.hasAdd && !namespace.Pepper.queryAsset) {
                         namespace.Pepper.queryAsset = view.selectedAsset.data;
-                        var stellarNet = new namespace.Core.StellarNetwork();
+                        const stellarNet = new namespace.Core.StellarNetwork();
                         stellarNet.setTrust(
                             new StellarSdk.Asset(
                                 view.selectedAsset.data.code,
@@ -2297,7 +2303,7 @@
                                     }
                                     else if (item.id === view.scroller.items.length - 1) {
                                         if (view.deleteStep === 3) {
-                                            setTimeout(function () {
+                                            setTimeout(() => {
                                                 data.accounts.splice(data.lastaccount, 1);
                                                 data.lastaccount = -1;
                                                 namespace.Pepper.saveWalletData(data);
@@ -2495,9 +2501,7 @@
                                                 }
                                                 else {
                                                     namespace.Pepper.copyToClipboard(
-                                                        namespace.Pepper.Resources.localeText[126] + " " + carouselitem.asset.code + "\n" +
-                                                        namespace.Pepper.Resources.localeText[133] + " " + carouselitem.asset.issuer + "\n" +
-                                                        namespace.Pepper.Resources.localeText[134] + " " + (carouselitem.asset.deposit || namespace.Core.currentAccount.keys.publicKey()), 
+                                                        `${namespace.Pepper.Resources.localeText[126]} ${carouselitem.asset.code}\n${namespace.Pepper.Resources.localeText[133]} ${carouselitem.asset.issuer}\n${namespace.Pepper.Resources.localeText[134]} ${carouselitem.asset.deposit || namespace.Core.currentAccount.keys.publicKey()}`,
                                                     namespace.Pepper.Resources.localeText[122]);
                                                 }
                                             }
@@ -2505,7 +2509,7 @@
                                         case 4:
                                             if (carouselitem && carouselitem.asset) {
                                                 if (namespace.Pepper.isDesktop) {
-                                                    window.open("https://" + carouselitem.asset.domain, "_blank");
+                                                    window.open(`https://${carouselitem.asset.domain}`, "_blank");
                                                 }
                                                 else {
                                                     window.location = "https://" + carouselitem.asset.domain;
@@ -2559,9 +2563,8 @@
                                                 };
                                                 if (!asset.data) {
                                                     let nativeAsset = namespace.Core.currentAccount.assets.find(x => x.code === "XLM" && x.issuer === "native");
-                                                    let canAdd = nativeAsset && namespace.Core.currentAccount.assets.length
-                                                        && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee()
-                                                        ? true : false;
+                                                    const canAdd = nativeAsset && namespace.Core.currentAccount.assets.length
+                                                        && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee();
                                                     asset = {
                                                         "data": new namespace.Core.Asset(issuer, selectedAsset.code, 0, () => {
                                                             domUpdateAssetPage();
@@ -2593,26 +2596,31 @@
                                     let code = namespace.Pepper.coinSwitch.currencies[namespace.Pepper.coinSwitch.coinBtnId - 1].code.toLowerCase();
                                     let amount = (namespace.Pepper.coinSwitch.minDeposit * amountBtnId).toFixed(namespace.Pepper.coinSwitch.coinBtnId === 1 ? 3 : 2);
                                     namespace.Pepper.coinSwitch.loading = true;
-                                    $.post( namespace.config.apiUrl + "/.coinswitch/order", { from: code, address: namespace.Core.currentAccount.keys.publicKey(), amount: amount })
-                                        .done(function( response ) {
-                                            namespace.Pepper.coinSwitch.loading = false;
-                                            if (response) {
-                                                let payload = JSON.parse(response);
-                                                if(payload.success && payload.data) {
-                                                    let url = "https://exchange.litemint.com/order/" + payload.data.orderId
-                                                    if (namespace.Pepper.isDesktop) {
-                                                        window.open(url, "_blank");
-                                                    }
-                                                    else {
-                                                        window.location = url;
-                                                    }
-                                                    view.scrollerEndTime = 0.3;
+                                    fetch(namespace.config.apiUrl + "/.coinswitch/order", {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ from: code, address: namespace.Core.currentAccount.keys.publicKey(), amount: amount })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        namespace.Pepper.coinSwitch.loading = false;
+                                        if (data) {
+                                            let payload = data;
+                                            if(payload.success && payload.data) {
+                                                let url = `https://exchange.litemint.com/order/${payload.data.orderId}`;
+                                                if (namespace.Pepper.isDesktop) {
+                                                    window.open(url, "_blank");
                                                 }
+                                                else {
+                                                    window.location = url;
+                                                }
+                                                view.scrollerEndTime = 0.3;
                                             }
-                                        })
-                                        .fail(function(xhr, status, error) {
-                                            namespace.Pepper.coinSwitch.loading = false;
-                                        });
+                                        }
+                                    })
+                                    .catch(() => {
+                                        namespace.Pepper.coinSwitch.loading = false;
+                                    });
                                 }
                                 else if (item.id === 4 && namespace.Pepper.coinSwitch.coinBtnId && !namespace.Pepper.coinSwitch.loading) {
                                     let btnWidth = item.width / 5;
@@ -2623,7 +2631,7 @@
                                     else {
                                         let btnId = namespace.Pepper.coinSwitch.coinBtnId || 1;
                                         let code = namespace.Pepper.coinSwitch.currencies[btnId - 1].code.toLowerCase();
-                                        let url = "https://exchange.litemint.com/?from="+ code + "&to=xlm&address=" + namespace.Core.currentAccount.keys.publicKey();
+                                        let url = `https://exchange.litemint.com/?from=${code}&to=xlm&address=${namespace.Core.currentAccount.keys.publicKey()}`;
                                         if (namespace.Pepper.isDesktop) {
                                             window.open(url, "_blank");
                                         }
@@ -2639,21 +2647,26 @@
                                         if(!namespace.Pepper.coinSwitch.loading && namespace.Pepper.coinSwitch.coinBtnId !== coinBtnId){
                                             namespace.Pepper.coinSwitch.coinBtnId = coinBtnId;
                                             namespace.Pepper.coinSwitch.loading = true;
-                                            const getSwapRates = function () {
+                                            const getSwapRates = () => {
                                                 let code = namespace.Pepper.coinSwitch.currencies[namespace.Pepper.coinSwitch.coinBtnId - 1].code.toLowerCase();
-                                                $.post( namespace.config.apiUrl + "/.coinswitch/rate", { from: code })
-                                                    .done(function( response ) {
-                                                        namespace.Pepper.coinSwitch.loading = false;
-                                                        view.setupTime = 0.5;
-                                                        if (response) {
-                                                            let payload = JSON.parse(response);
+                                                fetch(namespace.config.apiUrl + "/.coinswitch/rate", {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ from: code })
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    namespace.Pepper.coinSwitch.loading = false;
+                                                    view.setupTime = 0.5;
+                                                    if (data) {
+                                                        let payload = data;
                                                             if (payload.success && payload.data && payload.data.limitMinDestinationCoin) {
                                                                 namespace.Pepper.coinSwitch.rate = payload.data.rate;
                                                                 namespace.Pepper.coinSwitch.minDeposit = (payload.data.limitMinDepositCoin * 2).toFixed(namespace.Pepper.coinSwitch.coinBtnId === 1 ? 3 : 2);
                                                             }
                                                         }
                                                     })
-                                                    .fail(function(xhr, status, error) {
+                                                    .catch(() => {
                                                         namespace.Pepper.coinSwitch.loading = false;
                                                     });
                                             };
@@ -2663,7 +2676,7 @@
                                     else {
                                         let btnId = namespace.Pepper.coinSwitch.coinBtnId || 1;
                                         let code = namespace.Pepper.coinSwitch.currencies[btnId - 1].code.toLowerCase();
-                                        let url = "https://exchange.litemint.com/?from="+ code + "&to=xlm&address=" + namespace.Core.currentAccount.keys.publicKey();
+                                        let url = `https://exchange.litemint.com/?from=${code}&to=xlm&address=${namespace.Core.currentAccount.keys.publicKey()}`;
                                         if (namespace.Pepper.isDesktop) {
                                             window.open(url, "_blank");
                                         }
@@ -2762,7 +2775,7 @@
         else {
             if (view.page === namespace.Pepper.PageType.SignUp || view.page === namespace.Pepper.PageType.SignIn && !view.discardedPanel) {
                 if (!view.isPinMenu) {
-                    const wasZero = view.pinCode.length === 0 ? true : false;
+                    const wasZero = view.pinCode.length === 0;
                     const wasError = view.pinError;
 
                     for (let i = 0; i < view.numPad.length; i += 1) {
@@ -3249,7 +3262,7 @@
                                                         view.getActiveCarouselItem().asset.issuer);
                                                 }
 
-                                                var stellarNet = new namespace.Core.StellarNetwork();
+                                                const stellarNet = new namespace.Core.StellarNetwork();
                                                 stellarNet.sendPayment(
                                                     view.sendDestination,
                                                     asset,
@@ -3375,7 +3388,7 @@
                                             namespace.Core.currentAccount.processingOrder = null;
                                         }
                                         else if (namespace.Core.currentAccount.queuedOrder) {
-                                            var stellarNet = new namespace.Core.StellarNetwork();
+                                            const stellarNet = new namespace.Core.StellarNetwork();
 
                                             // Promote to processing.
                                             namespace.Core.currentAccount.processingOrder = {
@@ -4049,22 +4062,21 @@
                 view.scroller.items = [];
             }
 
-            $.get(view.selectedGame.data.leaderboard,
-            {
-                "playername": playerName
-            })
-            .done(function (response) {
+            const params = new URLSearchParams({ "playername": playerName });
+            fetch(`${view.selectedGame.data.leaderboard}?${params}`)
+            .then(response => response.json())
+            .then(data => {
                 view.isLoadingLeaderboard = false;
-                if (response) {
+                if (data) {
                     view.scroller.items = [];
-                    if (view.showAllTime && response.ath && response.countall) {
+                    if (view.showAllTime && data.ath && data.countall) {
 
                         if (view.selectedGame.data.challenge) {
-                            for(let i= 0; i < Math.min(3, response.top.length); i += 1){
+                            for(let i= 0; i < Math.min(3, data.top.length); i += 1){
                                 view.scroller.items.push({
                                     "id": view.scroller.items.length,
-                                    "data": response.top[i],
-                                    "count": response.countall
+                                    "data": data.top[i],
+                                    "count": data.countall
                                 });
                             }
 
@@ -4074,32 +4086,32 @@
                                     "data": {
                                         "name": namespace.Pepper.Resources.localeText[226],
                                         "score":""},
-                                    "count": response.countall
+                                    "count": data.countall
                                 });
                             }
                         }
 
-                        for(let i= 0; i <response.ath.length; i += 1){
+                        for(let i= 0; i <data.ath.length; i += 1){
                             view.scroller.items.push({
                                 "id": view.scroller.items.length,
-                                "data": response.ath[i],
-                                "count": response.countall
+                                "data": data.ath[i],
+                                "count": data.countall
                             });
                         }
                     }
                     else {
-                        for(let i= 0; i <response.top.length; i += 1){
+                        for(let i= 0; i <data.top.length; i += 1){
                             view.scroller.items.push({
                                 "id": i,
-                                "data": response.top[i],
-                                "count": response.count
+                                "data": data.top[i],
+                                "count": data.count
                             });
-                        }      
+                        }
                     }
                     view.needRedraw = true;
                 }
             })
-            .fail(function (xhr, status, error) {
+            .catch(() => {
                 view.isLoadingLeaderboard = false;
             });
         }
@@ -4244,9 +4256,8 @@
             const item = namespace.config.defaultAssets[i];
             if (!namespace.Core.currentAccount.assets.find(x => x.code === item.code && x.issuer === item.issuer)) {
                 if (applyFilter(item.asset, false)) {
-                    let canAdd = nativeAsset && namespace.Core.currentAccount.assets.length
-                        && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee()
-                        ? true : false;
+                    const canAdd = nativeAsset && namespace.Core.currentAccount.assets.length
+                        && namespace.Core.currentAccount.getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee();
                     view.list.items.push({
                         "data": item.asset,
                         "hasAdd": canAdd
@@ -4339,7 +4350,7 @@
                             view.scroller.items.push({
                                 "id": i,
                                 "data": namespace.Core.currentAccount.offers[i],
-                                "delete": view.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? true : false,
+                                "delete": view.cancellingOffer === namespace.Core.currentAccount.offers[i].id,
                                 "slideTime": view.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? 0.3 : 0
                             });
                         }
@@ -4448,19 +4459,19 @@
     }
 
     function generateToken (cb) {
-        const getAuthKey = function (cb) {
+        const getAuthKey = (cb) => {
             // Get the authentication public key (ECDH).
-            $.ajax(namespace.config.cyberbrawlApiUrl + "/auth/key").then(
-                function success(response) {
-                    cb(response);
-                },
-                function fail(data, status) {
+            fetch(namespace.config.cyberbrawlApiUrl + "/auth/key")
+                .then(response => response.json())
+                .then(data => {
+                    cb(data);
+                })
+                .catch(() => {
                     cb();
-                }
-            );
+                });
         };
 
-        const getToken = function (pair, signed, cb) {
+        const getToken = (pair, signed, cb) => {
             const headers = { 'Content-Type': 'application/json' };
             try {
                 fetch(namespace.config.cyberbrawlApiUrl + "/auth/token", {
@@ -4516,14 +4527,11 @@
         if (view && view.needDomUpdate) {
             view.needDomUpdate = false;
 
-            $("textarea, input, button").not(".spear").css("fontSize", view.baseFontSize * 0.8 / pixelRatio + "px");
-            $("#asset-page").css("fontSize", view.baseFontSize * 0.8 / pixelRatio + "px");
+            $("textarea, input, button").not(".spear").css("fontSize", `${view.baseFontSize * 0.8 / pixelRatio}px`);
+            $("#asset-page").css("fontSize", `${view.baseFontSize * 0.8 / pixelRatio}px`);
             $("textarea, input, button").not(".spear").css("padding",
-                view.baseFontSize * 0.5 / pixelRatio + "px "
-                + view.baseFontSize * 0.5 / pixelRatio + "px "
-                + view.baseFontSize * 0.5 / pixelRatio + "px "
-                + view.baseFontSize * 0.25 / pixelRatio + "px");
-            $(".group").css("margin", view.baseFontSize * 0.8 / pixelRatio + "px 0");
+                `${view.baseFontSize * 0.5 / pixelRatio}px ${view.baseFontSize * 0.5 / pixelRatio}px ${view.baseFontSize * 0.5 / pixelRatio}px ${view.baseFontSize * 0.25 / pixelRatio}px`);
+            $(".group").css("margin", `${view.baseFontSize * 0.8 / pixelRatio}px 0`);
 
             if (view.showModalPage) {
                 $("#verification-form").css({ top: (view.viewport.y + view.unit * 5.3) / pixelRatio, left: (view.viewport.x + view.unit * 0.5) / pixelRatio });
@@ -4962,7 +4970,7 @@
     }
 
     function domTogglePasswordVisibility() {
-        var elem = document.getElementById("import");
+        const elem = document.getElementById("import");
         if (elem.type === "password") {
             elem.type = "text";
         } else {
@@ -5049,9 +5057,8 @@
                             if (!nativeAsset) {
                                 nativeAsset = view.placeHolderAsset;
                             }
-                            let canAdd = namespace.Core.currentAccount
-                                .getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee()
-                                ? true : false;
+                            const canAdd = namespace.Core.currentAccount
+                                .getMaxSend(nativeAsset.balance, nativeAsset) >= namespace.Core.currentAccount.getTrustBaseFee();
                             view.scroller.items.push({
                                 "data": new namespace.Core.Asset(currency.issuer, currency.code, 0),
                                 "hasAdd": canAdd
@@ -5159,7 +5166,7 @@
                 $("#address").val(code);
                 let inp = $("#address")[0];
                 if (inp.createTextRange) {
-                    var part = inp.createTextRange();
+                    const part = inp.createTextRange();
                     part.move("character", 0);
                     part.select();
                 } else if (inp.setSelectionRange) {

@@ -188,7 +188,7 @@
     namespace.Core.Account.prototype.getReserve = function (asset) {
         if (this.data) {
             let reserve = asset.issuer === "native" ? (2 + this.data.subentry_count) * this.getBaseReserve() : 0;
-            this.offers.forEach(function (x) {
+            this.offers.forEach((x) => {
                 reserve += x.baseAsset.code === asset.code && (x.baseAsset.issuer === asset.issuer || asset.issuer === "native" && !x.baseAsset.issuer) ? Number(x.baseAmount) : 0;
             });
             return asset.issuer === "native" ? reserve + this.data.subentry_count * this.getBaseFee() : reserve;
@@ -225,7 +225,7 @@
 
     // Is the account loaded.
     namespace.Core.Account.prototype.isLoaded = function () {
-        return this.keys ? true : false;
+        return Boolean(this.keys);
     };
 
     /**

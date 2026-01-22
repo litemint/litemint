@@ -36,7 +36,7 @@
      * @return {String} Hexadecimal String.
      */
     namespace.Core.Utils.bytesToHex = function (bytes) {
-        return bytes.reduce(function (data, i) { return data + ("0" + i.toString(16)).slice(-2); }, "");
+        return bytes.reduce((data, i) => data + `0${i.toString(16)}`.slice(-2), "");
     };
 
     /**
@@ -172,7 +172,7 @@
      * @return {Boolean} True or False
      */
     namespace.Core.Utils.isOdd = function (b) {
-        return b & 1 ? true : false;
+        return Boolean(b & 1);
     };
 
     /**
@@ -328,9 +328,7 @@
      */
     namespace.Core.Utils.cleanMnemonic = function (mnemonic) {
         return mnemonic.toLowerCase().trim()
-            .split(" ").filter(function (e) {
-                return e != "";
-            }).join(" ");
+            .split(" ").filter((e) => e !== "").join(" ");
     };
 
     /**

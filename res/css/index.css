@@ -121,6 +121,14 @@ chart-container {
         height: 100%;
     }
 
+.header-logo {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    height: 35px !important;
+    width: auto;
+}
+
 .box a {
     color: rgb(24, 179, 206);
     text-decoration: none;
@@ -316,4 +324,44 @@ chart-container {
 
 ::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, .3); /* Or any other instruction making the element visible */
+}
+
+/* About page styles extracted from inline styles */
+.about-text-center {
+    text-align: center;
+}
+
+.about-copyright {
+    font-size: 0.8em;
+}
+
+.about-muted {
+    color: rgba(36, 41, 46, 0.5);
+}
+
+.about-dependencies {
+    /* Dependencies list container */
+}
+
+/* Signup page styles extracted from inline styles */
+.signup-frame-bg {
+    background-image: url('../img/triangle.png');
+    background-position: right bottom;
+    background-repeat: no-repeat;
+}
+
+.signup-title-cyan {
+    color: #39e8ff;
+}
+
+.signup-title-light-cyan {
+    color: #83f0ff;
+}
+
+.signup-title-white {
+    color: #ffffff;
+}
+
+.signup-link {
+    font-size: 0.9em;
 }

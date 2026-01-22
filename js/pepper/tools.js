@@ -52,14 +52,14 @@
         const len = manifest.length;
         let resources = {},
             loadedResources = 0;
-        function onLoad() {
+        const onLoad = () => {
             if (++loadedResources === len && cb) {
                 cb(resources);
             }
             if (singlecb) {
                 singlecb(loadedResources, len);
             }
-        }
+        };
         for (let i = 0; i < len; i += 1) {
             let item = manifest[i];
             resources[item.id] = new Image();
@@ -157,9 +157,9 @@
     if (!window.requestAnimationFrame) {
         window.requestAnimationFrame = (function () {
             return window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
-                function (callback) {
+                ((callback) => {
                     window.setTimeout(callback, 1000 / 60);
-                };
+                });
         })();
     }
 

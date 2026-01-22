@@ -10,9 +10,9 @@
 
     // Helper : Update the timer value based on elapsed.
     let view;
-    let updateTimer = function (elapsed, value, factor, cb) {
+    let updateTimer = (elapsed, value, factor, cb) => {
         if (value > 0) {
-            value -= elapsed * (factor ? factor : 1);
+            value -= elapsed * (factor ?? 1);
             if (value <= 0) {
                 value = 0;
                 if (cb) {
@@ -2089,7 +2089,7 @@
                 context.fillRect(this.scroller.x, this.scroller.y - this.scroller.headerHeight - namespace.Pepper.barHeight, this.width, this.scroller.height + this.scroller.headerHeight + namespace.Pepper.barHeight);
             }
             else if(this.scrollerEndTime){
-                context.fillStyle = "rgba(0, 0, 0, " + 2 * this.scrollerEndTime + ")";
+                context.fillStyle = `rgba(0, 0, 0, ${2 * this.scrollerEndTime})`;
                 context.fillRect(this.scroller.x, this.scroller.y - this.scroller.headerHeight - namespace.Pepper.barHeight, this.width, this.scroller.height + this.scroller.headerHeight + namespace.Pepper.barHeight);   
             }
         }
@@ -2179,7 +2179,7 @@
                     }
                     context.textAlign = "left";
                     context.font = this.getFont("Roboto-Regular");
-                    this.drawText(context, this.scroller.x + this.unit * 1.8, this.scroller.y - this.unit * 0.4, namespace.Pepper.Resources.localeText[187] + " " + count, "rgba(255, 255, 255, 0.7)", 0.7);
+                    this.drawText(context, this.scroller.x + this.unit * 1.8, this.scroller.y - this.unit * 0.4, `${namespace.Pepper.Resources.localeText[187]} ${count}`, "rgba(255, 255, 255, 0.7)", 0.7);
 
                     context.textAlign = "center";
                     context.font = this.getFont("Roboto-Regular");
@@ -2280,7 +2280,7 @@
                 break;
         }
 
-        let hasChallenge = (this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard && this.selectedGame && this.selectedGame.data && this.selectedGame.data.challenge) ? true : false;
+        const hasChallenge = this.scroller.type === namespace.Pepper.ScrollerType.Leaderboard && this.selectedGame?.data?.challenge;
         for (let i = 0; i < this.scroller.items.length; i += 1) {
             let item = this.scroller.items[i];
 
@@ -2496,12 +2496,12 @@
                             context.globalAlpha = 1 - this.setupTime * 2;
                             let amountBtnId = namespace.Pepper.coinSwitch.amountBtnId || 1;
                             let amount = Math.floor(namespace.Pepper.coinSwitch.minDeposit * amountBtnId * namespace.Pepper.coinSwitch.rate);
-                            this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, namespace.Pepper.Resources.localeText[213] + " ≈ " + amount + " XLM", "rgb(36, 41, 46)", 0.85);
+                            this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, `${namespace.Pepper.Resources.localeText[213]} ≈ ${amount} XLM`, "rgb(36, 41, 46)", 0.85);
                         }
                         else if (item.id === 3) {
                             context.globalAlpha = 1 - this.setupTime * 2;
                             let code = namespace.Pepper.coinSwitch.currencies[namespace.Pepper.coinSwitch.coinBtnId - 1].code;
-                            this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, item.label + " (" + code + ")", "rgb(36, 41, 46)", 0.7);
+                            this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, `${item.label} (${code})`, "rgb(36, 41, 46)", 0.7);
                         }
                         else {
                             this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.5, item.label, "rgb(36, 41, 46)", 0.7);
@@ -2544,13 +2544,12 @@
 
                         this.drawText(context, item.x + item.width - (item.delete ? item.slideTime * this.unit * 1.3 + this.unit * 0.2 : this.unit * 1.3), item.y + item.height * 0.36,
                             namespace.Pepper.Resources.localeText[171] + " " +
-                            namespace.Pepper.Tools.formatPrice(item.data.baseAmount) + " " + item.data.baseAsset.code + " @ " +
-                            namespace.Pepper.Tools.formatPrice(namespace.Pepper.Tools.rationalPriceToDecimal(item.data.price)) + " " + item.data.quoteAsset.code,
+                            `${namespace.Pepper.Tools.formatPrice(item.data.baseAmount)} ${item.data.baseAsset.code} @ ${namespace.Pepper.Tools.formatPrice(namespace.Pepper.Tools.rationalPriceToDecimal(item.data.price))} ${item.data.quoteAsset.code}`,
                             this.cancellingOffer && !item.delete ? "rgba(36, 41, 46, 0.4)" : "rgb(36, 41, 46)", 0.65);
 
                         this.drawText(context, item.x + item.width - (item.delete ? item.slideTime * this.unit * 1.3 + this.unit * 0.2 : this.unit * 1.3), item.y + item.height * 0.67,
                             namespace.Pepper.Resources.localeText[176] + " " +
-                            namespace.Pepper.Tools.formatPrice(item.data.quoteAmount) + " " + item.data.quoteAsset.code,
+                            `${namespace.Pepper.Tools.formatPrice(item.data.quoteAmount)} ${item.data.quoteAsset.code}`,
                             this.cancellingOffer && !item.delete ? "rgba(36, 41, 46, 0.2)" : "rgba(36, 41, 46, 0.5)", 0.65);
 
                         context.restore();
@@ -2581,8 +2580,8 @@
                         context.fillStyle = "#d5d7de";
                         context.fillRect(item.x, item.y, item.width, item.height - this.unit * 0.05);
                         context.restore();
-                        if (this.selectedGame && this.selectedGame.data && this.selectedGame.data.challenge && this.selectedGame.data.challenge.banner) {
-                            let banner = namespace.Pepper.Resources[this.selectedGame.data.challenge.id + "banner"];
+                        if (this.selectedGame?.data?.challenge?.banner) {
+                            let banner = namespace.Pepper.Resources[`${this.selectedGame.data.challenge.id}banner`];
                             if (!banner) {
                                 banner = {};
                                 banner.img = new Image();
@@ -2593,7 +2592,7 @@
                                     banner.valid = false;
                                 };
                                 banner.img.src = this.selectedGame.data.challenge.banner; 
-                                namespace.Pepper.Resources[this.selectedGame.data.challenge.id + "banner"] = banner;
+                                namespace.Pepper.Resources[`${this.selectedGame.data.challenge.id}banner`] = banner;
                             }
 
                             if(banner.valid) {
@@ -2605,8 +2604,8 @@
                         }
                     }
                     else if (item.data && (!hasChallenge || i >= 3)) {
-                        let hasDisplayName = item.data.displayname && item.data.displayname !== "" ? true : false;
-                        let isMe = (namespace.Core.currentAccount.friendlyAddress && item.data.name === namespace.Core.currentAccount.friendlyAddress.replace("*litemint.com", "")) ? true : false;
+                        const hasDisplayName = Boolean(item.data.displayname);
+                        const isMe = namespace.Core.currentAccount.friendlyAddress?.replace("*litemint.com", "") === item.data.name;
                         if (isMe) {
                             context.fillStyle = "rgb(36, 41, 46)";
                             context.fillRect(item.x, item.y, item.width, item.height);
@@ -2785,7 +2784,7 @@
                                 this.drawText(context, item.x + item.width * 0.5, item.y + item.height * 0.3, this.selectedBuyItem.error.status, textColor, 0.79);
                             }
                             else if (!this.selectedBuyItem.success) {
-                                this.drawText(context, item.x + this.unit * 2, item.y + item.height * 0.3, namespace.Pepper.Resources.localeText[198] + ": " + this.selectedBuyItem.data.orderPrice + " " + base.code, textColor, 0.79);
+                                this.drawText(context, item.x + this.unit * 2, item.y + item.height * 0.3, `${namespace.Pepper.Resources.localeText[198]}: ${this.selectedBuyItem.data.orderPrice} ${base.code}`, textColor, 0.79);
                             }                            
                         }
 
@@ -2889,7 +2888,7 @@
                     context.save();
                     context.textAlign = "right";
                     if (item.data.score) {
-                        this.drawText(context, item.x + item.width - item.height * 0.5, item.y + item.height * 0.5, item.data.score + " (" + (hasDisplayName ? item.data.displayname : item.data.name) + ")", "rgb(255, 255, 255)", 0.7);
+                        this.drawText(context, item.x + item.width - item.height * 0.5, item.y + item.height * 0.5, `${item.data.score} (${hasDisplayName ? item.data.displayname : item.data.name})`, "rgb(255, 255, 255)", 0.7);
                     }
                     else {
                         this.drawText(context, item.x + item.width - item.height * 0.5, item.y + item.height * 0.5, (hasDisplayName ? item.data.displayname : item.data.name), "rgba(255, 255, 255, 0.7)", 0.7);
@@ -2940,7 +2939,7 @@
             let secsRemaining = Math.max(0, this.selectedGame.data.challenge.expire - Math.floor(Date.now() / 1000));
             let hoursRemaining = Math.floor(secsRemaining / 3600);
             let minutesRemaining = Math.floor(secsRemaining / 60) % 60;
-            this.drawText(context, this.scroller.x + this.scroller.width - this.unit * 0.33, this.scroller.y - this.unit * 0.22, ("0" + hoursRemaining).slice(-2) + "h " + ("0" + minutesRemaining).slice(-2) + "m", "#fff", 0.70);
+            this.drawText(context, this.scroller.x + this.scroller.width - this.unit * 0.33, this.scroller.y - this.unit * 0.22, `${("0" + hoursRemaining).slice(-2)}h ${("0" + minutesRemaining).slice(-2)}m`, "#fff", 0.70);
             context.drawImage(namespace.Pepper.Resources.timerImage, this.scroller.x + this.scroller.width * 0.73, this.scroller.y - this.unit * 0.57, this.unit * 0.6, this.unit * 0.6);
             context.restore();
         }
@@ -3073,24 +3072,24 @@
             switch (namespace.Pepper.importType) {
                 case 1:
                     this.drawText(context, this.numPadArea.x + this.numPadArea.width * 0.5, y + this.unit * 1.2,
-                        namespace.Pepper.Resources.localeText[151] + namespace.Pepper.Tools.truncateKey(namespace.Pepper.importKey), "rgba(255, 255, 255," + fadeIn + ")", 0.82);
+                        `${namespace.Pepper.Resources.localeText[151]}${namespace.Pepper.Tools.truncateKey(namespace.Pepper.importKey)}`, `rgba(255, 255, 255,${fadeIn})`, 0.82);
                     break;
                 case 2:
                     this.drawText(context, this.numPadArea.x + this.numPadArea.width * 0.5, y + this.unit * 1.2,
-                        namespace.Pepper.Resources.localeText[151] + namespace.Pepper.Tools.truncateKey(namespace.Pepper.importKey), "rgba(255, 255, 255," + fadeIn + ")", 0.82);
+                        `${namespace.Pepper.Resources.localeText[151]}${namespace.Pepper.Tools.truncateKey(namespace.Pepper.importKey)}`, `rgba(255, 255, 255,${fadeIn})`, 0.82);
                     break;
                 case 3:
                     this.drawText(context, this.numPadArea.x + this.numPadArea.width * 0.5, y + this.unit * 1.2,
-                        namespace.Pepper.Resources.localeText[151] + namespace.Pepper.Tools.truncateKey(namespace.Pepper.importKey), "rgba(255, 255, 255," + fadeIn + ")", 0.82);
+                        `${namespace.Pepper.Resources.localeText[151]}${namespace.Pepper.Tools.truncateKey(namespace.Pepper.importKey)}`, `rgba(255, 255, 255,${fadeIn})`, 0.82);
                     break;
                 default:
                     this.drawText(context, this.numPadArea.x + this.numPadArea.width * 0.5, y + this.unit * 1.2,
-                        namespace.Pepper.Resources.localeText[5], "rgba(255, 255, 255," + fadeIn + ")", 0.82);
+                        namespace.Pepper.Resources.localeText[5], `rgba(255, 255, 255,${fadeIn})`, 0.82);
                     break;
             }
         }
         else {
-            this.drawText(context, this.numPadArea.x + this.numPadArea.width * 0.5 - (1 - fadeIn) * this.unit * 3, y + this.unit * 1.2, this.pinAccountName, "rgba(255, 255, 255," + fadeIn + ")", 0.9);
+            this.drawText(context, this.numPadArea.x + this.numPadArea.width * 0.5 - (1 - fadeIn) * this.unit * 3, y + this.unit * 1.2, this.pinAccountName, `rgba(255, 255, 255,${fadeIn})`, 0.9);
         }
         context.restore();
 
@@ -3267,7 +3266,7 @@
             else {
                 context.textAlign = "right";
                 context.font = this.getFont("Roboto-Regular");
-                this.drawText(context, this.pinMenuPanel.x + this.unit * 2.5 + (this.pinMenuPanel.width - this.unit * 2.7) - this.unit * 0.2, this.pinMenuPanel.y + this.unit * 1.9, "v" + namespace.Pepper.networkMessage, "rgba(255,255,255,0.7)", 0.72);
+                this.drawText(context, this.pinMenuPanel.x + this.unit * 2.5 + (this.pinMenuPanel.width - this.unit * 2.7) - this.unit * 0.2, this.pinMenuPanel.y + this.unit * 1.9, `v${namespace.Pepper.networkMessage}`, "rgba(255,255,255,0.7)", 0.72);
             }
 
             // Content.
@@ -3505,7 +3504,7 @@
             else {
                 context.textAlign = "right";
                 context.font = this.getFont("Roboto-Regular");
-                this.drawText(context, this.dashboardMenuPanel.x + this.unit * 2.5 + (this.dashboardMenuPanel.width - this.unit * 2.7) - this.unit * 0.2, this.dashboardMenuPanel.y + this.unit * 1.9, "v" + namespace.Pepper.networkMessage, "rgba(255,255,255,0.7)", 0.72);
+                this.drawText(context, this.dashboardMenuPanel.x + this.unit * 2.5 + (this.dashboardMenuPanel.width - this.unit * 2.7) - this.unit * 0.2, this.dashboardMenuPanel.y + this.unit * 1.9, `v${namespace.Pepper.networkMessage}`, "rgba(255,255,255,0.7)", 0.72);
             }
 
             // Content.
@@ -3560,7 +3559,7 @@
                 alpha = (this.scrollerEndTime) * 3 * context.globalAlpha;
             }
             if (alpha) {
-                context.fillStyle = "rgba(0, 0, 0," + alpha * 0.32 + ")";
+                context.fillStyle = `rgba(0, 0, 0,${alpha * 0.32})`;
                 context.fillRect(this.carousel.x, this.carousel.y - this.carousel.headerHeight - namespace.Pepper.barHeight, this.carousel.width, this.viewport.height + namespace.Pepper.barHeight);
             }
             context.restore();
@@ -3581,14 +3580,14 @@
         if (!this.isActivityMode) {
             let alpha = this.sendFormEndTime * 2 * context.globalAlpha;
             if (alpha) {
-                context.fillStyle = "rgba(0, 0, 0," + alpha * 0.15 + ")";
+                context.fillStyle = `rgba(0, 0, 0,${alpha * 0.15})`;
                 context.fillRect(this.carousel.x, this.carousel.y - this.carousel.headerHeight - namespace.Pepper.barHeight, this.carousel.width, this.carousel.height + this.unit * 0.5 + this.carousel.headerHeight + namespace.Pepper.barHeight);
             }
         }
         else {
             let alpha = 1 - this.sendFormOffset / (this.unit * 2) / 2;
             if (alpha) {
-                context.fillStyle = "rgba(0, 0, 0," + alpha * 0.15 + ")";
+                context.fillStyle = `rgba(0, 0, 0,${alpha * 0.15})`;
                 context.fillRect(this.carousel.x, this.carousel.y - this.carousel.headerHeight - namespace.Pepper.barHeight, this.carousel.width, this.carousel.height + this.unit * 0.5 + this.carousel.headerHeight + namespace.Pepper.barHeight);
             }
         }
@@ -3739,44 +3738,25 @@
 
                         context.globalAlpha = 1 - this.sendFormEndTime * 2 * context.globalAlpha;
 
-                        if (item.asset.nftContract && item.asset.nftContract.valid) {
-                            if (item.asset.validImage) {
-                                context.drawImage(item.asset.image, item.x + item.width * 0.5 - this.unit * 1.35, item.y + this.unit * 0.2, this.unit * 2.7, this.unit * 2.7);
-                            }
+                        context.textAlign = "center";
+                        context.font = this.getFont("Roboto-Regular");
+                        this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.8, namespace.Pepper.Resources.localeText[40], "rgba(255, 255, 255, 0.7)", 0.8);
 
-                            context.textAlign = "center";
-                            context.font = this.getFont("Roboto-Light");
-                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 3.5, item.asset.code, "rgb(255, 255, 255)", 1);
-                        }
-                        else if (item.asset.nftVerified) {
-                            context.textAlign = "center";
-                            context.font = this.getFont("Roboto-Regular");
-                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.8, namespace.Pepper.Resources.localeText[40], "rgba(255, 255, 255, 0.7)", 0.8);
+                        context.font = this.getFont("Roboto-Light");
+                        this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 1.7, item.asset.code, "rgb(255, 255, 255)", 1);
 
-                            context.font = this.getFont("Roboto-Light");
-                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 1.7, item.asset.code, "rgb(255, 255, 255)", 1);
-                        }
+                        if (this.error !== namespace.Pepper.ViewErrorType.AccountNotAvailable) {
+                            context.font = this.getFont("Roboto-Black");
+                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 2.5, namespace.Pepper.Tools.formatPrice(item.asset.balance), "rgb(255, 255, 255)", 1.5);
 
-                        if(!item.asset.nftVerified) {
-                            context.textAlign = "center";
-                            context.font = this.getFont("Roboto-Regular");
-                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 1.7, namespace.Pepper.Resources.localeText[217], "rgb(255, 255, 255)", 0.7);
-                            this.drawLoader(context, item.x + item.width * 0.5, item.y + item.height * 0.55, this.unit);
-                        }
-                        else if (this.error !== namespace.Pepper.ViewErrorType.AccountNotAvailable) {
-                            if (!(item.asset.nftContract && item.asset.nftContract.valid)) {
-                                context.font = this.getFont("Roboto-Black");
-                                this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 2.5, namespace.Pepper.Tools.formatPrice(item.asset.balance), "rgb(255, 255, 255)", 1.5);
-
-                                let currencyrate = namespace.Pepper.MarketData.rates[item.asset.code]; // 0.21
-                                let accountCurrencyRate = namespace.Pepper.MarketData.rates[this.account.currency]; // 89544
-                                if (currencyrate && currencyrate.rate && !isNaN(currencyrate.rate) && Number(currencyrate.rate) > 0 && accountCurrencyRate) {
-                                    let currencyPrice = 1 / currencyrate.rate * accountCurrencyRate.rate;
-                                    context.font = this.getFont("Roboto-Regular");
-                                    this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 3.3,
-                                        "(" + this.account.currency + " "
-                                        + namespace.Pepper.Tools.formatPrice(item.asset.balance * 1 / currencyPrice, accountCurrencyRate.precision) + ")", "rgb(255, 255, 255)", 0.8);
-                                }
+                            let currencyrate = namespace.Pepper.MarketData.rates[item.asset.code]; // 0.21
+                            let accountCurrencyRate = namespace.Pepper.MarketData.rates[this.account.currency]; // 89544
+                            if (currencyrate && currencyrate.rate && !isNaN(currencyrate.rate) && Number(currencyrate.rate) > 0 && accountCurrencyRate) {
+                                let currencyPrice = 1 / currencyrate.rate * accountCurrencyRate.rate;
+                                context.font = this.getFont("Roboto-Regular");
+                                this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 3.3,
+                                    "(" + this.account.currency + " "
+                                    + namespace.Pepper.Tools.formatPrice(item.asset.balance * 1 / currencyPrice, accountCurrencyRate.precision) + ")", "rgb(255, 255, 255)", 0.8);
                             }
                         }
                         else {
@@ -3838,11 +3818,11 @@
                             context.textAlign = "left";
                             context.font = this.getFont("Roboto-Regular");
                             if (orderBook.history[0].isBuy) {
-                                this.drawText(context, item.x + this.unit * 0.3, item.y + item.height - this.unit * 0.3, "1 " + item.asset.code + " = " +
+                                this.drawText(context, item.x + this.unit * 0.3, item.y + item.height - this.unit * 0.3, `1 ${item.asset.code} = ` +
                                     namespace.Pepper.Tools.formatPrice(namespace.Pepper.Tools.rationalPriceToDecimal(orderBook.history[0].price)) + " " + quoteAsset.code, "#fff", 0.7);
                             }
                             else {
-                                this.drawText(context, item.x + this.unit * 0.3, item.y + item.height - this.unit * 0.3, "1 " + item.asset.code + " = " +
+                                this.drawText(context, item.x + this.unit * 0.3, item.y + item.height - this.unit * 0.3, `1 ${item.asset.code} = ` +
                                     namespace.Pepper.Tools.formatPrice(namespace.Pepper.Tools.rationalPriceToDecimal(orderBook.history[0].price)) + " " + quoteAsset.code, "#fff", 0.7);
                             }
                         }
@@ -3927,28 +3907,7 @@
                             context.drawImage(namespace.Pepper.Resources.warningImage, item.x + item.width - this.unit, item.y + item.height - this.unit * 0.95, this.unit * 0.7, this.unit * 0.7);
                         }
 
-                        if (item.asset.nftContract && item.asset.nftContract.valid && !this.isActivityMode) {
-                            if (item.asset.balance > 0) {
-                                context.drawImage(namespace.Pepper.Resources.nftLightImage, item.x + this.unit * 0.3, item.y + this.unit * 0.2, this.unit * 1.25, this.unit * 1.25);
-
-                                context.textAlign = "left";
-                                context.font = this.getFont("Roboto-Regular");
-                                this.drawText(context, item.x + item.width * 0.5 + this.unit * 1.7, item.y + this.unit * 2, namespace.Pepper.Resources.localeText[218], "rgb(255, 255, 255)", 0.65);
-                                context.drawImage(namespace.Pepper.Resources.keyGreenImage, item.x + item.width * 0.5 + this.unit * 1.7, item.y + item.height * 0.5 - this.unit * 0.5, this.unit * 1, this.unit * 1);
-                            }
-                            else {
-                                context.drawImage(namespace.Pepper.Resources.nftZeroLightImage, item.x + this.unit * 0.3, item.y + this.unit * 0.2, this.unit * 1.25, this.unit * 1.25);
-
-                                context.textAlign = "left";
-                                context.font = this.getFont("Roboto-Regular");
-                                this.drawText(context, item.x + item.width * 0.5 + this.unit * 1.7, item.y + this.unit * 2, namespace.Pepper.Resources.localeText[219], "rgb(255, 255, 255)", 0.65);
-                                context.save();
-                                context.globalAlpha = 0.3 * context.globalAlpha;
-                                context.drawImage(namespace.Pepper.Resources.keyLightImage, item.x + item.width * 0.5 + this.unit * 1.7, item.y + item.height * 0.5 - this.unit * 0.5, this.unit * 1, this.unit * 1);
-                                context.restore();
-                            }
-                        }
-                        else if (item.asset.validImage) {
+                        if (item.asset.validImage) {
                             context.drawImage(item.asset.image, item.x + this.unit * 0.3, item.y + this.unit * 0.2, this.unit * 1.25, this.unit * 1.25);
                         }
                         else if (item.asset.code === "XLM") {
@@ -4146,7 +4105,7 @@
             if (item.y - this.book.offset + item.height > this.book.y
                 && item.y - this.book.offset - item.height < this.book.y + this.book.height || item.data.spot) {
                 if (!item.data.spot) {
-                    this.drawBookItem(context, item, spotItem ? true : false);
+                    this.drawBookItem(context, item, Boolean(spotItem));
                 }
                 else {
                     spotItem = item;
@@ -4323,7 +4282,7 @@
                 alpha = (this.scrollerEndTime) * 3 * context.globalAlpha;
             }
             if (alpha) {
-                context.fillStyle = "rgba(0, 0, 0," + alpha * 0.32 + ")";
+                context.fillStyle = `rgba(0, 0, 0,${alpha * 0.32})`;
                 context.fillRect(this.carousel.x, this.carousel.y - this.carousel.headerHeight - namespace.Pepper.barHeight, this.carousel.width, this.viewport.height + namespace.Pepper.barHeight);
             }
             context.restore();
@@ -5761,7 +5720,7 @@
                     this.scroller.items.push({
                         "label": data.accounts[i].name,
                         "id": data.accounts[i].id,
-                        "current": i === data.lastaccount ? true : false
+                        "current": i === data.lastaccount
                     });
                 }
                 this.showScroller = true;
@@ -5769,13 +5728,13 @@
                 break;
             case namespace.Pepper.ScrollerType.Languages:
                 for (let languageId in namespace.Pepper.Resources.languagePacks) {
-                    if (namespace.Pepper.Resources.languagePacks.hasOwnProperty(languageId)) {
+                    if (Object.hasOwn(namespace.Pepper.Resources.languagePacks, languageId)) {
                         let pack = namespace.Pepper.Resources.languagePacks[languageId];
                         this.scroller.items.push({
                             "languageId": languageId,
                             "label": pack.name,
                             "text": pack.text,
-                            "current": languageId === namespace.Pepper.Resources.languageId ? true : false
+                            "current": languageId === namespace.Pepper.Resources.languageId
                         });
                     }
                 }
@@ -5800,11 +5759,11 @@
             case namespace.Pepper.ScrollerType.Currencies:
                 let foundCurrency = false;
                 for (let rate in namespace.Pepper.MarketData.rates) {
-                    if (namespace.Pepper.MarketData.rates.hasOwnProperty(rate)) {
+                    if (Object.hasOwn(namespace.Pepper.MarketData.rates, rate)) {
                         this.scroller.items.push({
                             "id": rate,
                             "label": rate,
-                            "current": rate === this.account.currency ? true : false
+                            "current": rate === this.account.currency
                         });
                     }
 
@@ -5836,7 +5795,7 @@
                     this.scroller.items.push({
                         "id": i,
                         "label": item.asset.name,
-                        "current": i === this.carousel.active ? true : false
+                        "current": i === this.carousel.active
                     });
                 }
 
@@ -5908,7 +5867,7 @@
                 activeItem = this.getActiveCarouselItem();
                 this.scroller.items.push({ "id": 1, "label": namespace.Pepper.Resources.localeText[77], "current": false, "enabled": true });
                 this.scroller.items.push({ "id": 3, "label": namespace.Pepper.Resources.localeText[79], "current": false, "enabled": true });
-                this.scroller.items.push({ "id": 4, "label": namespace.Pepper.Resources.localeText[80], "current": false, "enabled": activeItem.asset.domain ? true : false });
+                this.scroller.items.push({ "id": 4, "label": namespace.Pepper.Resources.localeText[80], "current": false, "enabled": Boolean(activeItem.asset.domain) });
                 if (activeItem) {
                     this.scroller.items.push({ "id": 5, "label": namespace.Pepper.Resources.localeText[81], "current": false, "enabled": !namespace.Pepper.queryAsset && this.carousel.active !== 0 && Number(activeItem.asset.balance) === 0 });
                 }
@@ -5937,7 +5896,7 @@
                     this.scroller.items.push({
                         "id": i,
                         "data": namespace.Core.currentAccount.offers[i],
-                        "delete": this.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? true : false,
+                        "delete": this.cancellingOffer === namespace.Core.currentAccount.offers[i].id,
                         "slideTime": this.cancellingOffer === namespace.Core.currentAccount.offers[i].id ? 0.3 : 0
                     });
                 }
@@ -5975,7 +5934,7 @@
                         this.scroller.items.push({
                             "id": i + 1,
                             "label": this.carousel.items[i].asset.code,
-                            "current": this.carousel.items[i].asset.code === quoteAsset.code && this.carousel.items[i].asset.issuer === quoteAsset.issuer ? true : false,
+                            "current": this.carousel.items[i].asset.code === quoteAsset.code && this.carousel.items[i].asset.issuer === quoteAsset.issuer,
                             "asset": this.carousel.items[i].asset
                         });
                     }
@@ -6088,13 +6047,13 @@
             signUpMode = true;
         }
         this.page = signUpMode ? namespace.Pepper.PageType.SignUp : namespace.Pepper.PageType.SignIn;
-        this.isPinMenu = menu ? true : false;
+        this.isPinMenu = Boolean(menu);
         this.isDashboardMenu = false;
         this.dashboardMenuOffset = 0;
         this.pinStep = 0;
         this.pinError = false;
         this.pinAccountName = !signUpMode ? data.accounts[data.lastaccount].name : "";
-        this.hasPinSwitchBtn = (signUpMode && data.accounts.length > 0) || (!signUpMode && data.accounts.length > 1) ? true : false;
+        this.hasPinSwitchBtn = (signUpMode && data.accounts.length > 0) || (!signUpMode && data.accounts.length > 1);
         this.pinCode = [];
         this.pinCodeCheck = [];
     };
