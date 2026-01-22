@@ -1,7 +1,7 @@
 ﻿/**
  * @overview Litemint Pepper resources languages implementation.
- * @copyright 2018-2020 Frederic Rezeau, aka 오경진.
- * @copyright 2018-2020 Litemint LLC.
+ * @copyright 2018-2026 Frederic Rezeau, aka 오경진.
+ * @copyright 2018-2026 Litemint LLC.
  * @license [MIT]{@link https://github.com/litemint/litemint/blob/master/LICENSE}
  */
 
@@ -19,7 +19,7 @@
         "Confirm your PIN",
         "Sign In",
         "Next",
-        "Explore the crypto world.",
+        "Forge your legacy",
         "Incorrect PIN. Please try again.",
         "Your PIN can be 4-12 digits.",
         "Make sure you choose one that's hard to guess.",
@@ -30,9 +30,9 @@
         "Select language",
         "Help & feedback",
         "Configuring language. Please wait...",
-        "Loading your account. Please wait...",
+        "Please wait...",
         "Account",
-        "Loading your account. Please wait...",
+        "Please wait...",
         "SAVE YOUR BACKUP PHRASE",
         "Please write down these 24 words on a paper.", // 20
         "If you lose your PIN or device",
@@ -152,7 +152,7 @@
         "Share via",
         "Enter a private key, public address or",
         "24-word backup phrase to import an account.",
-        "Account Settings",
+        "My Account",
         "Save your backup phrase",
         "Rename Account", // 140
         "Delete Account",
@@ -170,7 +170,7 @@
         "Payment Received: ",
         "Notifications",
         "Toasts",
-        "Get Your Friendly Name",
+        "Login to Cyberbrawl",
         "Marketplace",
         "Give Us Some Love",
         "Help us grow and rate us if you enjoy Litemint!",
@@ -221,7 +221,7 @@
         "APPS",
         "Choose your PIN.",
         "Confirm it.",
-        "Done.",
+        "You're in.",
         "Can be traded (DEX)",
         "Quick deposit with CoinSwitch",
         "Select Deposit Amount", // 210

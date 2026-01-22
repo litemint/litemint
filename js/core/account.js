@@ -1,7 +1,7 @@
 ﻿/**
  * @overview Litemint Core Account implementation.
- * @copyright 2018-2020 Frederic Rezeau, aka 오경진.
- * @copyright 2018-2020 Litemint LLC.
+ * @copyright 2018-2026 Frederic Rezeau, aka 오경진.
+ * @copyright 2018-2026 Litemint LLC.
  * @license [MIT]{@link https://github.com/litemint/litemint/blob/master/LICENSE}
  */
 
@@ -238,15 +238,13 @@
      * @memberof Litemint.Core.Account
      */
     namespace.Core.Account.ResolveAccount = function (data, domain, cb) {
-        StellarSdk.FederationServer.createForDomain(domain)
-            .then((federationServer) => {
-                federationServer.resolveAccountId(data)
-                    .then((federationRecord) => {
-                        if (federationRecord.stellar_address) {
-                            cb(federationRecord.stellar_address);
-                        }
-                    });
-            });
+        const server = new StellarSdk.Federation.Server("https://api2.litemint.com/federation", domain);
+        server.resolveAccountId(data)
+        .then((federationRecord) => {
+            if (federationRecord.stellar_address) {
+                cb(federationRecord.stellar_address);
+            }
+        });
     };
 
     /**
@@ -262,7 +260,8 @@
             cb();
         }
         else {
-            StellarSdk.FederationServer.resolve(address)
+            const server = new StellarSdk.Federation.Server("https://api2.litemint.com/federation", "litemint.com");
+            server.resolve(address)
                 .then(federationRecord => {
                     cb(federationRecord.account_id, federationRecord.memo, federationRecord.memo_type);
                 })

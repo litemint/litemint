@@ -1,7 +1,7 @@
 ﻿/**
  * @overview Litemint decl.
- * @copyright 2018-2020 Frederic Rezeau, aka 오경진.
- * @copyright 2018-2020 Litemint LLC.
+ * @copyright 2018-2026 Frederic Rezeau, aka 오경진.
+ * @copyright 2018-2026 Litemint LLC.
  * @license [MIT]{@link https://github.com/litemint/litemint/blob/master/LICENSE}
  */
 
@@ -34,6 +34,7 @@
     namespace.config.debug = typeof namespace.config.debug === "undefined" ? true : namespace.config.debug;
     namespace.config.serverUrl = namespace.config.serverUrl || "https://horizon.stellar.org";
     namespace.config.apiUrl = namespace.config.apiUrl || "https://api.litemint.com";
+    namespace.config.cyberbrawlApiUrl = namespace.config.cyberbrawlApiUrl || "https://connect.cyberbrawl.io";
     namespace.config.federationServer = namespace.config.federationServer || "https://api.litemint.com/federation";
     namespace.config.opsEndPoint = namespace.config.opsEndPoint || "https://app.litemint.com/operations?opid=";
     namespace.config.maxOperations = namespace.config.maxOperations || 100;

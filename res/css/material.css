@@ -63,7 +63,7 @@ textarea {
     input:focus,
     textarea:focus {
         outline: none;
-        border-bottom: 2px solid rgb(42, 193, 188);
+        border-bottom: 2px solid rgb(42, 152, 193);
     }
 
 input[type="password"] {

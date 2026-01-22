@@ -1,34 +1,37 @@
-<h1 align="left"><a href="https://litemint.com" target="_blank" rel="noopener noreferrer"><img align=left width="75" src="https://litemint.com/300x300.png" alt="Litemint logo">Litemint</a></h1>
+<h1 align="left"><a href="https://litemint.com" target="_blank" rel="noopener noreferrer"><img align=left width="75" src="https://cdn.litemint.com/static/logosmall.png" alt="Litemint logo">Litemint</a></h1>
 
-[![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/litemint/litemint/blob/master/LICENSE) [![Build Status](https://travis-ci.org/litemint/litemint.svg?branch=master)](https://travis-ci.org/litemint/litemint)
+[![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/litemint/litemint/blob/master/LICENSE)
 
-> Explore the crypto world.
+> Forge your legacy.
 
-[https://litemint.com](https://litemint.com)
+[app.litemint.com](https://app.litemint.com) is a bespoke, open-source, non-custodial Stellar wallet built for gamers and digital collectors.
 
-Litemint is an open source, noncustodial, bespoke Stellar wallet for collectors and gamers. By leveraging the Stellar blockchain, Litemint enhances the user experience with asset ownership (NFT and collectibles) and decentralized micro-transactions.
+It offers true asset ownership, peer-to-peer payments, and native support for collectibles and NFTs on the Stellar blockchain.
 
-We are revamping our open source wallet to support a mobile-first experience with the NFT marketplace, along with existing features (SDEX and wallet). Expect the fully browsable marketplace content with support for all features including auctions, profiles and collections.
+## Accounts
+- Fully **non-custodial** — private keys never leave your device
+- Compatible with all mainstream stellar services and hardware wallets
+- Mnemonic recovery using [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
+- Deterministic key derivation via [SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md) and [SEP-0005](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md)
+- Accounts can be recovered or imported independently of Litemint
 
-## Discover Litemint:
-
-- Send, receive and trade (SDEX) any digital asset and NFT. Litemint is peer-to-peer, secure and friendly.
-
-- Your account keys always stay with you! Litemint accounts are standard, secure and compatible with all mainstream stellar services and hardware wallets. They implement mnemonic with [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), universal private key derivation with [SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md) and [SEP-0005](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md) and can be recovered and imported independently.
+## Collectibles
+- Send and receive any Stellar asset or NFT
+- Peer-to-peer trading via the Stellar DEX (SDEX)
+- Supports all stellar assets including USDC and more.
+- Secure, protocol-native, and easy to use
 
 ### Links
 
 - Website: https://litemint.com/
 - Discord: https://litemint.gg
-- Twitter: https://twitter.com/LitemintHQ
+- X (Twitter): https://twitter.com/LitemintHQ
 - Facebook: https://www.facebook.com/litemint
 - Youtube: https://www.youtube.com/litemint
-- Wallet Web App: https://litemint.app/
-- Google Play: https://play.google.com/store/apps/details?id=com.litemint.app
+- Wallet Web App: https://app.litemint.com/
 - Blog: https://blog.litemint.com/
-- Reddit: https://www.reddit.com/user/blockonomy
 
-## Building it Yourself
+## Building It Yourself
 
 ### Dependencies
 
@@ -66,13 +69,11 @@ Optionally, you can install [jsdoc](https://github.com/jsdoc3/jsdoc) if you want
    
 ## Contributing
 
-Got mad skills? You are welcome to contribute to Litemint!
+Contributions are welcome.
 
 Development on Litemint happens directly on this GitHub repository and external contributors are welcome to send [pull requests](https://help.github.com/articles/about-pull-requests) which will be reviewed and discussed.
 
 Please take a look at the [Code of Conduct](https://github.com/litemint/litemint/blob/master/CONTRIB.md) to learn more.
-
-Trying to report a possible security vulnerability in Litemint? For the safe disclosure of security bugs and information about our bounty program, please send an email to [security@litemint.com](mailto:security@litemint.com).
 
 ## Litemint License
 
@@ -82,211 +83,3 @@ Copyright (c) 2021 Frederic Rezeau, aka 오경진<br />
 Copyright (c) 2021 Litemint LLC
 
 > LITEMINT LLC owns all Litemint-related trademarks, service marks, and graphic logos and the names of all Litemint projects are trademarks of LITEMINT LLC.
-
-## Dependency Licenses
-
-Build on the shoulders of giants!
-
-### Elliptic (Elliptic Curve Cryptography)
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/indutny/elliptic</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>MIT License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>Modified to expose the hash cryptography primitives</td>
-  </tr>
-</table>
-
-### aes-js (Advanced Encryption Standard)
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/ricmoo/aes-js</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>MIT License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### scrypt-async-js
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/dchest/scrypt-async-js</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>MIT License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### tweetnacl-js
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/dchest/tweetnacl-js</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>The Unlicense</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### js-stellar-sdk
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/stellar/js-stellar-sdk</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>Apache-2.0 License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### bip39
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/iancoleman/bip39</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>MIT License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### jquery
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/jquery/jquery</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>MIT License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### material-design-icons
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/google/material-design-icons</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>Apache-2.0 License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### Chart.js
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/chartjs/Chart.js</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>MIT License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### jquery-qrcode
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/jeromeetienne/jquery-qrcode</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>MIT License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### bulma
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/jgthms/bulma</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>MIT License</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### identicons
-
-<table>
-  <tr>
-    <td>URL</td>
-    <td>https://github.com/Lobstrco/stellar-identicon-js</td>
-  </tr>
-  <tr>
-    <td>License</td>
-    <td>Apache License 2.0</td>
-  </tr>
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>

@@ -21,6 +21,18 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://app.litemint.com">
+    <meta property="og:title" content="Litemint App">
+    <meta property="og:description" content="Stellar wallet for gamers and collectors">
+    <meta property="og:image" content="https://cdn.litemint.com/static/banner-app.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://app.litemint.com">
+    <meta name="twitter:title" content="Litemint App">
+    <meta name="twitter:description" content="Stellar wallet for gamers and collectors">
+    <meta name="twitter:image" content="https://cdn.litemint.com/static/banner-app.png">
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     <link rel="stylesheet" type="text/css" href="res/css/normalize.css" />
@@ -29,27 +41,34 @@
     <link rel="stylesheet" type="text/css" href="res/css/spear.css" />
     <link rel="icon" type="image/x-icon" href="res/img/favicon.ico" />
 
-    <title>Litemint Web App</title>
+    <title>Litemint App</title>
     <base target="_blank">
 </head>
 <body>
     <div id="activity-view">
         <div id="activity-loader"></div>
-        <iframe id="activity-frame" src="https://dashboard.litemint.com" frameBorder="0"></iframe>
-        <div id="signup-frame" style="background-color:#fff; background-image:url('res/img/triangle.png');background-position:right bottom;background-repeat:no-repeat;">
+        <iframe id="activity-frame" src="about:blank" frameBorder="0"></iframe>
+        <div id="signup-frame" style="background-image:url('res/img/triangle.png');background-position:right bottom;background-repeat:no-repeat;">
             <div id="signup-step-one" class="signup-content">
                 <h3>Play. Collect. Trade.</h3>
-                <h2>Explore the <span style="color:#ffda65">crypto</span> world.</h2>
-                <br /><br /><p>Create an account, <a href="https://litemint.com/security" target="_blank">it's yours and only yours</a>.<br />No email is required.<br /><br />
-                    <a id="signup-getstarted"> <img src="res/img/rocket.png" style="vertical-align: middle;" width=25>&nbsp;Get started</a>
-                    &nbsp;&nbsp;&nbsp;&nbsp;<a href="https://litemint.com" target="_blank" style="font-size:0.9em;">Litemint</a> | <a href="https://litemint.com/privacy.html" target="_blank" style="font-size:0.9em;">Privacy</a> | <a href="https://litemint.com/terms.html" target="_blank" style="font-size:0.9em;">Terms</a>
+                <h2>Prepare to <span style="color:#39e8ff">forge</span> your legacy.</h2>
+                <br /><br /><p>Create your account on the blockchain<br />It's free. It's forever.<br /><br />
+                    <a id="signup-getstarted">Get started</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<a href="https://litemint.com/privacy" target="_blank" style="font-size:0.9em;">Privacy</a> | <a href="https://litemint.com/terms" target="_blank" style="font-size:0.9em;">Terms</a>
                 </p>                      
             </div>
             <div id="signup-step-two" class="signup-content">
                 <img src="res/img/key.png" width=90>
-                <h1 id="signup-page-text1" style="color:#33beba"></h1>
-                <h1 id="signup-page-text2" style="color:#ffda65"></h1> 
-                <h1 id="signup-page-text3" style="color:#24292d"></h1>
+                <h1 id="signup-page-text1" style="color:#39e8ff"></h1>
+                <h1 id="signup-page-text2" style="color:#83f0ff"></h1> 
+                <h1 id="signup-page-text3" style="color:#ffffff"></h1>
+            </div>
+            <div id="signup-step-three" class="signup-content">
+                <h3>Play. Collect. Trade.</h3>
+                <h2><span style="color:#39e8ff">Forge</span> your legacy.</h2>
+                <br /><br /><p>Enter your pin to login<br />
+                    <a href="https://litemint.com/privacy" target="_blank" style="font-size:0.9em;">Privacy</a> | <a href="https://litemint.com/terms" target="_blank" style="font-size:0.9em;">Terms</a>
+                </p>                      
             </div>
         </div>
         <div class="toggle-wallet-wrapper">
@@ -60,36 +79,19 @@
     <canvas id="mainview" class="unselectable"></canvas>
     <div id="outstreamContainer"></div>
 
-    <section id="loader" class="hero is-fullheight is-white">
+    <section id="loader" class="hero is-fullheight">
         <div class="hero-body">
             <div class="container">
                 <div class="has-text-centered">
                     <img src="res/img/homelogo.png" width="200" />
                     <br />
-                    <img src="res/img/loader.gif" />
+                    <img src="res/img/loader-2.svg" />
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="mobile" class="hero is-fullheight is-white is-hidden">
-        <div class="hero-body">
-            <div class="container">
-                <div class="has-text-centered">
-                    <img src="res/img/homelogo.png" width="200" />
-                    <br />
-                    <br />
-                    <p>Launch this page from your Destop PC/MAC</p>
-                    <p>or download Litemint on your mobile.</p>
-                    <br />
-                    <p><a href="https://play.google.com/store/apps/details?id=com.litemint.app"><img src="https://litemint.com/img/badge_playstore.png" /></a></p>
-                    <p><a href="https://itunes.apple.com/app/litemint/id1454801150"><img src="https://litemint.com/img/badge_appstore.png" /></a></p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <div id="snackbar">This is a test message</div>
+    <div id="snackbar"></div>
 
     <canvas id="qrcode" width="720" height="720"></canvas>
 
@@ -152,12 +154,11 @@
     <div id="about-page" class="page hidden">
         <div id="about-title" class="header"></div>
         <div id="about-content" class="content">
-            <div class="box-top"><p style="text-align:center;"><span id="about-page-devby"></span><a href="https://twitter.com/FredericRezeau">Frederic 경진 Rezeau</a><br /><br /><span id="about-page-distby"></span><a href="https://litemint.com">Litemint LLC</a><br /><span id="about-page-license"></span><a href="https://github.com/litemint/litemint/blob/master/LICENSE">MIT</a><br /><br /><span id="about-page-version"></span><br /><span style="font-size:0.8em">Copyright © 2020 Litemint LLC.</span></p></div>
+            <div class="box-top"><p style="text-align:center;"><span id="about-page-devby"></span><a href="https://twitter.com/FredericRezeau">Frederic 경진 Rezeau</a><br /><br /><span id="about-page-distby"></span><a href="https://litemint.com">Litemint LLC</a><br /><span id="about-page-license"></span><a href="https://github.com/litemint/litemint/blob/master/LICENSE">MIT</a><br /><br /><span id="about-page-version"></span><br /><span style="font-size:0.8em">Copyright © 2026 Litemint LLC.</span></p></div>
             <div class="box-contact"><a href="https://www.facebook.com/litemint/"><img src="res/img/fb.png" class="social-big" /></a><a href="https://twitter.com/LitemintHQ"><img src="res/img/twitter.png" class="social-big" /></a><a href="mailto:hello@litemint.com"><img src="res/img/email.png" class="social-big" /></a></div>
-            <div class="shadow box"><img id="about-rate-icon" src="res/img/rate.png" class="social" /><a id="about-page-rate"></a><br /><span id="about-page-rate-text" style="color:rgba(36, 41, 46, 0.5)"></span></div>
             <div class="shadow box"><img src="res/img/github.png" class="social" /><a id="about-page-view-git" href="https://github.com/litemint/litemint"></a><br /><span id="about-page-available-git" style="color:rgba(36, 41, 46, 0.5)"></span></div>
             <div class="shadow box"><b><span id="about-page-help"></span></b><br /><br /><a href="https://litemint.com">https://litemint.com</a><br /><span id="about-page-support"></span><a href="mailto:support@litemint.com">support@litemint.com</a><br /><span id="about-page-security"></span><a href="mailto:security@litemint.com">security@litemint.com</a></div>
-            <div class="shadow box"><b><span id="about-page-legal"></span></b><br /><br /><a href="https://litemint.com/terms.html"><span id="about-page-terms"></span></a><br /><a href="https://litemint.com/privacy.html"><span id="about-page-privacy"></span></a></div>
+            <div class="shadow box"><b><span id="about-page-legal"></span></b><br /><br /><a href="https://litemint.com/terms"><span id="about-page-terms"></span></a><br /><a href="https://litemint.com/privacy"><span id="about-page-privacy"></span></a></div>
             <div class="shadow box"><b><span id="about-page-warning"></span></b><br /><br /><span id="about-page-trade-warning"></span></div>
             <div class="shadow box">
                 <b><span id="about-page-depends"></span></b><br />
@@ -209,6 +210,8 @@
 
     <!-- Outstream SDK -->
     <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3.js"></script>   
+
+    <script src="stellar-sdk.min.js"></script>
 
     <script src="config.js"></script>
     <script src="core.min.js"></script>

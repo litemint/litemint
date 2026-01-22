@@ -1,7 +1,7 @@
 ﻿/**
  * @overview Litemint Core Utils implementation.
- * @copyright 2018-2020 Frederic Rezeau, aka 오경진.
- * @copyright 2018-2020 Litemint LLC.
+ * @copyright 2018-2026 Frederic Rezeau, aka 오경진.
+ * @copyright 2018-2026 Litemint LLC.
  * @license [MIT]{@link https://github.com/litemint/litemint/blob/master/LICENSE}
  */
 

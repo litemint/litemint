@@ -1,7 +1,7 @@
 /**
  * @overview Litemint Spear index.
- * @copyright 2018-2020 Frederic Rezeau, aka 오경진.
- * @copyright 2018-2020 Litemint LLC.
+ * @copyright 2018-2026 Frederic Rezeau, aka 오경진.
+ * @copyright 2018-2026 Litemint LLC.
  * @license [MIT]{@link https://github.com/litemint/litemint/blob/master/LICENSE}
  */
 
@@ -60,35 +60,46 @@
         onResize();
 
         if (isMobile()) {
-            $("#activity-view").hide();
-            $("#mainview").hide();
-            $("#mobile").removeClass("is-hidden");
+            window.location.href = '/?flavor=pepper';
         }
         else{
             $("#activity-loader").hide();
-            let data = Litemint.Pepper.loadWalletData();
-            if (!data.accounts.length){
-                $("#activity-frame").hide();
-                Litemint.Pepper.showWallet = false;
-                $("#activity-view").css("width", "100%");
-                $("#close-wallet-button").hide();
-                $("#open-wallet-button").hide();
+            const loadPage = () => {
+                let data = Litemint.Pepper.loadWalletData();
+                if (!data.accounts.length){
+                    $("#activity-frame").hide();
+                    Litemint.Pepper.showWallet = false;
+                    $("#activity-view").css("width", "100%");
+                    $("#close-wallet-button").hide();
+                    $("#open-wallet-button").hide();
+                    $("#signup-step-three").hide();
+                }
+                else{
+                    Litemint.Pepper.showWallet = true;
+                    $("#activity-frame").hide();
+                    $("#signup-frame").show();
+                    $("#signup-step-one").hide();
+                    $("#signup-step-two").hide();
+                    $("#signup-step-three").show();
+                    $("#activity-view").animate({
+                        width: $(window).width() - $(window).height() * 0.5 + "px"
+                    }, 350, "swing", function () {
+                        $("#open-wallet-button").hide();
+                        $("#close-wallet-button").show();
+                    });
+                } 
             }
-            else{
-                $("#activity-frame").show();
-                $("#signup-frame").hide();
-                $("#activity-frame").attr("src", "https://hello.litemint.com");
-            }           
+            loadPage();
 
-            Litemint.Pepper.onSignIn = function () {
+            Litemint.Pepper.onSignIn = function (token) {
                 $("#signup-frame").hide();
                 $("#close-wallet-button").show();
                 $("#activity-frame").show();
-                $("#activity-frame").attr("src", "https://dashboard.litemint.com");
+                $("#activity-frame").attr("src", `https://cyberbrawl.io${token ? '?token=' + token : ''}`);
             };
 
             Litemint.Pepper.onSignOut = function () {
-                $("#activity-frame").attr("src", "https://hello.litemint.com");
+                loadPage();
             };
         }
 

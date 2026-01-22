@@ -1,7 +1,7 @@
 ﻿/**
  * @overview Litemint Pepper View implementation.
- * @copyright 2018-2020 Frederic Rezeau, aka 오경진.
- * @copyright 2018-2020 Litemint LLC.
+ * @copyright 2018-2026 Frederic Rezeau, aka 오경진.
+ * @copyright 2018-2026 Litemint LLC.
  * @license [MIT]{@link https://github.com/litemint/litemint/blob/master/LICENSE}
  */
 
@@ -96,7 +96,7 @@
         for (let i = 0; i < 5; i += 1) {
             this.pinMenu.push(new namespace.Pepper.HudElement(i));
         }
-        for (let i = 0; i < 5; i += 1) {
+        for (let i = 0; i < 4; i += 1) {
             this.dashboardMenu.push(new namespace.Pepper.HudElement(i));
         }
         this.sendBtn = new namespace.Pepper.HudElement();
@@ -111,7 +111,6 @@
         this.transactionsBtn = new namespace.Pepper.HudElement();
         this.assetsBtn = new namespace.Pepper.HudElement();
         this.moreBtn = new namespace.Pepper.HudElement();
-        this.chartBtn = new namespace.Pepper.HudElement();
         this.quoteBtn = new namespace.Pepper.HudElement();
         this.pinBtn = new namespace.Pepper.HudElement();
         this.pinCodeBtn = new namespace.Pepper.HudElement();
@@ -128,11 +127,9 @@
         this.numPadCloseBtn = new namespace.Pepper.HudElement();
         this.bookBtn = new namespace.Pepper.HudElement();
         this.pasteBtn = new namespace.Pepper.HudElement();
-        this.depositBtn = new namespace.Pepper.HudElement();
         this.addAssetBtn = new namespace.Pepper.HudElement();
         this.qrBtn = new namespace.Pepper.HudElement();
         this.accountBtn = new namespace.Pepper.HudElement();
-        this.marketBtn = new namespace.Pepper.HudElement();
         this.assetPicker = new namespace.Pepper.HudElement();
         this.closeScrollerBtn = new namespace.Pepper.HudElement();
         this.closeModalBtn = new namespace.Pepper.HudElement();
@@ -653,7 +650,6 @@
 
         this.needRedraw |= this.menuBtn.update(elapsed);
         this.needRedraw |= this.accountBtn.update(elapsed);
-        this.needRedraw |= this.marketBtn.update(elapsed);
         this.needRedraw |= this.dashboardMenuPanel.update(elapsed);
         this.needRedraw |= this.closeScrollerBtn.update(elapsed);
         this.needRedraw |= this.leaderboardModeBtn.update(elapsed);
@@ -713,17 +709,6 @@
             this.accountBtn.y = this.accountBtn.ty;
             this.accountBtn.speed = 7;
             this.accountBtn.spawned = false;
-        }
-
-        this.marketBtn.width = this.unit * 1.2;
-        this.marketBtn.height = this.unit * 1.2;
-        this.marketBtn.tx = this.viewport.x + this.marketBtn.width - (this.isActivityMode ? this.unit * 2.6 : 0);
-        this.marketBtn.ty = this.viewport.y - this.dashboardTime * this.marketBtn.height * 2;
-        if (this.marketBtn.spawned) {
-            this.marketBtn.x = this.marketBtn.tx;
-            this.marketBtn.y = this.marketBtn.ty;
-            this.marketBtn.speed = 14;
-            this.marketBtn.spawned = false;
         }
 
         this.activityLabel.width = this.unit * 2.7;
@@ -787,7 +772,6 @@
     namespace.Pepper.View.prototype.updateCarousel = function (elapsed) {
         this.needRedraw |= this.carouselItem.update(elapsed);
         this.needRedraw |= this.moreBtn.update(elapsed);
-        this.needRedraw |= this.chartBtn.update(elapsed);
         this.needRedraw |= this.quoteBtn.update(elapsed);
         this.needRedraw |= this.sendBtn.update(elapsed);
         this.needRedraw |= this.receiveBtn.update(elapsed);
@@ -832,14 +816,6 @@
         this.tradeBtn.x = this.tradeBtn.tx;
         this.tradeBtn.y = this.tradeBtn.ty;
         this.tradeBtn.spawned = false;
-
-        this.chartBtn.width = this.unit;
-        this.chartBtn.height = this.unit;
-        this.chartBtn.x = this.carousel.x + this.unit * 0.7;
-        this.chartBtn.y = this.carousel.y + this.carousel.height - (this.chartBtn.height + this.unit * 0.1);
-        this.chartBtn.tx = this.chartBtn.x;
-        this.chartBtn.ty = this.chartBtn.y;
-        this.chartBtn.spawned = false;
 
         this.moreBtn.width = this.unit;
         this.moreBtn.height = this.unit;
@@ -1640,7 +1616,6 @@
         this.needRedraw |=this.bookBtn.update(elapsed);
         this.needRedraw |=this.qrBtn.update(elapsed);
         this.needRedraw |=this.pasteBtn.update(elapsed);
-        this.needRedraw |=this.depositBtn.update(elapsed);
 
         this.numPadArea.x = this.viewport.x + this.unit * 0.5;
         this.numPadArea.width = this.viewport.width - this.unit;
@@ -1741,14 +1716,6 @@
         this.qrBtn.tx = this.qrBtn.x;
         this.qrBtn.ty = this.qrBtn.y;
         this.qrBtn.spawned = false;
-
-        this.depositBtn.width = this.unit * 3.7;
-        this.depositBtn.height = this.unit * 0.8;
-        this.depositBtn.x = this.viewport.x + this.viewport.width - this.depositBtn.width - this.unit * 0.15;
-        this.depositBtn.y = this.carousel.y + this.carousel.height + this.unit * 0.5;
-        this.depositBtn.tx = this.depositBtn.x;
-        this.depositBtn.ty = this.depositBtn.y;
-        this.depositBtn.spawned = false;
     };
 
     // Draw the view.
@@ -1849,7 +1816,7 @@
                 }
 
                 if (i < 2) {
-                    context.fillStyle = "rgb(105, 211, 208)";
+                    context.fillStyle = "rgb(77, 153, 202)";
                     context.fillRect(x, this.viewport.y + this.unit * 2.1, this.unit * 3, this.unit * 0.1);
                 }
 
@@ -1858,7 +1825,7 @@
                 this.circle(context,
                     x,
                     this.viewport.y + this.unit * 2.1,
-                    this.unit * 0.62 + trx * this.unit * 0.6, "rgb(105, 211, 208)");
+                    this.unit * 0.62 + trx * this.unit * 0.6, "rgb(77, 153, 202)");
 
                 this.circle(context,
                     x,
@@ -3181,7 +3148,7 @@
             }
 
             if ((this.pinCode.length < this.pinMax || element.id === 11) && (element.selected || element.selectTime)) {
-                this.roundRect(context, element.x + margin, element.y + margin, element.width - margin * 2, element.height - margin * 2, this.unit * 0.1, "rgba(42, 193, 188, " + (element.selectTime ? element.selectTime * 0.5 : 0.5) + ")");
+                this.roundRect(context, element.x + margin, element.y + margin, element.width - margin * 2, element.height - margin * 2, this.unit * 0.1, "rgba(42, 152, 193, " + (element.selectTime ? element.selectTime * 0.5 : 0.5) + ")");
             }
 
             if (element.id < 11) {
@@ -3245,7 +3212,7 @@
         }
 
         if (count < this.pinMin) {
-            this.roundRect(context, this.pinBtn.x, this.pinBtn.y, this.pinBtn.width, this.pinBtn.height, this.pinBtn.height * 0.1, "rgba(42, 193, 188, 0.5)");
+            this.roundRect(context, this.pinBtn.x, this.pinBtn.y, this.pinBtn.width, this.pinBtn.height, this.pinBtn.height * 0.1, "rgba(42, 152, 193, 0.5)");
             context.font = this.getFont("Roboto-Medium");
             this.drawText(context, this.pinBtn.x + this.pinBtn.width * 0.5, this.pinBtn.y + this.pinBtn.height * 0.5, text, "rgba(255, 255, 255, 0.4)", 1);
         }
@@ -3382,15 +3349,6 @@
         }
         context.drawImage(namespace.Pepper.Resources.accountImage, this.accountBtn.x, this.accountBtn.y, this.accountBtn.width, this.accountBtn.width);
         context.restore();
-
-        if (!namespace.Core.currentAccount.watchOnly) {
-            context.save();
-            if (this.marketBtn.hover || this.marketBtn.selected) {
-                context.globalAlpha = 0.7 * context.globalAlpha;
-            }
-            context.drawImage(namespace.Pepper.Resources.rocketImage, this.marketBtn.x + this.unit * 0.125, this.marketBtn.y + this.unit * 0.125, this.marketBtn.width - this.unit * 0.25, this.marketBtn.width - this.unit * 0.25);
-            context.restore();
-        }
 
         context.save();
         this.roundRect(context, this.activityLabel.x, this.activityLabel.y, this.activityLabel.width, this.activityLabel.height, this.unit * 0.18, "rgba(36, 41, 46, 0.1)");
@@ -3574,20 +3532,16 @@
                         this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[91], "rgb(36, 41, 46)", 0.8);
                         break;
                     case 1:
-                        context.drawImage(namespace.Pepper.Resources.rocketDarkImage, element.x + element.height * 0.6, element.y + element.height * 0.26, element.height * 0.45, element.height * 0.45);
-                        this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[203], "rgb(36, 41, 46)", 0.8);
-                        break;
-                    case 2:
                         context.fillStyle = "rgba(36, 41, 46, 0.16)";
                         context.fillRect(element.x, element.y, element.width, element.height * 0.016);
                         context.drawImage(namespace.Pepper.Resources.globeImage, element.x + element.height * 0.6, element.y + element.height * 0.26, element.height * 0.43, element.height * 0.43);
                         this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[13], "rgb(36, 41, 46)", 0.8);
                         break;
-                    case 3:
+                    case 2:
                         context.drawImage(namespace.Pepper.Resources.questionImage, element.x + element.height * 0.6, element.y + element.height * 0.26, element.height * 0.43, element.height * 0.43);
                         this.drawText(context, element.x + element.height * 1.4, element.y + element.height * 0.5, namespace.Pepper.Resources.localeText[14], "rgb(36, 41, 46)", 0.8);
                         break;
-                    case 4:
+                    case 3:
                         context.fillStyle = "rgba(36, 41, 46, 0.16)";
                         context.fillRect(element.x, element.y, element.width, element.height * 0.016);
                         context.drawImage(namespace.Pepper.Resources.walletImage, element.x + element.height * 0.6, element.y + element.height * 0.26, element.height * 0.43, element.height * 0.43);
@@ -3814,14 +3768,14 @@
                                 context.font = this.getFont("Roboto-Black");
                                 this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 2.5, namespace.Pepper.Tools.formatPrice(item.asset.balance), "rgb(255, 255, 255)", 1.5);
 
-                                let currencyrate = namespace.Pepper.MarketData.rates[item.asset.code];
-                                let accountCurrencyRate = namespace.Pepper.MarketData.rates[this.account.currency];
+                                let currencyrate = namespace.Pepper.MarketData.rates[item.asset.code]; // 0.21
+                                let accountCurrencyRate = namespace.Pepper.MarketData.rates[this.account.currency]; // 89544
                                 if (currencyrate && currencyrate.rate && !isNaN(currencyrate.rate) && Number(currencyrate.rate) > 0 && accountCurrencyRate) {
                                     let currencyPrice = 1 / currencyrate.rate * accountCurrencyRate.rate;
                                     context.font = this.getFont("Roboto-Regular");
                                     this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 3.3,
                                         "(" + this.account.currency + " "
-                                        + namespace.Pepper.Tools.formatPrice(item.asset.balance * currencyPrice, accountCurrencyRate.precision) + ")", "rgb(255, 255, 255)", 0.8);
+                                        + namespace.Pepper.Tools.formatPrice(item.asset.balance * 1 / currencyPrice, accountCurrencyRate.precision) + ")", "rgb(255, 255, 255)", 0.8);
                                 }
                             }
                         }
@@ -4004,15 +3958,6 @@
 
                     if (!this.isActivityMode) {
                         context.save();
-                        if (this.carousel.active === index && (this.chartBtn.hover || this.chartBtn.selected)) {
-                            context.globalAlpha = 0.7 * context.globalAlpha;
-                        }
-                        context.drawImage(namespace.Pepper.Resources.chartImage, item.x + this.unit * 0.2, item.y + item.height - this.unit * 1.1, this.unit, this.unit);
-                        context.restore();
-                    }
-
-                    if (!this.isActivityMode) {
-                        context.save();
                         if (this.carousel.active === index && (this.moreBtn.hover || this.moreBtn.selected)) {
                             context.globalAlpha = 0.7 * context.globalAlpha;
                         }
@@ -4036,13 +3981,13 @@
                         this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.31, item.asset.code + "/BTC " + namespace.Pepper.Resources.localeText[120], "rgba(255, 255, 255, 0.7)", 0.67);
                         if (currencyrate && currencyrate.rate > 0) {
                             const quote = namespace.Pepper.MarketData.rates["BTC"];
-                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.81, namespace.Pepper.Tools.formatPrice(1 / quote.rate, quote.precision), "rgba(255, 255, 255, 1)", 0.9);
+                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.81, namespace.Pepper.Tools.formatPrice(quote.rate, quote.precision), "rgba(255, 255, 255, 1)", 0.9);
                         }
                     }
                     else {
                         this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.31, item.asset.code + "/USD " + namespace.Pepper.Resources.localeText[120], "rgba(255, 255, 255, 0.7)", 0.67);
                         if (currencyrate && currencyrate.rate > 0) {
-                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.81, namespace.Pepper.Tools.formatPrice(1 / currencyrate.rate, currencyrate.precision), "rgba(255, 255, 255, 1)", 0.9);
+                            this.drawText(context, item.x + item.width * 0.5, item.y + this.unit * 0.81, namespace.Pepper.Tools.formatPrice(currencyrate.rate, currencyrate.precision), "rgba(255, 255, 255, 1)", 0.9);
                         }
                     }
 
@@ -4576,7 +4521,7 @@
 
         context.fillStyle = "rgb(255, 255, 255)";
         context.fillRect(item.x, item.y, item.width, item.height);
-        context.fillStyle = item.insertTime ? "rgba(42, 193, 188, " + 0.15 * item.insertTime + ")" : "rgba(255, 255, 255, 0)";
+        context.fillStyle = item.insertTime ? "rgba(42, 152, 193, " + 0.15 * item.insertTime + ")" : "rgba(255, 255, 255, 0)";
         context.fillRect(item.x, item.y, item.width, item.height);
         context.fillStyle = item.selected || item.hover ? "rgba(36, 41, 46, 0.07)" : "rgba(255, 255, 255, 0)";
         context.font = this.getFont("Roboto-Regular");
@@ -5508,15 +5453,6 @@
             context.drawImage(namespace.Pepper.Resources.qrCodeImage, this.list.x + this.unit * 1.5, middleY + this.unit * 1.8, this.list.width - this.unit * 3, this.list.width - this.unit * 3);
             context.restore();
 
-            context.save();
-            this.roundRect(context, this.depositBtn.x, this.depositBtn.y, this.depositBtn.width, this.depositBtn.height, this.unit * 0.18, namespace.Pepper.Resources.primaryColor);
-            if (this.depositBtn.hover || this.depositBtn.selected) {
-                context.globalAlpha = 0.7 * context.globalAlpha;
-            }
-            context.font = this.getFont("Roboto-Regular");
-            context.textAlign = "center";
-            this.drawText(context, this.depositBtn.x + this.depositBtn.width * 0.5, this.depositBtn.y + this.depositBtn.height * 0.5, namespace.Pepper.Resources.localeText[215], "rgb(255, 255, 255)", 0.68);
-            context.restore();
             context.restore();
         }
 
@@ -5545,7 +5481,7 @@
 
                 if (element.selected || element.selectTime) {
                     const margin = this.unit * 0.1;
-                    this.roundRect(context, element.x + margin, element.y + margin, element.width - margin * 2, element.height - margin * 2, this.unit * 0.1, "rgba(42, 193, 188, " + (element.selectTime ? element.selectTime * 0.5 : 0.5) + ")");
+                    this.roundRect(context, element.x + margin, element.y + margin, element.width - margin * 2, element.height - margin * 2, this.unit * 0.1, "rgba(42, 152, 193, " + (element.selectTime ? element.selectTime * 0.5 : 0.5) + ")");
                 }
 
                 if (element.id < 11) {
@@ -5576,7 +5512,7 @@
             && this.activityType !== namespace.Pepper.ActivityType.Trade
             && this.activityType !== namespace.Pepper.ActivityType.Exchange) {
             context.save();
-            this.roundRect(context, this.numPadSendBtn.x, this.numPadSendBtn.y, this.numPadSendBtn.width, this.numPadSendBtn.height, this.numPadSendBtn.height * 0.1, "rgb(42, 193, 188)");
+            this.roundRect(context, this.numPadSendBtn.x, this.numPadSendBtn.y, this.numPadSendBtn.width, this.numPadSendBtn.height, this.numPadSendBtn.height * 0.1, "rgb(42, 152, 193)");
             context.font = this.getFont("Roboto-Medium");
             if (this.numPadSendBtn.hover || this.numPadSendBtn.selected) {
                 context.globalAlpha = 0.7 * context.globalAlpha;
@@ -5604,7 +5540,7 @@
             context.textAlign = "center";
             this.drawText(context, this.numPadSendBtn.x + this.numPadSendBtn.width * 0.5, middleY + size + this.unit * 0.3, namespace.Pepper.Resources.localeText[71], "rgb(36, 41, 46)", 0.6);
 
-            this.roundRect(context, this.numPadSendBtn.x, this.numPadSendBtn.y, this.numPadSendBtn.width, this.numPadSendBtn.height, this.numPadSendBtn.height * 0.1, "rgb(42, 193, 188)");
+            this.roundRect(context, this.numPadSendBtn.x, this.numPadSendBtn.y, this.numPadSendBtn.width, this.numPadSendBtn.height, this.numPadSendBtn.height * 0.1, "rgb(42, 152, 193)");
             this.drawLoader(context, this.numPadSendBtn.x + this.numPadSendBtn.width * 0.5, this.numPadSendBtn.y + this.numPadSendBtn.height * 0.5, this.numPadSendBtn.height * 0.7);
         }
 
@@ -5941,7 +5877,7 @@
 
                 this.scroller.items.push({
                     "id": 4,
-                    "label": namespace.Core.currentAccount.friendlyAddress ? namespace.Core.currentAccount.friendlyAddress : namespace.Pepper.Resources.localeText[156],
+                    "label": namespace.Pepper.Resources.localeText[156],
                     "current": false
                 });
 
@@ -5971,7 +5907,6 @@
             case namespace.Pepper.ScrollerType.AssetsMenu:
                 activeItem = this.getActiveCarouselItem();
                 this.scroller.items.push({ "id": 1, "label": namespace.Pepper.Resources.localeText[77], "current": false, "enabled": true });
-                this.scroller.items.push({ "id": 2, "label": namespace.Pepper.Resources.localeText[78], "current": false, "enabled": true });
                 this.scroller.items.push({ "id": 3, "label": namespace.Pepper.Resources.localeText[79], "current": false, "enabled": true });
                 this.scroller.items.push({ "id": 4, "label": namespace.Pepper.Resources.localeText[80], "current": false, "enabled": activeItem.asset.domain ? true : false });
                 if (activeItem) {

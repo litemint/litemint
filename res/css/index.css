@@ -34,11 +34,12 @@
 }
 
 a {
-    color: rgb(42, 193, 188);
+    color: rgb(61, 219, 247);
     text-decoration: none;
 }
 
 a:hover {
+    color: #fff;
     text-decoration: underline;
 }
 
@@ -108,7 +109,7 @@ chart-container {
 .header {
     font-family: Roboto-Medium;
     height: 50px;
-    background-color: rgb(224, 115, 119);
+    background-color: rgb(46, 46, 46);
     color: white;
     line-height: 50px;
     padding-left: 11px;
@@ -119,6 +120,17 @@ chart-container {
         display: inline-block;
         height: 100%;
     }
+
+.box a {
+    color: rgb(24, 179, 206);
+    text-decoration: none;
+}
+
+.box a:hover {
+    color: rgb(24, 179, 206);
+    text-decoration: underline;
+}
+
 
 #about-close-img {
     opacity: 0.5;
@@ -150,7 +162,8 @@ chart-container {
     position: absolute;
     width:0;
     height:0;
-    background-color: #fff;
+    background: url('../img/bg.png') no-repeat center center fixed;
+    background-size: cover;
     overflow: hidden;
     z-index: 9999;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -159,8 +172,8 @@ chart-container {
 #activity-loader {
     width: 100%;
     height: 100%;
-    background:white;
-    background:url(../img/loader.gif) center center no-repeat;
+    background: #183443 !important;
+    background:url(../img/loader-2.svg) center center no-repeat;
 }
 
 #activity-frame {
@@ -208,7 +221,7 @@ chart-container {
 
 .box-top {
     padding: 7px;
-    background-color: rgb(42, 193, 188);
+    background-color: rgb(42, 152, 193);
     color: rgba(255, 255, 255, 0.7);
 }
 

@@ -1,7 +1,7 @@
 ﻿/**
  * @overview Litemint Core Network implementation.
- * @copyright 2018-2020 Frederic Rezeau, aka 오경진.
- * @copyright 2018-2020 Litemint LLC.
+ * @copyright 2018-2026 Frederic Rezeau, aka 오경진.
+ * @copyright 2018-2026 Litemint LLC.
  * @license [MIT]{@link https://github.com/litemint/litemint/blob/master/LICENSE}
  */
 
@@ -27,8 +27,6 @@
     // Return the surge pricing fee multiplier.
     // Recommended 100K stroop.
     const getSurgePricingFee = () => {
-        console.log(StellarSdk.BASE_FEE);
-        console.log((Number(StellarSdk.BASE_FEE) * 1000).toString());
         return (Number(StellarSdk.BASE_FEE) * 1000).toString();
     };
  
@@ -44,7 +42,7 @@
         }
 
         if (!stellarServer) {
-            stellarServer = new StellarSdk.Server(namespace.config.serverUrl);
+            stellarServer = new StellarSdk.Horizon.Server(namespace.config.serverUrl);
 
             // Retrieve the base fee and reserve.
             $.ajax(namespace.config.serverUrl + "/fee_stats").then(
@@ -63,7 +61,7 @@
                                     }
                             })
                             .catch(function(err) {
-                                console.log(err)
+                                console.error(err)
                             })
                     }
                 },
@@ -183,7 +181,6 @@
                                                         if (!namespace.Core.currentAccount.offers.find((offer) => {
                                                             return offer.id === record.id && offer.last_modified_ledger === record.last_modified_ledger })) {
                                                             updateOffers = true;
-                                                            console.log(record);
                                                         }
                                                     }
 
@@ -792,8 +789,6 @@
             offerId: "0"
         };
 
-        console.log(offer);
-
         stellarServer.loadAccount(namespace.Core.currentAccount.keys.publicKey())
             .then(function (receiver) {
                 const transaction = new StellarSdk.TransactionBuilder(receiver, { "fee": getSurgePricingFee(), "networkPassphrase": networkPassphrase })
@@ -983,7 +978,7 @@
                     });
 
                 if (result.home_domain) {
-                    StellarSdk.StellarTomlResolver.resolve(result.home_domain)
+                    StellarSdk.StellarToml.Resolver.resolve(result.home_domain)
                         // Query the toml.
                         .then(stellarToml => {
                             let found = false;

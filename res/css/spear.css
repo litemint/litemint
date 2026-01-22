@@ -14,6 +14,7 @@ html, body {
     padding: 0;
     overflow:hidden;
     -ms-touch-action: none;
+    color: #0d4a63;
 }
 
 .center-block {
@@ -23,7 +24,7 @@ html, body {
 }
 
 .site-navbar {
-    background: white !important;
+    background: #183443 !important;
     transition-duration: 172ms
 }
 
@@ -36,7 +37,7 @@ html, body {
 }
 
 .command {
-    color: #2ac1bc;
+    color: #183443;
     font-family: Rajdhani;
 }
 
@@ -46,12 +47,12 @@ html, body {
 
 span.part1 {
     font-family: Rajdhani;
-    color: #ffdd57;
+    color: #ff78ff;
 }
 
 span.part2 {
     font-family: Rajdhani;
-    color: #2ac1bc;
+    color: #183443;
 }
 
 .site-menu a:hover, .site-menu a:visited, .site-menu a:active, .site-menu a:link, .site-menu a:focus {
@@ -120,7 +121,7 @@ a:link, a:active, a:visited, a:hover {
     max-width:100%;
     max-height:100%;
     overflow:auto;
-    color:#24292d;
+    color:#ffffff;
     padding:15px;
 }
 
@@ -132,13 +133,13 @@ a:link, a:active, a:visited, a:hover {
 .signup-content h2 {
     font-family: "roboto-bold";
     font-size: 3rem;
-    color:#33beba;
+    color:#ffffff;
 }
 
 .signup-content h1 {
     font-family: "roboto-bold";
     font-size: 2.7rem;
-    color:#24292d;
+    color:#ffffff;
 }
 
 .signup-content p {
@@ -149,15 +150,15 @@ a:link, a:active, a:visited, a:hover {
 #signup-getstarted {
     font-family: "roboto-bold";
     font-size: 1.5rem;
-    background-color:#267df4;
+    background-color:#1bc4e2;
     color:#fff;
-    border-radius:30px;
+    border-radius:5px;
     padding:17px;
     margin-top:17px;
 }
 
 #signup-getstarted:hover{
-    background-color:#24292d;
+    background-color:#4dd5ff;
     transition:all 0.3s ease-in-out;
 }
 
@@ -198,6 +199,7 @@ iframe {
 }
 
 #loader {
+    background: #183443;
     position: absolute;
     width: 100%;
     z-index: 99999;

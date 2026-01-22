@@ -28,6 +28,9 @@ images
 js/config_debug.js
 node_modules/*
 package-lock.json
+compiler.jar
+compressor.jar
+build-dev.sh
 
 # Logs and databases #
 ######################

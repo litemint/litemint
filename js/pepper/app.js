@@ -1,7 +1,7 @@
 ﻿/**
  * @overview Litemint Pepper App implementation.
- * @copyright 2018-2020 Frederic Rezeau, aka 오경진.
- * @copyright 2018-2020 Litemint LLC.
+ * @copyright 2018-2026 Frederic Rezeau, aka 오경진.
+ * @copyright 2018-2026 Litemint LLC.
  * @license [MIT]{@link https://github.com/litemint/litemint/blob/master/LICENSE}
  */
 
@@ -98,7 +98,6 @@
                                 if (!err) {
                                     let newBook = namespace.Pepper.orderBooks[propId] ? false : true;
                                     namespace.Pepper.orderBooks[propId] = book;
-                                    console.log(namespace.Pepper.orderBooks[propId]);
                                     loadOrderBook(newBook);
                                 }
                             });
@@ -112,10 +111,6 @@
                 }
             }
         }, 1000 * namespace.config.marketDataInterval);
-
-        setInterval(() => {
-            retrieveLeaderboard();
-        }, 1000 * 5 * namespace.config.marketDataInterval);
 
         // Download the store data.
         namespace.Pepper.storeData = [];
@@ -1113,9 +1108,7 @@
                 element.setPointerCapture(id);
             }
             catch (err) {
-                if (event.originalEvent.pointerId) {
-                    console.log(err);
-                }
+                console.error(err);
             }
         }
     }
@@ -1254,7 +1247,6 @@
                                 }
                                 else {
                                     item.shopPriceRate.sourceAmount = namespace.Pepper.Tools.formatPrice(0);
-                                    console.log(result);
                                 }                                
                             }
                         });
@@ -1432,7 +1424,6 @@
                         cachedData.volumeArray,
                         cachedData.time);
                     view.getActiveCarouselItem().hasChart = true;
-                    view.chartBtn.selectTime = 1;
                 }
                 else {
                     view.getActiveCarouselItem().hasChart = false;
@@ -1464,7 +1455,6 @@
                                 namespace.Pepper.cachedMarketData[view.getActiveCarouselItem().asset.code] = newCacheData;
                                 createChart(priceArray, volumeArray, response[0].time);
                                 view.getActiveCarouselItem().hasChart = true;
-                                view.chartBtn.selectTime = 1;
                             }
                             else {
                                 const newCacheData = {};
@@ -1657,9 +1647,6 @@
                     if (!clicked && !view.isActivityMode) {
                         clicked = testElement(0, point, view.moreBtn, false);
                     }
-                    if (!clicked && !view.isActivityMode) {
-                        clicked = testElement(0, point, view.chartBtn, false);
-                    }
                     if (!clicked && view.isActivityMode && view.activityType === namespace.Pepper.ActivityType.Trade && view.getActiveCarouselItem() !== view.placeHolderAsset) {
                         clicked = testElement(0, point, view.quoteBtn, false);
                     }
@@ -1690,9 +1677,6 @@
                     }
                     if (!clicked) {
                         clicked = testElement(0, point, view.accountBtn, false);
-                    }
-                    if (!clicked) {
-                        clicked = testElement(0, point, view.marketBtn, false);
                     }
                     if (!clicked && view.carousel.offset === view.carousel.anchor) {
                         if (!view.isActivityMode
@@ -1726,9 +1710,6 @@
                                 testElement(0, point, view.bookBtn, false);
                                 testElement(0, point, view.pasteBtn, false);
                                 testElement(0, point, view.qrBtn, false);
-                            }
-                            else if (view.activityType === namespace.Pepper.ActivityType.Receive) {
-                                testElement(0, point, view.depositBtn, false);
                             }
                             else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
                                 if (!namespace.Core.currentAccount.queuedOrder) {
@@ -1887,7 +1868,6 @@
                     else {
                         testElement(1, point, view.menuBtn, isPointerDown);
                         testElement(1, point, view.accountBtn, isPointerDown);
-                        testElement(1, point, view.marketBtn, isPointerDown);
                         testElement(1, point, view.assetPicker, isPointerDown);
 
                         if (view.isActivityMode) {
@@ -1904,9 +1884,6 @@
                                 testElement(1, point, view.bookBtn, isPointerDown);
                                 testElement(1, point, view.pasteBtn, isPointerDown);
                                 testElement(1, point, view.qrBtn, isPointerDown);
-                            }
-                            else if (view.activityType === namespace.Pepper.ActivityType.Receive) {
-                                testElement(1, point, view.depositBtn, isPointerDown);
                             }
                             else if (view.activityType === namespace.Pepper.ActivityType.Trade) {
                                 
@@ -1992,7 +1969,6 @@
                         }
                         else {
                             testElement(1, point, view.moreBtn, isPointerDown);
-                            testElement(1, point, view.chartBtn, isPointerDown);
                             if (!namespace.Core.currentAccount.watchOnly) {
                                 testElement(1, point, view.sendBtn, isPointerDown);
                             }
@@ -2308,21 +2284,7 @@
                                         namespace.Pepper.saveWalletData(data);
                                     }
                                     else if (item.id === 4) {
-                                        if (!namespace.Core.currentAccount.friendlyAddress &&
-                                            !namespace.Core.currentAccount.watchOnly) {
-                                                domShowGetFriendlyPage();
-                                        }
-                                        else if(namespace.Core.currentAccount.friendlyAddress) {
-                                            if (window.Android) {
-                                                window.Android.copyToClipboard("address", namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
-                                            }
-                                            else if (namespace.Pepper.isWebkitHost()) {
-                                                webkit.messageHandlers.callbackHandler.postMessage({ "name": "copyToClipboard", "label": "address", "data": namespace.Core.currentAccount.friendlyAddress, "message": namespace.Pepper.Resources.localeText[122] });
-                                            }
-                                            else {
-                                                namespace.Pepper.copyToClipboard(namespace.Core.currentAccount.friendlyAddress, namespace.Pepper.Resources.localeText[122]);
-                                            }
-                                        }
+                                        signIntoCyberbrawl();
                                     }
                                     else if (item.id === view.scroller.items.length - 2) {
                                         if (!namespace.Core.currentAccount.nobackup) {
@@ -2423,8 +2385,6 @@
                                                             && message.response.data.extras.result_codes.operations
                                                             ? message.response.data.extras.result_codes.operations : message.response && message.response.data ? message.response.data.title : ""
                                                     };
-                                                    console.log(view.selectedBuyItem.error);
-                                                    console.log(message);
                                                 }
                                             });
 
@@ -2445,7 +2405,6 @@
                                         (success, msg) => {
                                             if (!success) {
                                                 namespace.Pepper.queryAsset = null;
-                                                console.log(msg);
                                             }
                                         });
                                 }
@@ -2514,7 +2473,7 @@
                                             }
                                             break;
                                         case 2:
-                                            loadChart();
+                                            // loadChart();
                                             break;
                                         case 3:
                                             if (carouselitem && carouselitem.asset) {
@@ -2571,7 +2530,6 @@
                                                         else {
                                                             carouselitem.asset.loaded = true;
                                                             namespace.Pepper.queryAsset = null;
-                                                            console.log(JSON.stringify(msg));
                                                         }
                                                     });
                                             }
@@ -2690,7 +2648,6 @@
                                                         if (response) {
                                                             let payload = JSON.parse(response);
                                                             if (payload.success && payload.data && payload.data.limitMinDestinationCoin) {
-                                                                console.log(payload.data);
                                                                 namespace.Pepper.coinSwitch.rate = payload.data.rate;
                                                                 namespace.Pepper.coinSwitch.minDeposit = (payload.data.limitMinDepositCoin * 2).toFixed(namespace.Pepper.coinSwitch.coinBtnId === 1 ? 3 : 2);
                                                             }
@@ -2972,25 +2929,12 @@
                                     view.loadScroller(namespace.Pepper.ScrollerType.AccountSettings);
                                     break;
                                 case 1:
-                                    view.isDashboardMenu = false;
-                                    if (view.isActivityMode) {
-                                        view.closeSendPage(() => {
-                                            domShowAddressForm(false);
-                                            domShowTradeForm(false);
-                                            showMarketplace();
-                                        });
-                                    }
-                                    else {
-                                        showMarketplace();
-                                    }
-                                    break;
-                                case 2:
                                     view.loadScroller(namespace.Pepper.ScrollerType.Languages);
                                     break;
-                                case 3:
+                                case 2:
                                     domShowAboutPage(true);
                                     break;
-                                case 4:
+                                case 3:
                                     view.closeSendPage(() => {
                                         domShowAddressForm(false);
                                         domShowTradeForm(false);
@@ -3160,24 +3104,6 @@
                         });
 
                         if (!namespace.Core.currentAccount.watchOnly) {
-                            testElement(2, point, view.marketBtn, isPointerDown, function () {
-                                if (!called) {
-                                    called = true;
-                                    if (view.isActivityMode) {
-                                        view.closeSendPage(() => {
-                                            domShowAddressForm(false);
-                                            domShowTradeForm(false);
-                                            showMarketplace();
-                                        });
-                                    }
-                                    else {
-                                        showMarketplace();
-                                    }
-                                }
-                            });
-                        }
-
-                        if (!namespace.Core.currentAccount.watchOnly) {
                             testElement(2, point, view.addAssetBtn, isPointerDown, function () {
                                 if (!called) {
                                     called = true;
@@ -3226,13 +3152,6 @@
                                 else {
                                     view.loadScroller(namespace.Pepper.ScrollerType.AssetsMenu);
                                 }
-                            }
-                        });
-
-                        testElement(2, point, view.chartBtn, isPointerDown, function () {
-                            if (!called) {
-                                called = true;
-                                loadChart();
                             }
                         });
 
@@ -3435,11 +3354,6 @@
                                 else if (!close && view.activityType === namespace.Pepper.ActivityType.Receive && view.getActiveCarouselItem()) {
 
                                     let clickedDeposit = false;
-                                    testElement(2, point, view.depositBtn, isPointerDown, function () {
-                                        clickedDeposit = true;
-                                        view.loadScroller(namespace.Pepper.ScrollerType.CoinSwap);
-                                    });
-
                                     if (!clickedDeposit && !view.scrollerEndTime && view.numPadCloseBtn.y + view.unit < point.y) {
                                         let key = view.getActiveCarouselItem().asset.deposit || namespace.Core.currentAccount.keys.publicKey();
                                         if (window.Android) {
@@ -3481,7 +3395,6 @@
                                                     namespace.Core.currentAccount.processingOrder.result = { error: false };
                                                 }
                                                 else {
-                                                    console.log(JSON.stringify(message));
                                                     namespace.Core.currentAccount.processingOrder.result = {
                                                         error: true,
                                                         status: message.response && message.response.data
@@ -3789,8 +3702,6 @@
                                                     domShowAddressForm(false);
                                                     domShowTradeForm(false);
                                                 });
-
-                                                domShowGetFriendlyPage();
                                             }
                                             else if(namespace.Core.currentAccount.friendlyAddress) {
                                                 if (window.Android) {
@@ -3845,20 +3756,6 @@
                                                         else {
                                                             domShowApp(false);
                                                         }
-                                                    }
-                                                    else if (item.overScoreBtn && item.data.data.gameid) {
-                                                        view.selectedGame = item.data;
-                                                        canCollapse = false;
-                                                        if(view.selectedGame.data.leaderboard){
-                                                            view.loadScroller(namespace.Pepper.ScrollerType.Leaderboard); 
-                                                            if(namespace.leaderBoardRequestId){
-                                                                clearTimeout(namespace.leaderBoardRequestId);
-                                                            }
-                                                            namespace.leaderBoardRequestId = setTimeout(() => { 
-                                                                namespace.leaderBoardRequestId = null;
-                                                                retrieveLeaderboard();                                                       
-                                                            }, 1000);
-                                                        }                                                    
                                                     }
                                                     else if (item.overShopBtn && item.data.data.gameid) {
                                                         canCollapse = false;
@@ -3943,7 +3840,6 @@
                                                     item.overLaunchBtn = false;
 
                                                     let endpoint = namespace.Pepper.Tools.removeTrailingSlash(namespace.config.opsEndPoint);
-                                                    console.log(endpoint);
                                                     if (namespace.Pepper.isDesktop) {
                                                         window.open(endpoint + item.data.id, "_blank");
                                                     }
@@ -4030,7 +3926,6 @@
                                                         (success, msg) => {
                                                             if (!success) {
                                                                 namespace.Pepper.queryAsset = null;
-                                                                console.log(msg);
                                                             }
                                                         });
                                                 }
@@ -4136,18 +4031,7 @@
         namespace.Core.currentAccount.queuedOrder = null;
     }
 
-    function loadGame(id, url, noloader, external) {
-        if(id && id !== "") {
-            generateToken(id, (token) => {
-                if (token) {
-                    if(url[url.length - 1] !== "/"){
-                        url += "/";
-                    }
-                    url += "?token=" + token;
-                    domShowApp(true, id, url, noloader, external);
-                }
-            });
-        }
+    function loadGame(url) {
     }
 
     function retrieveLeaderboard(userTriggered) {
@@ -4484,7 +4368,9 @@
                 cb();
 
                 if(namespace.Pepper.onSignIn){
-                    namespace.Pepper.onSignIn();
+                    generateToken((token) => {
+                        namespace.Pepper.onSignIn(token);
+                    });
                 }
 
                 if (gtag) {
@@ -4496,34 +4382,6 @@
                 cb(err);
             }
         });
-    }
-
-    function showMarketplace() {
-
-        loadStore();
-
-        if (!namespace.Core.currentAccount.friendlyAddress) {
-            namespace.Core.Account.ResolveAccount(namespace.Core.currentAccount.keys.publicKey(), "litemint.com", (addr) => {
-                namespace.Core.currentAccount.friendlyAddress = addr;
-                view.needRedraw = true;
-            });
-        }
-
-        view.activityType = namespace.Pepper.ActivityType.Exchange;
-        view.isActivityMode = true;
-        view.sendFormTime = 0.5;
-
-        for (let i = 0; i < view.carousel.items.length; i += 1) {
-            if (view.carousel.items[i].chartMode) {
-                view.carousel.items[i].chartMode = false;
-                view.carousel.items[i].transitionTime = 0.5;
-            }
-        }
-
-        if (view.placeHolderAsset) {
-            view.placeHolderAsset.chartMode = false;
-            view.placeHolderAsset.transitionTime = 0.5;
-        }
     }
 
     function handleSignInError(error) {
@@ -4538,7 +4396,9 @@
                     view.error = namespace.Pepper.ViewErrorType.AccountNotCreated;
 
                     if(namespace.Pepper.onSignIn){
-                        namespace.Pepper.onSignIn();
+                        generateToken((token) => {
+                            namespace.Pepper.onSignIn(token);
+                        });
                     }
 
                     if (gtag) {
@@ -4587,11 +4447,11 @@
         }
     }
 
-    function generateToken (purpose, cb) {
+    function generateToken (cb) {
         const getAuthKey = function (cb) {
             // Get the authentication public key (ECDH).
-            $.ajax(namespace.config.apiUrl + "/.auth/getkey").then(
-                function success(response) {         
+            $.ajax(namespace.config.cyberbrawlApiUrl + "/auth/key").then(
+                function success(response) {
                     cb(response);
                 },
                 function fail(data, status) {
@@ -4601,24 +4461,31 @@
         };
 
         const getToken = function (pair, signed, cb) {
-            $.post(namespace.config.apiUrl + "/.auth/gettoken", {
-                purpose: purpose,
-                address: namespace.Core.currentAccount.keys.publicKey(),
-                data: signed,
-                ecdh: pair.getPublic(true, "hex")
-            }).then(
-                function success(response) {
-                    if (response && !response.error) {
-                        cb(response.token);
-                    }
-                    else{
-                        cb();
-                    }
-                },
-                function fail(data, status) {
+            const headers = { 'Content-Type': 'application/json' };
+            try {
+                fetch(namespace.config.cyberbrawlApiUrl + "/auth/token", {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        account: namespace.Core.currentAccount.keys.publicKey(),
+                        data: signed,
+                        signer: pair.getPublic(true, "hex")
+                    })
+                })
+                .then(response => {
+                    return response?.json();
+                })
+                .then(json => {
+                    cb(json?.token)
+                })
+                .catch(err => {
+                    console.error(err);
                     cb();
-                }
-            );
+                });
+            } catch (err) {
+                console.error(err);
+                cb();
+            }
         };
 
         getAuthKey((key) => {
@@ -4689,7 +4556,7 @@
 
                         $(".trade-input").not(".spear").css("fontSize", view.baseFontSize * 0.67 / pixelRatio + "px");
                         $(".trade-input").not(".spear").css("padding", view.unit * 0.2 / pixelRatio + "px");
-                        $(".trade-input").not(".spear").css("border", view.unit * 0.02 / pixelRatio + "px solid rgb(42, 193, 188)");
+                        $(".trade-input").not(".spear").css("border", view.unit * 0.02 / pixelRatio + "px solid rgb(42, 152, 193)");
                         $(".trade-input").not(".spear").css("-webkit-border-radius", view.unit * 0.18 / pixelRatio + "px");
                         $(".trade-input").not(".spear").css("-moz-border-radius", view.unit * 0.18 / pixelRatio + "px");
                         $(".trade-input").not(".spear").css("border-radius", view.unit * 0.18 / pixelRatio + "px");
@@ -4811,7 +4678,7 @@
                 }
             }
             else {
-                $("#activity-frame").attr("src","https://dashboard.litemint.com");
+                $("#activity-frame").attr("src","about:blank");
             }
         }
     }
@@ -4845,15 +4712,17 @@
         }
     }
 
-    function domShowGetFriendlyPage() {
-        generateToken("e1e4c072-b534-46e7-a362-0e5edc2cd12d", (token) => {
-            if (namespace.Pepper.isDesktop) {
-                window.open("https://litemint.com/getfriendly/?token=" + token, "_blank");
+    function signIntoCyberbrawl() {
+        generateToken((token) => {
+            if (!namespace.Pepper?.onSignIn) {
+                window.open(
+                `https://cyberbrawl.io/?token=${encodeURIComponent(token)}`,
+                '_blank'
+                );
+            } else {
+                namespace.Pepper.onSignIn(token);
             }
-            else {
-                window.location = "https://litemint.com/getfriendly/?token=" + token;
-            }
-        })
+        });
     }
 
     function domShowAboutPage(show) {
@@ -5070,8 +4939,6 @@
         $("#asset-conditions-title").html(namespace.Pepper.Resources.localeText[129]);
         $("#rename").attr("placeholder", namespace.Pepper.Resources.localeText[146]);
         $("#import").attr("placeholder", namespace.Pepper.Resources.localeText[149]);
-        $("#about-page-rate").html(namespace.Pepper.Resources.localeText[158]);
-        $("#about-page-rate-text").html(namespace.Pepper.Resources.localeText[159]);
 
         if (namespace.Pepper.isDesktop) {
             $("#signup-page-text1").html(namespace.Pepper.Resources.localeText[205]);
@@ -5131,19 +4998,6 @@
         e.preventDefault();
     });
 
-    // Handle about rate button click.
-    $("#about-page-rate, #about-rate-icon").click(function (e) {
-        if (window.Android) {
-            window.Android.rate();
-        }
-        else if (namespace.Pepper.isWebkitHost()) {
-            webkit.messageHandlers.callbackHandler.postMessage({ "name": "rate" });
-        }
-        else {
-            window.open("https://www.facebook.com/litemint/reviews/", "_blank");
-        }
-    });
-
     // Handle about-title click.
     $("#about-title").click(function (e) {
         domShowAboutPage(false);
@@ -5184,7 +5038,7 @@
             view.scroller.loading = true;
             view.needRedraw = true;
             view.scroller.items = [];
-            StellarSdk.StellarTomlResolver.resolve($("#domain").val())
+            StellarSdk.StellarToml.Resolver.resolve($("#domain").val())
                 .then(stellarToml => {
                     view.scroller.loading = false;
                     for (let i = 0; i < stellarToml.CURRENCIES.length; i += 1) {
