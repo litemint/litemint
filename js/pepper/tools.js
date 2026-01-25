@@ -131,7 +131,7 @@
      * @return {String} Truncated key.
      */
     namespace.Pepper.Tools.truncateKey = function (key, long) {
-        if (key.length > 25) {
+        if (key?.length > 25) {
             if (long) {
                 return key.substr(0, 10) + "..." + key.substr(key.length - 10, key.length);
             }

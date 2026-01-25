@@ -4462,13 +4462,14 @@
         const getAuthKey = (cb) => {
             // Get the authentication public key (ECDH).
             fetch(namespace.config.cyberbrawlApiUrl + "/auth/key")
-                .then(response => response.json())
-                .then(data => {
-                    cb(data);
-                })
-                .catch(() => {
-                    cb();
-                });
+            .then(res => {
+                if (!res.ok) throw new Error(res.status);
+                return res.text();
+            })
+            .then(key => {
+                cb(key)
+            })
+            .catch(err => { console.error(err); cb(); });
         };
 
         const getToken = (pair, signed, cb) => {
